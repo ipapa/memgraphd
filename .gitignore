@@ -4,3 +4,11 @@
 *.jar
 *.war
 *.ear
+.swp
+.cache
+.classpath
+.project
+.settings/
+.springBeans
+target/
+.idea/
