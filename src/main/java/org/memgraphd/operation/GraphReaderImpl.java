@@ -2,29 +2,44 @@ package org.memgraphd.operation;
 
 import org.memgraphd.data.GraphData;
 import org.memgraphd.decision.Sequence;
-import org.memgraphd.memory.MemoryAccess;
 import org.memgraphd.memory.MemoryReference;
-
+import org.memgraphd.memory.operation.MemoryOperations;
+/**
+ * Base implementation of {@link GraphReader}.
+ * 
+ * @author Ilirjan Papa
+ * @since August 1, 2012
+ *
+ */
 public class GraphReaderImpl extends AbstractGraphAccess implements GraphReader {
     private final GraphSeeker seeker;
     
-    public GraphReaderImpl(MemoryAccess memoryAccess, GraphSeeker seeker) {
+    public GraphReaderImpl(MemoryOperations memoryAccess, GraphSeeker seeker) {
         super(memoryAccess);
         this.seeker = seeker;
     }
-
+    
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public final GraphData readId(String id) {
         MemoryReference ref = seeker.seekById(id);
         return ref != null ? getMemoryAccess().readGraph(ref) : null;
     }
     
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public final GraphData readSequence(Sequence seq) {
         MemoryReference ref = seeker.seekBySequence(seq);
         return ref != null ? getMemoryAccess().read(ref) : null;
     }
-
+    
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public final GraphData[] readIds(String[] ids) {
         GraphData[] result = new GraphData[ids.length];
@@ -33,7 +48,10 @@ public class GraphReaderImpl extends AbstractGraphAccess implements GraphReader 
         }
         return result;
     }
-
+    
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public final GraphData[] readSequences(Sequence[] seqs) {
         GraphData[] result = new GraphData[seqs.length];
@@ -42,12 +60,18 @@ public class GraphReaderImpl extends AbstractGraphAccess implements GraphReader 
         }
         return result;
     }
-
+    
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public GraphData readReference(MemoryReference ref) {
         return getMemoryAccess().read(ref);
     }
-
+    
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public GraphData[] readReferences(MemoryReference[] refs) {
         GraphData[] result = new GraphData[refs.length];

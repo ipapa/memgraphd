@@ -10,9 +10,15 @@ import org.memgraphd.data.event.GraphDataEventListenerManager;
 import org.memgraphd.data.relationship.DataMatchmaker;
 import org.memgraphd.data.relationship.DataRelationship;
 import org.memgraphd.exception.GraphException;
-import org.memgraphd.memory.MemoryAccess;
 import org.memgraphd.memory.MemoryReference;
-
+import org.memgraphd.memory.operation.MemoryOperations;
+/**
+ * Base implementation for {@link GraphWriter}.
+ * 
+ * @author Ilirjan Papa
+ * @since August 4, 2012
+ *
+ */
 public class GraphWriterImpl extends AbstractGraphAccess implements GraphWriter {
     private static final Logger LOGGER = Logger.getLogger(GraphWriterImpl.class);
     
@@ -21,7 +27,7 @@ public class GraphWriterImpl extends AbstractGraphAccess implements GraphWriter 
     private final GraphSeeker seeker;
     private final DataMatchmaker dataMatchmaker;
     
-    public GraphWriterImpl(MemoryAccess memoryAccess, GraphDataEventListenerManager eventManager, 
+    public GraphWriterImpl(MemoryOperations memoryAccess, GraphDataEventListenerManager eventManager, 
             GraphMappings mappings, GraphSeeker seeker, DataMatchmaker matchMaker) {
         super(memoryAccess);
         this.eventManager = eventManager;
@@ -29,7 +35,10 @@ public class GraphWriterImpl extends AbstractGraphAccess implements GraphWriter 
         this.mappings = mappings;
         this.dataMatchmaker = matchMaker;
     }
-
+    
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public MemoryReference write(GraphData data) throws GraphException {
         
@@ -57,7 +66,10 @@ public class GraphWriterImpl extends AbstractGraphAccess implements GraphWriter 
     private void setMemoryReference(MemoryReference ref, GraphData data) {
         ((GraphDataImpl)data).setRefence(ref);
     }
-
+    
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public MemoryReference[] write(GraphData[] data) throws GraphException {
         MemoryReference[] result = new MemoryReference[data.length];
@@ -109,7 +121,10 @@ public class GraphWriterImpl extends AbstractGraphAccess implements GraphWriter 
             }
         }
     }
-
+    
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void delete(GraphData gData) throws GraphException {
         Data data = gData.getData();
@@ -131,7 +146,10 @@ public class GraphWriterImpl extends AbstractGraphAccess implements GraphWriter 
         // alert listeners
         eventManager.onDelete(gData);
     }
-
+    
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void delete(GraphData[] data) throws GraphException {
         for(GraphData sd : data) {

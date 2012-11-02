@@ -11,10 +11,10 @@ import org.memgraphd.data.relationship.DataMatchmakerImpl;
 import org.memgraphd.decision.Sequence;
 import org.memgraphd.exception.GraphException;
 import org.memgraphd.memory.MemoryAccess;
-import org.memgraphd.memory.MemoryAccessImpl;
+import org.memgraphd.memory.MemoryBlock;
 import org.memgraphd.memory.MemoryManager;
 import org.memgraphd.memory.MemoryReference;
-import org.memgraphd.memory.MemoryStats;
+import org.memgraphd.memory.operation.MemoryOperations;
 import org.memgraphd.operation.GraphFilter;
 import org.memgraphd.operation.GraphFilterImpl;
 import org.memgraphd.operation.GraphReader;
@@ -45,7 +45,7 @@ public final class GraphImpl extends GraphSupervisorImpl implements Graph {
     public GraphImpl(MemoryManager memoryManager) {
         this.mappings = new GraphMappingsImpl();
         
-        MemoryAccess memoryAccess = new MemoryAccessImpl(memoryManager);
+        MemoryOperations memoryAccess = new MemoryAccess(memoryManager);
         this.seeker = new GraphSeekerImpl(memoryAccess, mappings);
         this.reader = new GraphReaderImpl(memoryAccess, seeker);
         this.dataMatchmaker = new DataMatchmakerImpl(memoryAccess, seeker);
@@ -257,7 +257,7 @@ public final class GraphImpl extends GraphSupervisorImpl implements Graph {
      * {@inheritDoc}
      */
     @Override
-    public GraphData[] filterBy(MemoryStats block) {
+    public GraphData[] filterBy(MemoryBlock block) {
         authorize();
         return filter.filterBy(block);
     }

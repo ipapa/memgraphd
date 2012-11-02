@@ -1,12 +1,12 @@
 package org.memgraphd.memory.operation;
 
 import org.memgraphd.data.GraphData;
+import org.memgraphd.memory.MemoryBlock;
 import org.memgraphd.memory.MemoryLocation;
-import org.memgraphd.memory.MemoryStats;
 
 public interface MemoryLocationOperations {
     
-    void reserve(MemoryStats block);
+    void reserve(MemoryBlock block);
     
     void update(GraphData data);
     

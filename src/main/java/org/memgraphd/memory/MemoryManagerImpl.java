@@ -1,8 +1,14 @@
 package org.memgraphd.memory;
 
-import org.memgraphd.memory.operation.MemoryBlockResolver;
 import org.memgraphd.memory.operation.MemoryLocationOperations;
 
+/**
+ * A base implementation of a {@link MemoryManager}.
+ * 
+ * @author Ilirjan Papa
+ * @since July 31, 2012
+ *
+ */
 public final class MemoryManagerImpl implements MemoryManager {
     private final MemoryLocation[] buffer;
     private final MemoryBlockResolver requestResolver;
@@ -15,7 +21,10 @@ public final class MemoryManagerImpl implements MemoryManager {
         
         reserveBlocks(resolver.blocks());
     }
-
+    
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public final int capacity() {
         int capacity = 0;
@@ -25,6 +34,9 @@ public final class MemoryManagerImpl implements MemoryManager {
         return capacity;
     }
     
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int occupied() {
         int occupied = 0;
@@ -33,7 +45,10 @@ public final class MemoryManagerImpl implements MemoryManager {
         }
         return occupied;
     }
-
+    
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int available() {
         int available = 0;
@@ -43,6 +58,9 @@ public final class MemoryManagerImpl implements MemoryManager {
         return available;
     }
     
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int recycled() {
         int recycled = 0;
@@ -52,16 +70,25 @@ public final class MemoryManagerImpl implements MemoryManager {
         return recycled;
     }
     
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public final MemoryBlock[] blocks() {
         return resolver().blocks();
     }
-
+    
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public final MemoryBlockResolver resolver() {
         return requestResolver;
     }
     
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public final MemoryLocation read(MemoryReference ref) {
         if(ref.id() < 0 || ref.id() >= capacity()) {

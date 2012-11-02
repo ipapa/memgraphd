@@ -7,8 +7,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.memgraphd.data.Data;
 import org.memgraphd.data.GraphData;
-import org.memgraphd.memory.MemoryAccess;
 import org.memgraphd.memory.MemoryReference;
+import org.memgraphd.memory.operation.MemoryOperations;
 import org.memgraphd.operation.AbstractGraphAccess;
 import org.memgraphd.operation.GraphSeeker;
 
@@ -24,7 +24,7 @@ public class DataMatchmakerImpl extends AbstractGraphAccess implements DataMatch
     private final Map<String, Set<MemoryReference>> singles;
     private GraphSeeker seeker;
     
-    public DataMatchmakerImpl(MemoryAccess memoryAccess, GraphSeeker seeker) {
+    public DataMatchmakerImpl(MemoryOperations memoryAccess, GraphSeeker seeker) {
         super(memoryAccess);
         this.seeker = seeker;
         this.singles = new ConcurrentHashMap<String, Set<MemoryReference>>();

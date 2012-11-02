@@ -6,7 +6,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.memgraphd.memory.operation.MemoryBlockOperations;
 
-
+/**
+ * Implements the {@link MemoryBlock} and all available {@link MemoryBlockOperations}.
+ * The {@link MemoryBlock} interface gives you read-only access to the block and {@link MemoryBlockOperations}
+ * give you write access.
+ *  
+ * @author Ilirjan Papa
+ * @since July 28, 2012
+ *
+ */
 public final class MemoryBlockImpl implements MemoryBlock, MemoryBlockOperations {
     private final String name;
     private final AtomicInteger capacity;
@@ -26,41 +34,65 @@ public final class MemoryBlockImpl implements MemoryBlock, MemoryBlockOperations
         setCursor(0);
     }
     
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public final String name() {
         return name;
     }
-
+    
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public final int capacity() {
         return capacity.intValue();
     }
-
+    
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public final int occupied() {
         return cursor.intValue() - startsWith().id() + recycled.size() + 1;
     }
     
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public final int available() {
         return capacity.intValue() - (cursor.intValue() + 1) + recycled.size();
     }
     
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int recycled() {
         return recycled.size();
     }
     
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public final MemoryReference startsWith() {
         return startsWith;
     }
-
+    
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public final MemoryReference endsWith() {
         return endsWith;
     }
-
+    
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public final synchronized void setBoundaries(MemoryReference startsWith, MemoryReference endsWith) {
         if(startsWith() != null || endsWith() != null) {
@@ -77,10 +109,9 @@ public final class MemoryBlockImpl implements MemoryBlock, MemoryBlockOperations
         this.endsWith = endsWith;
     }
     
-    private void setCursor(int cursor) {
-        this.cursor = new AtomicInteger(cursor);
-    }
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public final MemoryReference next() {
         if(cursor.intValue() == endsWith().id()) {
@@ -89,10 +120,17 @@ public final class MemoryBlockImpl implements MemoryBlock, MemoryBlockOperations
         MemoryReference ref = recycled.poll();
         return ref != null ? ref : MemoryReference.valueOf(cursor.incrementAndGet());
     }
-
+    
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public final void recycle(MemoryReference reference) {
         recycled.add(reference);
+    }
+    
+    private void setCursor(int cursor) {
+        this.cursor = new AtomicInteger(cursor);
     }
 
 }

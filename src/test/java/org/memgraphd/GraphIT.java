@@ -26,10 +26,10 @@ import org.memgraphd.decision.SingleNodeDecisionMaker;
 import org.memgraphd.exception.GraphException;
 import org.memgraphd.memory.MemoryBlock;
 import org.memgraphd.memory.MemoryBlockImpl;
+import org.memgraphd.memory.MemoryBlockResolver;
 import org.memgraphd.memory.MemoryManager;
 import org.memgraphd.memory.MemoryManagerImpl;
 import org.memgraphd.memory.MemoryReference;
-import org.memgraphd.memory.operation.MemoryBlockResolver;
 import org.memgraphd.request.GraphRequest;
 import org.memgraphd.request.GraphWriteRequestimpl;
 

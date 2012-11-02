@@ -6,13 +6,19 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import org.memgraphd.data.GraphData;
 import org.memgraphd.memory.operation.MemoryLocationOperations;
 
-
+/**
+ * Implements {@link MemoryLocation} and {@link MemoryLocationOperations}.
+ * 
+ * @author Ilirjan Papa
+ * @since July 31, 2012
+ *
+ */
 public class MemoryLocationImpl implements MemoryLocation, MemoryLocationOperations {
     private final MemoryReference reference;
     private final Set<MemoryLocation> links;
     private final Set<MemoryLocation> references;
     private GraphData data;
-    private MemoryStats block;
+    private MemoryBlock block;
     
     public MemoryLocationImpl(MemoryReference ref, GraphData data) {
         this.reference = ref;
@@ -21,33 +27,51 @@ public class MemoryLocationImpl implements MemoryLocation, MemoryLocationOperati
         this.references = new CopyOnWriteArraySet<MemoryLocation>();
     }
     
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public final MemoryReference reference() {
         return reference;
     }
-
+    
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public final GraphData data() {
         return data;
     }
     
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public final MemoryStats block() {
+    public final MemoryBlock block() {
         return this.block;
     }
-
+    
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public final void reserve(MemoryStats block) {
+    public final void reserve(MemoryBlock block) {
         if(block == null)
             throw new IllegalArgumentException("No Reservation - Memory block is null");
         setBlock(block);
     }
-
+    
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public final synchronized void update(GraphData data) {
         this.data = data;
     }
     
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public final void link(MemoryLocation location) {
         if(!links.contains(location)) {
@@ -55,41 +79,58 @@ public class MemoryLocationImpl implements MemoryLocation, MemoryLocationOperati
         }
     }
     
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public final void delink(MemoryLocation location) {
         links.remove(location);
     }
     
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public final void reference(MemoryLocation ref) {
         if(!references.contains(ref)) {
             references.add(ref);
         }
     }
-
+    
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public final void dereference(MemoryLocation loc) {
         references.remove(loc);
     }
     
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public final synchronized void free() {
         data = null;
         ((MemoryBlockImpl)block).recycle(reference());
     }
     
-    private final synchronized void setBlock(MemoryStats block) {
-        this.block = block;
-    }
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public final Set<MemoryLocation> getLinks() {
+    public final Set<MemoryLocation> links() {
         return links;
     }
-
+    
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public final Set<MemoryLocation> getReferences() {
+    public final Set<MemoryLocation> references() {
         return references;
     }
-
+    
+    private final synchronized void setBlock(MemoryBlock block) {
+        this.block = block;
+    }
 }

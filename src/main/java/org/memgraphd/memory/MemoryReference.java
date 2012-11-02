@@ -7,7 +7,13 @@ import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 import org.memgraphd.GraphLifecycleHandler;
 
-
+/**
+ * A memory reference is a unique identifier for a {@link MemoryLocation}.
+ * 
+ * @author Ilirjan Papa
+ * @since July 12, 2012
+ *
+ */
 public final class MemoryReference implements GraphLifecycleHandler {
     private final int id;
     private static Map<Integer, MemoryReference> store = new HashMap<Integer, MemoryReference>();
@@ -34,6 +40,11 @@ public final class MemoryReference implements GraphLifecycleHandler {
         return id;
     }
     
+    /**
+     * It generates an immutable instance of a {@link MemoryReference}.
+     * @param id integer
+     * @return {@link MemoryReference}
+     */
     public static MemoryReference valueOf(int id) {
         if(store.containsKey(id)) {
             return store.get(id);
