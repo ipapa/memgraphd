@@ -28,7 +28,7 @@ public class HSQLBookKeeper extends AbstractBookKeeper {
     protected void createDatabase() {
         try {
             Statement stmt = openConnection().createStatement();
-            stmt.executeUpdate(String.format("CREATE CACHED TABLE %s(DECISION_SEQUENCE INTEGER NOT NULL PRIMARY KEY, DECISION_TIME TIMESTAMP NOT NULL, REQUEST_TYPE VARCHAR(10) NOT NULL, REQUEST_URI VARCHAR(100) NOT NULL, REQUEST_TIME TIMESTAMP NOT NULL, REQUEST_DATA VARCHAR(10000));", dbName));
+            stmt.executeUpdate(String.format("CREATE CACHED TABLE %s(DECISION_SEQUENCE INTEGER NOT NULL PRIMARY KEY, DECISION_TIME TIMESTAMP NOT NULL, REQUEST_TYPE VARCHAR(10) NOT NULL, REQUEST_URI VARCHAR(100) NOT NULL, REQUEST_TIME TIMESTAMP NOT NULL, REQUEST_DATA VARCHAR(10000));", getDatabaseName()));
         } catch(SQLException e) {
             LOGGER.error("Failed to create database.", e);
             throw new RuntimeException(e);
@@ -39,12 +39,12 @@ public class HSQLBookKeeper extends AbstractBookKeeper {
         
         if(isFlushToDiskTime()) {
             LOGGER.info("Starting the flush to disk proccess");
-            lastTimeFlushedToDisk.set(System.currentTimeMillis());
+            getLastFlushedToDisk().set(System.currentTimeMillis());
             Set<Decision> oldBuffer = swapBuffer();
             for(Set<Decision> setOfDescions : splitDecisionsIntoBatches(oldBuffer)) {
-                executor.execute(
-                        new BookKeeperWriter("BookKeeperWriter-Thread" + counter.incrementAndGet(),
-                                dbName, openConnection(), setOfDescions));
+                getExecutor().execute(
+                        new BookKeeperWriter("BookKeeperWriter-Thread" + getCounter().incrementAndGet(),
+                                getDatabaseName(), openConnection(), setOfDescions));
             }
         }
     }

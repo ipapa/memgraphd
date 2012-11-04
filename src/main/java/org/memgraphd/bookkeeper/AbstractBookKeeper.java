@@ -1,7 +1,5 @@
 package org.memgraphd.bookkeeper;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -19,57 +17,41 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.apache.log4j.Logger;
 import org.memgraphd.GraphLifecycleHandler;
 import org.memgraphd.decision.Decision;
 import org.memgraphd.decision.Sequence;
+import org.memgraphd.persistence.PersistenceStore;
 
 
-public abstract class AbstractBookKeeper implements BookKeeper, Runnable, GraphLifecycleHandler {
+public abstract class AbstractBookKeeper extends PersistenceStore implements BookKeeper, Runnable, GraphLifecycleHandler {
     
-    protected final Logger LOGGER = Logger.getLogger(getClass());
-    
-    protected static final long WRITE_FREQUENCY = 3000L;
+    private static final long WRITE_FREQUENCY = 3000L;
 
-    protected static final int BATCH_SIZE = 10000;
+    private static final int BATCH_SIZE = 10000;
     
-    protected final String dbName;
-    
-    protected final String dbFilePath;
-    
-    protected volatile AtomicBoolean bookClosed = new AtomicBoolean(true);
-    
-    protected Set<Decision> buffer;
+    private Set<Decision> buffer;
    
-    protected final ReentrantLock bufferLock = new ReentrantLock();
+    private final ReentrantLock bufferLock = new ReentrantLock();
     
-    protected ScheduledExecutorService scheduler;
+    private ScheduledExecutorService scheduler;
     
-    protected ExecutorService executor;
-    
-    private final Connection connection;
+    private ExecutorService executor;
     
     private final BookKeeperReader reader;
     
-    protected final AtomicLong lastTimeFlushedToDisk = new AtomicLong();
+    private final AtomicLong lastTimeFlushedToDisk = new AtomicLong();
     
-    protected AtomicInteger counter = new AtomicInteger();
+    private AtomicInteger counter = new AtomicInteger();
+    
+    private volatile AtomicBoolean bookClosed = new AtomicBoolean(true);
     
     public AbstractBookKeeper(String dbName, String dbFilePath) throws SQLException {
-        this.dbName = dbName;
-        this.dbFilePath =dbFilePath;
+        
+        super(dbName, dbFilePath);
+        
         this.buffer = new HashSet<Decision>();
-        
-        loadJDBCDriver();
-        
-        connection = createNewConnection();
-        
-        reader = new BookKeeperReader(null, dbName, connection);
-        
-        if(!doesTableExist()) {
-            LOGGER.info("Database does not exist, creating it...");
-            createDatabase();
-        }
+    
+        reader = new BookKeeperReader(null, dbName, openConnection());
         
     }
     
@@ -93,50 +75,6 @@ public abstract class AbstractBookKeeper implements BookKeeper, Runnable, GraphL
         }
     }
     
-    protected abstract void createDatabase();
-    
-    protected String getJDBCDriver() {
-        return "org.hsqldb.jdbc.JDBCDriver";
-    }
-    
-    protected synchronized Connection openConnection() {
-        return connection;
-    }
-    
-    protected Connection createNewConnection() {
-        try {
-            LOGGER.info("Creating a new database connection");
-            String connectionString = String.format("jdbc:hsqldb:file:%s;", dbFilePath);
-            
-            return DriverManager.getConnection(connectionString, "SA", "");
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to connect to hsql db", e);
-        }
-    }
-
-    protected void closeConnection() {
-        try {
-            LOGGER.info("Flushing data to disc and compacting database");
-            openConnection().createStatement().execute("SHUTDOWN COMPACT;");
-            LOGGER.info("Finished compacting the database.");
-        } catch (SQLException e) {
-            LOGGER.error("Failed to compact and shutdown database connection", e);
-        }
-    }
-
-    protected boolean doesTableExist() {
-        boolean response = true;
-        try {
-            openConnection().createStatement().executeQuery(
-                   String.format(
-                           "SELECT COUNT(*) FROM %s WHERE DECISION_SEQUENCE < 100", dbName));
-
-        } catch (SQLException e) {
-            response = false;
-        }
-        return response;
-    }
-    
     @Override
     public void record(Decision decision) {
         authorize();
@@ -158,7 +96,6 @@ public abstract class AbstractBookKeeper implements BookKeeper, Runnable, GraphL
     public boolean isBookOpen() {
         return !bookClosed.get();
     }
-    
 
     @Override
     public Sequence lastTransactionId() {
@@ -166,7 +103,8 @@ public abstract class AbstractBookKeeper implements BookKeeper, Runnable, GraphL
         authorize();
         
         try {
-            ResultSet rs = openConnection().createStatement().executeQuery(String.format("SELECT MAX(DECISION_SEQUENCE) FROM %s;", dbName));
+            ResultSet rs = openConnection().createStatement().executeQuery(
+                    String.format("SELECT MAX(DECISION_SEQUENCE) FROM %s;", getDatabaseName()));
             while(rs.next()) {
                 return Sequence.valueOf(rs.getLong(1));
             }
@@ -195,7 +133,7 @@ public abstract class AbstractBookKeeper implements BookKeeper, Runnable, GraphL
         LOGGER.info("Deleting all transcations from the book. Size=" + lastTransactionId());
         try {
             PreparedStatement statement = openConnection().prepareStatement(
-                    String.format("DELETE FROM %s;", dbName));
+                    String.format("DELETE FROM %s;", getDatabaseName()));
           statement.execute();
           lastTimeFlushedToDisk.set(0);
         } catch (Exception e) {
@@ -234,14 +172,6 @@ public abstract class AbstractBookKeeper implements BookKeeper, Runnable, GraphL
         buffer.add(decision);
         bufferLock.unlock();
     }
-
-    protected void loadJDBCDriver() {
-        try {
-            Class.forName(getJDBCDriver());
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException("Failed to load jdbc drivers", e);
-        }
-    }
     
     protected List<Set<Decision>> splitDecisionsIntoBatches(Set<Decision> decisions) {
         List<Set<Decision>> batchSet = new ArrayList<Set<Decision>>();
@@ -261,6 +191,18 @@ public abstract class AbstractBookKeeper implements BookKeeper, Runnable, GraphL
         return batchSet;
     }
     
+    protected final AtomicInteger getCounter() {
+        return counter;
+    }
+    
+    protected final ExecutorService getExecutor() {
+        return executor;
+    }
+    
+    protected final AtomicLong getLastFlushedToDisk() {
+        return lastTimeFlushedToDisk;
+    }
+    
     @Override
     public void onStartup() {
         openBook();
@@ -270,4 +212,5 @@ public abstract class AbstractBookKeeper implements BookKeeper, Runnable, GraphL
     public void onShutdown() {
         closeBook();
     }
+  
 }
