@@ -1,7 +1,6 @@
 package org.memgraphd.bookkeeper;
 
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
@@ -23,18 +22,7 @@ public class HSQLBookKeeper extends AbstractBookKeeper {
     public HSQLBookKeeper(String dbName, String dbFilePath) throws SQLException {
         super(dbName, dbFilePath);
     }
-    
-    @Override
-    protected void createDatabase() {
-        try {
-            Statement stmt = openConnection().createStatement();
-            stmt.executeUpdate(String.format("CREATE CACHED TABLE %s(DECISION_SEQUENCE INTEGER NOT NULL PRIMARY KEY, DECISION_TIME TIMESTAMP NOT NULL, REQUEST_TYPE VARCHAR(10) NOT NULL, REQUEST_URI VARCHAR(100) NOT NULL, REQUEST_TIME TIMESTAMP NOT NULL, REQUEST_DATA VARCHAR(10000));", getDatabaseName()));
-        } catch(SQLException e) {
-            LOGGER.error("Failed to create database.", e);
-            throw new RuntimeException(e);
-        }
-    }
-    
+  
     public void run() {
         
         if(isFlushToDiskTime()) {
@@ -46,6 +34,35 @@ public class HSQLBookKeeper extends AbstractBookKeeper {
                         new BookKeeperWriter("BookKeeperWriter-Thread" + getCounter().incrementAndGet(),
                                 getDatabaseName(), openConnection(), setOfDescions));
             }
+        }
+    }
+
+    @Override
+    protected String createDatabaseSQL() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("CREATE CACHED TABLE ").append(getDatabaseName());
+        builder.append("(SEQUENCE_ID INTEGER NOT NULL PRIMARY KEY,");
+        builder.append("DECISION_TIME TIMESTAMP NOT NULL,");
+        builder.append("REQUEST_TYPE VARCHAR(10) NOT NULL,");
+        builder.append("DATA_ID VARCHAR(100) NOT NULL,");
+        builder.append("DATA OBJECT NOT NULL);");
+        return builder.toString();
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void wipe(Decision decision) {
+        try {
+            openConnection().createStatement().executeUpdate(
+                    String.format("DELETE FROM %s WHERE SEQUENCE_ID=%d", 
+                            getDatabaseName(), decision.getSequence().number()));
+        } catch (SQLException e) {
+            String msg = String.format("Failed to delete decision with sequence=", 
+                                            decision.getSequence().number());
+            LOGGER.error(msg, e);
+            throw new RuntimeException(msg, e);
         }
     }
     

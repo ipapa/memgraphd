@@ -30,7 +30,7 @@ public final class MemoryAccess implements MemoryOperations {
      */
     @Override
     public MemoryReference write(GraphData item) {
-        MemoryBlock block = memoryManager.resolver().resolve(item.getDecision().getRequest());
+        MemoryBlock block = memoryManager.resolver().resolve(item.getData());
         MemoryReference nextAvailableRef = block.next();
         ((MemoryLocationOperations)memoryManager.read(nextAvailableRef)).update(item);
         return nextAvailableRef;
@@ -50,6 +50,9 @@ public final class MemoryAccess implements MemoryOperations {
     @Override
     public GraphData readGraph(MemoryReference reference) {
         MemoryLocation location = getMemoryLocation(reference);
+        // reset old relationships that might no longer be valid
+        resetRelationships(location.data());
+        // build new set of relationships
         LinkedList<GraphData> graph = new LinkedList<GraphData>();
         read(location, true, graph);
         GraphData last = graph.peekFirst();
@@ -57,6 +60,14 @@ public final class MemoryAccess implements MemoryOperations {
             read(getMemoryLocation(last.getReference()), false, graph);
         }
         return read(location, false, graph);
+    }
+    
+    private void resetRelationships(GraphData gData) {
+        if(gData.getRelatedData() != null) {
+            GraphRelatedDataImpl relations = (GraphRelatedDataImpl) gData.getRelatedData();
+            relations.setReferences(null);
+            relations.setRelationships(null);
+        }
     }
     
     /**

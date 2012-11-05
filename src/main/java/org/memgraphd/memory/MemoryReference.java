@@ -53,11 +53,24 @@ public final class MemoryReference implements GraphLifecycleHandler {
         store.put(id, newImpl);
         return newImpl;
     }
-
+    
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public void onStartup() {
+    public synchronized void onStartup() {
     }
-
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public synchronized void onClearAll() {
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public synchronized void onShutdown() {
         store.clear();

@@ -3,6 +3,7 @@ package org.memgraphd.persistence;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 import org.apache.log4j.Logger;
 
@@ -29,7 +30,7 @@ public abstract class PersistenceStore {
         }
     }
     
-    protected abstract void createDatabase();
+    protected abstract String createDatabaseSQL();
     
     protected void loadJDBCDriver() {
         try {
@@ -39,12 +40,22 @@ public abstract class PersistenceStore {
         }
     }
     
+    protected void createDatabase() {
+        try {
+            Statement stmt = openConnection().createStatement();
+            stmt.executeUpdate(createDatabaseSQL());
+        } catch(SQLException e) {
+            LOGGER.error("Failed to create database.", e);
+            throw new RuntimeException(e);
+        }
+    }
+    
     protected boolean doesTableExist() {
         boolean response = true;
         try {
             openConnection().createStatement().executeQuery(
                    String.format(
-                           "SELECT COUNT(*) FROM %s WHERE DECISION_SEQUENCE < 100", dbName));
+                           "SELECT COUNT(*) FROM %s WHERE SEQUENCE_ID < 100", getDatabaseName()));
 
         } catch (SQLException e) {
             response = false;

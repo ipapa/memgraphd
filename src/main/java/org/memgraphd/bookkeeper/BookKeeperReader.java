@@ -7,14 +7,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.joda.time.DateTime;
-import org.json.JSONObject;
+import org.memgraphd.GraphRequestType;
+import org.memgraphd.data.Data;
 import org.memgraphd.decision.Decision;
 import org.memgraphd.decision.DecisionImpl;
 import org.memgraphd.decision.Sequence;
-import org.memgraphd.request.GraphDeleteRequestImpl;
-import org.memgraphd.request.GraphRequest;
-import org.memgraphd.request.GraphWriteRequestimpl;
-import org.memgraphd.request.RequestType;
 
 /**
  * It is responsible for reading decisions already made from the book on behalf of the book-keeper.
@@ -40,32 +37,21 @@ public class BookKeeperReader extends BookKeeperBase {
         List<Decision> result = new ArrayList<Decision>();
         PreparedStatement statement = 
            getConnection().prepareStatement(
-                String.format("SELECT * FROM %s WHERE DECISION_SEQUENCE BETWEEN ? AND ? ORDER BY DECISION_SEQUENCE ASC", getDbName()));
+                String.format("SELECT * FROM %s WHERE SEQUENCE_ID BETWEEN ? AND ? ORDER BY SEQUENCE_ID ASC", getDbName()));
         statement.setLong(1, start.number());
         statement.setLong(2, end.number());
         
         ResultSet rs = statement.executeQuery();
         
         while(rs.next()) {
-            RequestType reqType = RequestType.valueOf(rs.getString("REQUEST_TYPE"));
-            String reqUri = rs.getString("REQUEST_URI");
-            DateTime reqTime = new DateTime(rs.getTimestamp("REQUEST_TIME").getTime());
-            JSONObject reqData = new JSONObject(rs.getString("REQUEST_DATA"));
             result.add(new DecisionImpl(
-                    createRequest(reqType, reqUri, reqTime, reqData) , 
-                    Sequence.valueOf(rs.getLong("DECISION_SEQUENCE")), 
-                    new DateTime(rs.getTimestamp("DECISION_TIME").getTime())));
+                    Sequence.valueOf(rs.getLong("SEQUENCE_ID")), 
+                    new DateTime(rs.getTimestamp("DECISION_TIME").getTime()),
+                    GraphRequestType.valueOf(rs.getString("REQUEST_TYPE")),
+                    rs.getString("DATA_ID"),
+                    (Data) rs.getObject("DATA")));
         }
         return result;
-    }
-    
-    private GraphRequest createRequest(RequestType reqType, String reqUri, DateTime reqTime, JSONObject reqData) {
-        switch (reqType) {
-            case PUT:
-                return new GraphWriteRequestimpl(reqUri, reqTime, reqData);
-            default:
-                return new GraphDeleteRequestImpl(reqUri, reqTime);
-        }
     }
 
 }

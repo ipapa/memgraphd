@@ -41,10 +41,9 @@ class BookKeeperWriter extends BookKeeperBase implements Runnable {
             for(Decision d : decisions) {
                 insert.setLong(1, d.getSequence().number());
                 insert.setTimestamp(2, new Timestamp(d.getTime().getMillis()));
-                insert.setString(3, d.getRequest().getType().name());
-                insert.setString(4, d.getRequest().getRequestUri());
-                insert.setTimestamp(5, new Timestamp(d.getTime().getMillis()));
-                insert.setString(6, d.getRequest().getData().toString());
+                insert.setString(3, d.getRequestType().name());
+                insert.setString(4, d.getDataId());
+                insert.setObject(5, d.getData());
                 
                 LOGGER.debug(insert.toString());
                 insert.addBatch();
@@ -63,7 +62,7 @@ class BookKeeperWriter extends BookKeeperBase implements Runnable {
     
     private PreparedStatement createStatement() {
         try {
-            return getConnection().prepareStatement(String.format("INSERT INTO %s VALUES (?,?,?, ?,?,?);", getDbName()));
+            return getConnection().prepareStatement(String.format("INSERT INTO %s VALUES (?,?,?,?,?);", getDbName()));
         } catch (SQLException e) {
             LOGGER.error("Failed to crated a prepared statement", e);
             throw new RuntimeException(e);

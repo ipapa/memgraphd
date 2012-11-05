@@ -9,6 +9,11 @@ import org.memgraphd.data.relationship.DataRelationship;
 
 
 public class TvEpisode extends DataImpl implements DataValidator, DataRelationship {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -8362521491512221109L;
+    
     private final String seasonId;
     private final String episodeName;
     private final String episodeNumber;

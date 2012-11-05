@@ -51,11 +51,24 @@ public final class Sequence implements GraphLifecycleHandler {
         
         return newSeq;
     }
-
+    
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public void onStartup() {
+    public synchronized void onStartup() {
     }
-
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public synchronized void onClearAll() {
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public synchronized void onShutdown() {
         store.clear();

@@ -1,19 +1,23 @@
 package org.memgraphd;
 
 import java.util.ArrayList;
+import java.util.Collection;
 
+import org.apache.log4j.Logger;
 import org.memgraphd.controller.GraphController;
 import org.memgraphd.data.GraphData;
 import org.memgraphd.data.event.GraphDataEventListener;
 import org.memgraphd.data.event.GraphDataEventListenerManagerImpl;
 import org.memgraphd.data.relationship.DataMatchmaker;
 import org.memgraphd.data.relationship.DataMatchmakerImpl;
+import org.memgraphd.decision.Decision;
 import org.memgraphd.decision.Sequence;
 import org.memgraphd.exception.GraphException;
 import org.memgraphd.memory.MemoryAccess;
 import org.memgraphd.memory.MemoryBlock;
 import org.memgraphd.memory.MemoryManager;
 import org.memgraphd.memory.MemoryReference;
+import org.memgraphd.memory.MemoryStats;
 import org.memgraphd.memory.operation.MemoryOperations;
 import org.memgraphd.operation.GraphFilter;
 import org.memgraphd.operation.GraphFilterImpl;
@@ -33,19 +37,22 @@ import org.memgraphd.operation.GraphWriterImpl;
  *
  */
 public final class GraphImpl extends GraphSupervisorImpl implements Graph {
-    private final GraphMappings mappings;
     
+    private static final Logger LOGGER = Logger.getLogger(GraphImpl.class);
+    
+    private final GraphMappings mappings;
     private final GraphFilter filter;
     private final GraphReader reader;
     private final GraphWriter writer;
     private final GraphSeeker seeker;
     
+    private final MemoryOperations memoryAccess;
     private final DataMatchmaker dataMatchmaker;
     
     public GraphImpl(MemoryManager memoryManager) {
         this.mappings = new GraphMappingsImpl();
         
-        MemoryOperations memoryAccess = new MemoryAccess(memoryManager);
+        this.memoryAccess = new MemoryAccess(memoryManager);
         this.seeker = new GraphSeekerImpl(memoryAccess, mappings);
         this.reader = new GraphReaderImpl(memoryAccess, seeker);
         this.dataMatchmaker = new DataMatchmakerImpl(memoryAccess, seeker);
@@ -113,18 +120,18 @@ public final class GraphImpl extends GraphSupervisorImpl implements Graph {
      * {@inheritDoc}
      */
     @Override
-    public MemoryReference write(GraphData data) throws GraphException {
+    public MemoryReference write(Decision decision) throws GraphException {
         authorize();
-        return writer.write(data);
+        return writer.write(decision);
     }
     
     /**
      * {@inheritDoc}
      */
     @Override
-    public MemoryReference[] write(GraphData[] data) throws GraphException {
+    public MemoryReference[] write(Decision[] decisions) throws GraphException {
         authorize();
-        return writer.write(data);
+        return writer.write(decisions);
     }
     
     /**
@@ -278,6 +285,44 @@ public final class GraphImpl extends GraphSupervisorImpl implements Graph {
     public GraphData[] filterByRange(Sequence startSeq, Sequence endSeq) {
         authorize();
         return filterByRange(startSeq, endSeq);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final synchronized void clear() {
+        authorize();
+        LOGGER.info("Wiping out all graph data.");
+        for(MemoryReference ref : mappings.getAllMemoryReferences()) {
+            GraphData gData = readReference(ref);
+            try {
+                LOGGER.info(String.format("Deleting graph data id=%s", gData.getData().getId()));
+                delete(gData);
+            } catch (GraphException e) {
+                LOGGER.error(String.format("Failed to delete graph data id=%s", gData.getData().getId()), e);
+            }
+        }
+        
+        notifyOnClearAll();
+        
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final boolean isEmpty() {
+        authorize();
+        return ((MemoryStats)memoryAccess).occupied() == 0;
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final Collection<MemoryReference> getAllMemoryReferences() {
+        return mappings.getAllMemoryReferences();
     }
 
 }

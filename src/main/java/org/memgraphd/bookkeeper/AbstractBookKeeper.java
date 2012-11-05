@@ -1,6 +1,5 @@
 package org.memgraphd.bookkeeper;
 
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -104,7 +103,7 @@ public abstract class AbstractBookKeeper extends PersistenceStore implements Boo
         
         try {
             ResultSet rs = openConnection().createStatement().executeQuery(
-                    String.format("SELECT MAX(DECISION_SEQUENCE) FROM %s;", getDatabaseName()));
+                    String.format("SELECT MAX(SEQUENCE_ID) FROM %s;", getDatabaseName()));
             while(rs.next()) {
                 return Sequence.valueOf(rs.getLong(1));
             }
@@ -125,21 +124,6 @@ public abstract class AbstractBookKeeper extends PersistenceStore implements Boo
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }
-    
-    @Override
-    public synchronized void deleteAll() {
-        authorize();
-        LOGGER.info("Deleting all transcations from the book. Size=" + lastTransactionId());
-        try {
-            PreparedStatement statement = openConnection().prepareStatement(
-                    String.format("DELETE FROM %s;", getDatabaseName()));
-          statement.execute();
-          lastTimeFlushedToDisk.set(0);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        
     }
     
     private void authorize() {
@@ -211,6 +195,10 @@ public abstract class AbstractBookKeeper extends PersistenceStore implements Boo
     @Override
     public void onShutdown() {
         closeBook();
+    }
+    
+    @Override
+    public void onClearAll() {
     }
   
 }

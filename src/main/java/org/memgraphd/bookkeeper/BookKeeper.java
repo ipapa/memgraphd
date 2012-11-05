@@ -28,17 +28,18 @@ public interface BookKeeper {
     void record(Decision decision);
     
     /**
+     * It will wipe off the book a pre-recorded decision.
+     * @param decision {@link Decision}
+     */
+    void wipe(Decision decision);
+    
+    /**
      * Read a range of decisions from the book starting at start and ending at end sequence.
      * @param start {@link Sequence}
      * @param end {@link Sequence}
      * @return {@link List} of {@link Decision}
      */
     List<Decision> readRange(Sequence start, Sequence end);
-    
-    /**
-     * <b>WARNING:</b> Invoking this method will delete all records from the book.
-     */
-    void deleteAll();
     
     /**
      * When you are done writing/reading from the book, you need to close it.

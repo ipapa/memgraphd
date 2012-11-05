@@ -3,7 +3,8 @@ package org.memgraphd.decision;
 import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 import org.joda.time.DateTime;
-import org.memgraphd.request.GraphRequest;
+import org.memgraphd.GraphRequestType;
+import org.memgraphd.data.Data;
 
 /**
  * Default implementation of {@link Decision}.
@@ -14,13 +15,17 @@ import org.memgraphd.request.GraphRequest;
  */
 public final class DecisionImpl implements Decision {
     private final Sequence sequence;
-    private final GraphRequest request;
+    private final GraphRequestType requestType;
+    private final String dataId;
+    private final Data data;
     private final DateTime time;
     
-    public DecisionImpl(GraphRequest request, Sequence seq, DateTime time) {
-        this.request = request;
+    public DecisionImpl(Sequence seq, DateTime decionTime, GraphRequestType requestType, String dataId, Data data) {
         this.sequence = seq;
-        this.time = time;
+        this.time = decionTime;
+        this.data = data;
+        this.dataId = dataId;
+        this.requestType = requestType;
     }
     
     /**
@@ -35,20 +40,37 @@ public final class DecisionImpl implements Decision {
      * {@inheritDoc}
      */
     @Override
-    public final GraphRequest getRequest() {
-        return request;
+    public final DateTime getTime() {
+        return time;
     }
     
     /**
      * {@inheritDoc}
      */
     @Override
-    public final DateTime getTime() {
-        return time;
+    public final GraphRequestType getRequestType() {
+        return requestType;
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final String getDataId() {
+        return dataId;
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final Data getData() {
+        return data;
     }
     
     @Override
     public final String toString() {
         return ReflectionToStringBuilder.toString(this, ToStringStyle.MULTI_LINE_STYLE);
     }
+    
 }

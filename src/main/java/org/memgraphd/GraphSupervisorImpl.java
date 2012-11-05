@@ -11,13 +11,13 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @since October 1, 2012
  *
  */
-public class GraphSupervisorImpl implements GraphSupervisor {
+public abstract class GraphSupervisorImpl implements GraphSupervisor {
     private final List<GraphLifecycleHandler> listeners;
     private volatile GraphState state;
     
     public GraphSupervisorImpl() {
-        listeners = new CopyOnWriteArrayList<GraphLifecycleHandler>();
-        state = GraphState.INITIALIZED;
+        this.listeners = new CopyOnWriteArrayList<GraphLifecycleHandler>();
+        this.state = GraphState.INITIALIZED;
     }
     
     /**
@@ -85,6 +85,12 @@ public class GraphSupervisorImpl implements GraphSupervisor {
     private void notifyOnShutdown() {
         for(GraphLifecycleHandler h : listeners) {
             h.onShutdown();
+        }
+    }
+    
+    protected void notifyOnClearAll() {
+        for(GraphLifecycleHandler h : listeners) {
+            h.onClearAll();
         }
     }
     

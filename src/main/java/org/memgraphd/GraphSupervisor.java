@@ -21,6 +21,12 @@ public interface GraphSupervisor {
     void stop();
     
     /**
+     * Wipes out all the data from the {@link Graph}.<br>
+     * <b>WARNING: This will permanently wipe out all the data you have stored in this {@link Graph}.</b> 
+     */
+    void clear();
+    
+    /**
      * Checks to see if {@link Graph} is running.
      * @return true if it is running, false otherwise.
      */
@@ -31,4 +37,10 @@ public interface GraphSupervisor {
      * @return true if it is stopped, false otherwise.
      */
     boolean isStopped();
+    
+    /**
+     * Returns true if the {@link Graph} is empty, has no data stored in it.
+     * @return true if the {@link Graph} has not data stored in it, false otherwise.
+     */
+    boolean isEmpty();
 }

@@ -1,9 +1,10 @@
 package org.memgraphd.memory;
 
+import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.memgraphd.data.GraphData;
+import org.memgraphd.memory.operation.MemoryBlockOperations;
 import org.memgraphd.memory.operation.MemoryLocationOperations;
 
 /**
@@ -23,8 +24,8 @@ public class MemoryLocationImpl implements MemoryLocation, MemoryLocationOperati
     public MemoryLocationImpl(MemoryReference ref, GraphData data) {
         this.reference = ref;
         this.data = data;
-        this.links = new CopyOnWriteArraySet<MemoryLocation>();
-        this.references = new CopyOnWriteArraySet<MemoryLocation>();
+        this.links = new HashSet<MemoryLocation>();
+        this.references = new HashSet<MemoryLocation>();
     }
     
     /**
@@ -73,7 +74,7 @@ public class MemoryLocationImpl implements MemoryLocation, MemoryLocationOperati
      * {@inheritDoc}
      */
     @Override
-    public final void link(MemoryLocation location) {
+    public final synchronized void link(MemoryLocation location) {
         if(!links.contains(location)) {
             links.add(location);
         }
@@ -83,7 +84,7 @@ public class MemoryLocationImpl implements MemoryLocation, MemoryLocationOperati
      * {@inheritDoc}
      */
     @Override
-    public final void delink(MemoryLocation location) {
+    public final synchronized void delink(MemoryLocation location) {
         links.remove(location);
     }
     
@@ -91,7 +92,7 @@ public class MemoryLocationImpl implements MemoryLocation, MemoryLocationOperati
      * {@inheritDoc}
      */
     @Override
-    public final void reference(MemoryLocation ref) {
+    public final synchronized void reference(MemoryLocation ref) {
         if(!references.contains(ref)) {
             references.add(ref);
         }
@@ -101,7 +102,7 @@ public class MemoryLocationImpl implements MemoryLocation, MemoryLocationOperati
      * {@inheritDoc}
      */
     @Override
-    public final void dereference(MemoryLocation loc) {
+    public final synchronized void dereference(MemoryLocation loc) {
         references.remove(loc);
     }
     
@@ -111,7 +112,7 @@ public class MemoryLocationImpl implements MemoryLocation, MemoryLocationOperati
     @Override
     public final synchronized void free() {
         data = null;
-        ((MemoryBlockImpl)block).recycle(reference());
+        ((MemoryBlockOperations)block).recycle(reference());
     }
     
     /**

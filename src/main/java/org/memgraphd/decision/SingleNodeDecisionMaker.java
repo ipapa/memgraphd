@@ -6,8 +6,9 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.memgraphd.GraphLifecycleHandler;
+import org.memgraphd.GraphRequestType;
 import org.memgraphd.bookkeeper.BookKeeper;
-import org.memgraphd.request.GraphRequest;
+import org.memgraphd.data.Data;
 
 /**
  * A single node implementation of a {@link DecisionMaker} meant to be used when running on a single JVM.
@@ -32,8 +33,20 @@ public class SingleNodeDecisionMaker implements DecisionMaker, GraphLifecycleHan
      * {@inheritDoc}
      */
     @Override
-    public Decision decide(GraphRequest request) {
-        Decision decision = new DecisionImpl(request, Sequence.valueOf(latestInUseSequence.incrementAndGet()), new DateTime());
+    public Decision decideWriteRequest(Data data) {
+        Decision decision = new DecisionImpl(Sequence.valueOf(latestInUseSequence.incrementAndGet()), 
+                new DateTime(), GraphRequestType.PUT, data.getId(), data);
+        bookKeeper.record(decision);
+        return decision;
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Decision decideDeleteRequest(Data data) {
+        Decision decision = new DecisionImpl(Sequence.valueOf(latestInUseSequence.incrementAndGet()), 
+                new DateTime(), GraphRequestType.DELETE, data.getId(), data);
         bookKeeper.record(decision);
         return decision;
     }
@@ -50,18 +63,16 @@ public class SingleNodeDecisionMaker implements DecisionMaker, GraphLifecycleHan
      * {@inheritDoc}
      */
     @Override
-    public void clearAll() {
-        LOGGER.info("Deleting all decisions I have made.");
-        bookKeeper.deleteAll();
-        latestInUseSequence.set(0L);
+    public Sequence latestDecision() {
+        return Sequence.valueOf(latestInUseSequence.get());
     }
     
     /**
      * {@inheritDoc}
      */
     @Override
-    public Sequence latestDecision() {
-        return Sequence.valueOf(latestInUseSequence.get());
+    public void reverse(Decision decision) {
+        bookKeeper.wipe(decision);
     }
     
     /**
@@ -78,6 +89,14 @@ public class SingleNodeDecisionMaker implements DecisionMaker, GraphLifecycleHan
     @Override
     public void onShutdown() {
         // do nothing
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onClearAll() {
+        latestInUseSequence.set(bookKeeper.lastTransactionId().number());
     }
 
 }

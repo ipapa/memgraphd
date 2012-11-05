@@ -20,4 +20,9 @@ public interface GraphLifecycleHandler {
      * Actions to take right after memgraphd was shut down.
      */
     void onShutdown();
+    
+    /**
+     * Actions to take right after memgraphd wiped all graph data.
+     */
+    void onClearAll();
 }

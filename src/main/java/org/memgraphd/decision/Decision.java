@@ -1,14 +1,13 @@
 package org.memgraphd.decision;
 
 import org.joda.time.DateTime;
-import org.memgraphd.request.GraphDeleteRequest;
-import org.memgraphd.request.GraphRequest;
-import org.memgraphd.request.GraphWriteRequest;
+import org.memgraphd.GraphRequestType;
+import org.memgraphd.data.Data;
 
 /**
- * The {@link DecisionMaker} makes {@link Decision}s on {@link GraphWriteRequest} and {@link GraphDeleteRequest}s events.
- * These events get ordered and assigned a {@link Sequence}. We also capture the {@link GraphRequest} the decision as based on
- * and the time that the decision was made.
+ * The {@link DecisionMaker} makes {@link Decision}(s) on incoming Graph events that change the state of our data model.
+ * These requests are either {@link GraphRequestType#PUT} or {@link GraphRequestType#DELETE}.
+ * These events get ordered and assigned a {@link Sequence}. 
  * 
  * @author Ilirjan Papa
  * @since July 23, 2012
@@ -24,10 +23,23 @@ public interface Decision {
     Sequence getSequence();
     
     /**
-     * Returns the {@link GraphRequest} instance which was the input to this decision.
-     * @return {@link GraphRequest} most likely a {@link GraphWriteRequest} or {@link GraphDeleteRequest}.
+     * The type of request that got decided.
+     * @return {@link GraphRequestType}
      */
-    GraphRequest getRequest();
+    GraphRequestType getRequestType();
+    
+    /**
+     * Returns the id of the data concerning this decision.
+     * @return {@link String}
+     */
+    String getDataId();
+    
+    /**
+     * The {@link Data} object on which we based our decision.
+     * This only applies to write events, not deletes.
+     * @return {@link Data}
+     */
+    Data getData();
     
     /**
      * Returns the time the decision was made.

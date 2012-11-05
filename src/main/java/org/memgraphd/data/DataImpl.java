@@ -10,6 +10,11 @@ import org.joda.time.DateTime;
  *
  */
 public class DataImpl implements Data {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 4198986927144007897L;
+    
     private final String id;
     private final DateTime createdDate;
     private final DateTime lastModifiedDate;

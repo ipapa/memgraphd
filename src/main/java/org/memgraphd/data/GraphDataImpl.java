@@ -1,6 +1,9 @@
 package org.memgraphd.data;
 
+import org.apache.commons.lang.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang.builder.ToStringStyle;
 import org.memgraphd.decision.Decision;
+import org.memgraphd.decision.Sequence;
 import org.memgraphd.memory.MemoryReference;
 
 /**
@@ -12,14 +15,12 @@ import org.memgraphd.memory.MemoryReference;
  */
 public class GraphDataImpl implements GraphData {
     private final Decision decision;
-    private final Data data;
     private final GraphRelatedData relatedData;
     
     private MemoryReference reference;
     
-    public GraphDataImpl(Decision decision, Data data) {
+    public GraphDataImpl(Decision decision) {
         this.decision = decision;
-        this.data = data;
         this.relatedData = new GraphRelatedDataImpl();
     }
     
@@ -35,16 +36,8 @@ public class GraphDataImpl implements GraphData {
      * {@inheritDoc}
      */
     @Override
-    public final Decision getDecision() {
-        return decision;
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public final Data getData() {
-        return data;
+        return decision.getData();
     }
     
     /**
@@ -60,5 +53,18 @@ public class GraphDataImpl implements GraphData {
     @Override
     public final GraphRelatedData getRelatedData() {
         return relatedData;
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final Sequence getSequence() {
+        return decision.getSequence();
+    }
+    
+    @Override
+    public final String toString() {
+        return ReflectionToStringBuilder.toString(this, ToStringStyle.MULTI_LINE_STYLE);
     }
 }

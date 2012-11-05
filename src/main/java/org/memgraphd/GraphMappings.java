@@ -1,5 +1,7 @@
 package org.memgraphd;
 
+import java.util.Collection;
+
 import org.memgraphd.decision.Sequence;
 import org.memgraphd.memory.MemoryReference;
 /**
@@ -66,4 +68,10 @@ public interface GraphMappings {
      * @param ref {@link MemoryReference}
      */
     void put(Sequence sequence, MemoryReference ref);
+    
+    /**
+     * Returns a list of all memory references currently in use.
+     * @return {@link Collection} of {@link MemoryReference}
+     */
+    Collection<MemoryReference> getAllMemoryReferences();
 }

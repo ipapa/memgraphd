@@ -3,7 +3,7 @@ package org.memgraphd.decision;
 import java.util.List;
 
 import org.memgraphd.bookkeeper.BookKeeper;
-import org.memgraphd.request.GraphRequest;
+import org.memgraphd.data.Data;
 
 /**
  * The {@link DecisionMaker} is in charge of making decisions about the write/delete events that change
@@ -17,11 +17,18 @@ import org.memgraphd.request.GraphRequest;
 public interface DecisionMaker {
     
     /**
-     * Given an incoming request, please make a decision about it.
-     * @param request {@link GraphRequest}
+     * Orders a write event to memgraphd.
+     * @param data {@link Data}
      * @return {@link Decision}
      */
-    Decision decide(GraphRequest request);
+    Decision decideWriteRequest(Data data);
+    
+    /**
+     * Orders a write event to memgraphd.
+     * @param data {@link Data}
+     * @return {@link Decision}
+     */
+    Decision decideDeleteRequest(Data data);
     
     /**
      * Return the last-good-known decision sequence made by this decision maker.
@@ -38,7 +45,9 @@ public interface DecisionMaker {
     List<Decision> readRange(Sequence startSeq, Sequence endSequence);
     
     /**
-     * <b>WARNING:</b> Calling this method will delete all decision ever made.
+     * Reverses an enacted decision, which is no longer valid.
+     * @param decision {@link Decision}
      */
-    void clearAll();
+    void reverse(Decision decision);
+
 }

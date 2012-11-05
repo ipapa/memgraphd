@@ -4,10 +4,6 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.memgraphd.Graph;
-import org.memgraphd.data.Data;
-import org.memgraphd.data.GraphData;
-import org.memgraphd.data.GraphDataConverter;
-import org.memgraphd.data.GraphDataImpl;
 import org.memgraphd.decision.Decision;
 import org.memgraphd.decision.DecisionMaker;
 import org.memgraphd.decision.Sequence;
@@ -26,12 +22,10 @@ public class GraphDataInitializer {
     
     private final Graph graph;
     private final DecisionMaker decisionMaker;
-    private final GraphDataConverter converter;
     
-    public GraphDataInitializer(Graph graph, DecisionMaker decisionMaker, GraphDataConverter converter) {
+    public GraphDataInitializer(Graph graph, DecisionMaker decisionMaker) {
         this.graph = graph;
         this.decisionMaker = decisionMaker;
-        this.converter = converter;
     }
     
     public void initialize() {
@@ -65,14 +59,8 @@ public class GraphDataInitializer {
         for(Decision d : allDecsions) {
             LOGGER.debug(String.format("Loading decision sequenceId=%d", d.getSequence().number()));
             try {
-                // 1. Read the data from request object
-                Data data = converter.convert(d.getRequest());
-                
-                // 2. Construct graph data object
-                GraphData graphData = new GraphDataImpl(d, data);
-                
-                // 3. Record this data in the brain
-                graph.write(graphData);
+
+                graph.write(d);
                 
             } catch (GraphException e) {
                 LOGGER.error("Failed to write decision to Graph " + d.toString());

@@ -1,5 +1,6 @@
 package org.memgraphd;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -85,6 +86,14 @@ public final class GraphMappingsImpl implements GraphMappings {
     @Override
     public void delete(Sequence seq) {
         seqMap.remove(seq);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final Collection<MemoryReference> getAllMemoryReferences() {
+        return  idMap.values();
     }
 
 }

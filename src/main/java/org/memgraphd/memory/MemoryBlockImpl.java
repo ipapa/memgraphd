@@ -55,7 +55,7 @@ public final class MemoryBlockImpl implements MemoryBlock, MemoryBlockOperations
      */
     @Override
     public final int occupied() {
-        return cursor.intValue() - startsWith().id() + recycled.size() + 1;
+        return cursor.intValue() - startsWith().id() - recycled.size() + 1;
     }
     
     /**

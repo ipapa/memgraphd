@@ -2,6 +2,7 @@ package org.memgraphd.operation;
 
 import org.memgraphd.Graph;
 import org.memgraphd.data.GraphData;
+import org.memgraphd.decision.Decision;
 import org.memgraphd.exception.GraphException;
 import org.memgraphd.memory.MemoryReference;
 /**
@@ -14,23 +15,23 @@ import org.memgraphd.memory.MemoryReference;
 public interface GraphWriter {
     
     /**
-     * Write {@link GraphData} into the {@link Graph} and return the {@link MemoryReference} assigned
+     * Write {@link Decision} into the {@link Graph} and return the {@link MemoryReference} assigned
      * to this data instance for future references by the caller.
      * 
-     * @param data {@link GraphData}
+     * @param decision {@link GraphData}
      * @return {@link MemoryReference}
      * @throws GraphException
      */
-    MemoryReference write(GraphData data) throws GraphException;
+    MemoryReference write(Decision decision) throws GraphException;
     
     /**
-     * Same functionality as {@link #write(GraphData)} but this time we are writing more than one data instances
+     * Same functionality as {@link #write(Decision)} but this time we are writing more than one decision instances
      * into the graph and for each write event we are returning its assigned memory reference.
-     * @param data array of {@link GraphData}
+     * @param data array of {@link Decision}
      * @return array of {@link MemoryReference}
      * @throws GraphException
      */
-    MemoryReference[] write(GraphData[] data) throws GraphException;
+    MemoryReference[] write(Decision[] decisions) throws GraphException;
     
     /**
      * Delete this {@link GraphData} from the {@link Graph}.
