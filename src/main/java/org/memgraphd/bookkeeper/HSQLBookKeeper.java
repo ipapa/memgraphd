@@ -19,8 +19,18 @@ import org.memgraphd.decision.Decision;
 public class HSQLBookKeeper extends AbstractBookKeeper {
     private static final Logger LOGGER = Logger.getLogger(HSQLBookKeeper.class);
     
-    public HSQLBookKeeper(String dbName, String dbFilePath) throws SQLException {
-        super(dbName, dbFilePath);
+    /**
+     * Default name of the database table to store book data.
+     */
+    public static final String DEFAULT_TABLE_NAME = "PUBLIC.BOOK";
+    
+    /**
+     * Default database file path where all database files will be created.
+     */
+    public static final String DEFAULT_DB_FILE_PATH = "/tmp/book/";
+
+    public HSQLBookKeeper() {
+        super(DEFAULT_TABLE_NAME, DEFAULT_DB_FILE_PATH);
     }
   
     public void run() {

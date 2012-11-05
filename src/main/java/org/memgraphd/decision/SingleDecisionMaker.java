@@ -8,6 +8,7 @@ import org.joda.time.DateTime;
 import org.memgraphd.GraphLifecycleHandler;
 import org.memgraphd.GraphRequestType;
 import org.memgraphd.bookkeeper.BookKeeper;
+import org.memgraphd.bookkeeper.HSQLBookKeeper;
 import org.memgraphd.data.Data;
 
 /**
@@ -17,14 +18,14 @@ import org.memgraphd.data.Data;
  * @since July 27, 2012
  *
  */
-public class SingleNodeDecisionMaker implements DecisionMaker, GraphLifecycleHandler {
+public class SingleDecisionMaker implements DecisionMaker, GraphLifecycleHandler {
     private final Logger LOGGER = Logger.getLogger(getClass());
     
     private final BookKeeper bookKeeper;
     private final AtomicLong latestInUseSequence;
     
-    public SingleNodeDecisionMaker(BookKeeper bookKeeper) {
-        this.bookKeeper = bookKeeper;
+    public SingleDecisionMaker() {
+        this.bookKeeper = new HSQLBookKeeper();
         this.latestInUseSequence = new AtomicLong();
         LOGGER.info("Max sequence number in user is: " + latestInUseSequence);
     }
@@ -80,6 +81,10 @@ public class SingleNodeDecisionMaker implements DecisionMaker, GraphLifecycleHan
      */
     @Override
     public void onStartup() {
+        if(bookKeeper instanceof GraphLifecycleHandler) {
+            GraphLifecycleHandler handler = (GraphLifecycleHandler) bookKeeper;
+            handler.onStartup();
+        }
         latestInUseSequence.set(bookKeeper.lastTransactionId().number());
     }
     
@@ -87,15 +92,22 @@ public class SingleNodeDecisionMaker implements DecisionMaker, GraphLifecycleHan
      * {@inheritDoc}
      */
     @Override
-    public void onShutdown() {
-        // do nothing
+    public synchronized void onShutdown() {
+        if(bookKeeper instanceof GraphLifecycleHandler) {
+            GraphLifecycleHandler handler = (GraphLifecycleHandler) bookKeeper;
+            handler.onShutdown();
+        }
     }
     
     /**
      * {@inheritDoc}
      */
     @Override
-    public void onClearAll() {
+    public synchronized void onClearAll() {
+        if(bookKeeper instanceof GraphLifecycleHandler) {
+            GraphLifecycleHandler handler = (GraphLifecycleHandler) bookKeeper;
+            handler.onClearAll();
+        }
         latestInUseSequence.set(bookKeeper.lastTransactionId().number());
     }
 

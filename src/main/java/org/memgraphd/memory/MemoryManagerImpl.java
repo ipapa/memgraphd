@@ -11,10 +11,19 @@ import org.memgraphd.memory.operation.MemoryLocationOperations;
  */
 public final class MemoryManagerImpl implements MemoryManager {
     private final MemoryLocation[] buffer;
-    private final MemoryBlockResolver requestResolver;
+    private final MemoryBlockResolver resolver;
+    
+    public MemoryManagerImpl(int capacity) {
+        this.resolver = new DefaultMemoryBlockResolver(capacity);
+        this.buffer = new MemoryLocation[capacity()];
+        
+        initialize();
+        
+        reserveBlocks(resolver.blocks());
+    }
     
     public MemoryManagerImpl(MemoryBlockResolver resolver) {
-        this.requestResolver = resolver;
+        this.resolver = resolver;
         this.buffer = new MemoryLocation[capacity()];
         
         initialize();
@@ -83,7 +92,7 @@ public final class MemoryManagerImpl implements MemoryManager {
      */
     @Override
     public final MemoryBlockResolver resolver() {
-        return requestResolver;
+        return resolver;
     }
     
     /**

@@ -7,7 +7,7 @@ import org.json.JSONException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.memgraphd.bookkeeper.HSQLBookKeeper;
+import org.memgraphd.controller.GraphController;
 import org.memgraphd.controller.GraphControllerImpl;
 import org.memgraphd.data.Data;
 import org.memgraphd.data.DataImpl;
@@ -16,17 +16,7 @@ import org.memgraphd.data.OnlineVideo;
 import org.memgraphd.data.TvEpisode;
 import org.memgraphd.data.TvSeason;
 import org.memgraphd.data.TvSeries;
-import org.memgraphd.decision.Decision;
-import org.memgraphd.decision.DecisionImpl;
-import org.memgraphd.decision.Sequence;
-import org.memgraphd.decision.SingleNodeDecisionMaker;
 import org.memgraphd.exception.GraphException;
-import org.memgraphd.memory.MemoryBlock;
-import org.memgraphd.memory.MemoryBlockImpl;
-import org.memgraphd.memory.MemoryBlockResolver;
-import org.memgraphd.memory.MemoryManager;
-import org.memgraphd.memory.MemoryManagerImpl;
-import org.memgraphd.memory.MemoryReference;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -38,27 +28,16 @@ public class GraphIT {
     private static final String TVSEASON_ID = "TvSeason-1";
     private static final String TVEPISODE_ID = "TvEpisode-123";
     private static final String VIDEO_ID = "Video-123";
-    private static final String DB_PATH = "/tmp/book/";
-    private static final String DB_NAME = "public.book";
 
     private final int CAPACITY = 100;
 
-    private Graph graph;
-    private GraphControllerImpl graphController;
-    private MemoryManager memoryManager;
-    private SingleNodeDecisionMaker decisionMaker;
+    private GraphController graph;
     private Data video, episode, season, series = null;
-
-    private Decision decisionVideo, decisionEpisode, decisionSeason, decisionSeries = null;
     
     private long start;
 
     @Before
     public void setUp() throws SQLException {
-
-        initializeGraph();
-
-        graph.start();
 
         video = new OnlineVideo(VIDEO_ID, new DateTime(), new DateTime(), "Video #1", TVEPISODE_ID);
         episode = new TvEpisode(TVEPISODE_ID, new DateTime(), new DateTime(), TVSEASON_ID,
@@ -66,44 +45,32 @@ public class GraphIT {
         season = new TvSeason(TVSEASON_ID, new DateTime(), new DateTime(), "1", TVSERIES_ID);
         series = new TvSeries(TVSERIES_ID, new DateTime(), new DateTime(), "The Simpsons");
         
-        DateTime now = new DateTime();
-        decisionVideo = new DecisionImpl(Sequence.valueOf(1), now, GraphRequestType.PUT, video.getId(), video);
-        decisionEpisode = new DecisionImpl(Sequence.valueOf(2), now, GraphRequestType.PUT, episode.getId(), episode);
-        decisionSeason = new DecisionImpl(Sequence.valueOf(3), now, GraphRequestType.PUT, season.getId(), season);
-        decisionSeries = new DecisionImpl(Sequence.valueOf(4), now, GraphRequestType.PUT, series.getId(), series);
-        
+        graph =  new GraphControllerImpl(CAPACITY);
     }
     
     @After
     public void tearDown() {
         graph.clear();
-
-        graph.stop();
     }
-
+    
     @Test
     public void testGraph() throws GraphException, SQLException, JSONException {
-        writeToGraph(false);
-        
+        writeToGraph();
         testLookingUpById();
-        
-        testLookingUpBySequence();
-        
-        testReadRange();
     }
 
     @Test
     public void testGraphRelatedData() throws GraphException, SQLException {
         start = System.currentTimeMillis();
-        graph.write(decisionVideo);
-        graph.write(decisionEpisode);
-        graph.write(decisionSeason);
-        graph.write(decisionSeries);
+        graph.write(video);
+        graph.write(episode);
+        graph.write(season);
+        graph.write(series);
         System.out.println("Finished writing 4 objects in " + (System.currentTimeMillis() - start)
                 + " millis.");
 
         start = System.currentTimeMillis();
-        GraphData graphVideo = graph.readId(VIDEO_ID);
+        GraphData graphVideo = graph.read(VIDEO_ID);
         System.out.println("Finished reading video object graph objects in "
                 + (System.currentTimeMillis() - start) + " millis.");
 
@@ -133,23 +100,23 @@ public class GraphIT {
     public void testDeleteLinkInTheMiddleOfGraph() throws GraphException, SQLException,
             InterruptedException {
 
-        graph.write(decisionVideo);
-        graph.write(decisionEpisode);
-        graph.write(decisionSeason);
-        graph.write(decisionSeries);
+        graph.write(video);
+        graph.write(episode);
+        graph.write(season);
+        graph.write(series);
         
-        GraphData graphEpisode = graph.readId(decisionEpisode.getDataId());
+        GraphData graphEpisode = graph.read(TVEPISODE_ID);
         assertNotNull(graphEpisode);
-        graph.delete(graphEpisode);
+        graph.delete(TVEPISODE_ID);
         
-        GraphData graphVideo = graph.readId(VIDEO_ID);
+        GraphData graphVideo = graph.read(VIDEO_ID);
 
-        assertNull("I just deleted you", graph.readId(TVEPISODE_ID));
+        assertNull("I just deleted you", graph.read(TVEPISODE_ID));
         assertNotNull(graphVideo);
         assertNull(graphVideo.getRelatedData().getLinks());
         assertNull(graphVideo.getRelatedData().getReferences());
 
-        GraphData graphSeason = graph.readId(TVSEASON_ID);
+        GraphData graphSeason = graph.read(TVSEASON_ID);
         assertNotNull(graphSeason);
         assertNotNull(graphSeason.getRelatedData().getLinks());
         assertNotNull(graphSeason.getRelatedData().getLinks().relationships()[0]);
@@ -159,31 +126,31 @@ public class GraphIT {
     @Test
     public void testSimpleDelete() throws GraphException, SQLException, InterruptedException {
 
-        graph.write(decisionVideo);
+        graph.write(video);
 
-        GraphData graphVideo = graph.readId(VIDEO_ID);
+        GraphData graphVideo = graph.read(VIDEO_ID);
         assertNotNull(graphVideo);
         assertSame(video, graphVideo.getData());
 
-        graph.delete(graphVideo);
-        assertNull(graph.readId(VIDEO_ID));
+        graph.delete(VIDEO_ID);
+        assertNull(graph.read(VIDEO_ID));
     }
 
     @Test
     public void testDeleteTopReference() throws GraphException, SQLException, InterruptedException {
 
-        graph.write(decisionVideo);
-        graph.write(decisionEpisode);
-        graph.write(decisionSeason);
-        graph.write(decisionSeries);
+        graph.write(video);
+        graph.write(episode);
+        graph.write(season);
+        graph.write(series);
 
-        graph.delete(graph.readId(TVEPISODE_ID));
-        graph.delete(graph.readId(TVSERIES_ID));
+        graph.delete(TVEPISODE_ID);
+        graph.delete(TVSERIES_ID);
 
-        assertNull(graph.readId(TVEPISODE_ID));
-        assertNull(graph.readId(TVSERIES_ID));
+        assertNull(graph.read(TVEPISODE_ID));
+        assertNull(graph.read(TVSERIES_ID));
 
-        GraphData graphSeason = graph.readId(TVSEASON_ID);
+        GraphData graphSeason = graph.read(TVSEASON_ID);
         assertNull(graphSeason.getRelatedData().getLinks());
         assertNull(graphSeason.getRelatedData().getReferences());
     }
@@ -191,8 +158,8 @@ public class GraphIT {
     @Test
     public void testGraphController() throws JSONException, GraphException, InterruptedException,
             SQLException {
-        writeToGraph(true);
-        assertEquals(CAPACITY, memoryManager.blocks()[0].occupied());
+        writeToGraph();
+        assertEquals(CAPACITY, graph.occupied());
     }
     
     @Test
@@ -202,95 +169,28 @@ public class GraphIT {
         
         graph.clear();
         
-        assertEquals(0, decisionMaker.latestDecision().number());
-        assertEquals(0, memoryManager.occupied());
-        assertEquals(CAPACITY, memoryManager.capacity());
-        assertEquals(CAPACITY, memoryManager.available());
+        assertEquals(0, graph.occupied());
+        assertEquals(CAPACITY, graph.capacity());
+        assertEquals(CAPACITY, graph.available());
     }
 
-    private void testLookingUpById() {
+    private void testLookingUpById() throws GraphException {
 
         start = System.currentTimeMillis();
         for (int i = 0; i < CAPACITY; i++) {
-            assertNotNull(graph.readId(String.valueOf(i)));
-            assertEquals(String.valueOf(i), graph.readId(String.valueOf(i)).getData().getId());
+            assertNotNull(graph.read(String.valueOf(i)));
+            assertEquals(String.valueOf(i), graph.read(String.valueOf(i)).getData().getId());
         }
         System.out.println("Looking up items by id took: " + (System.currentTimeMillis() - start)
                 + " millis");
     }
 
-    private void testLookingUpBySequence() {
-        start = System.currentTimeMillis();
-        for (int i = 0; i < CAPACITY; i++) {
-
-            assertNotNull(graph.readSequence(Sequence.valueOf(i)) == null);
-        }
-        System.out.println("Looking up items by sequence id took: "
-                + (System.currentTimeMillis() - start) + " millis");
-    }
-
-    private void testReadRange() {
-        MemoryReference[] chunk = new MemoryReference[CAPACITY];
-        for (int i = 0; i < CAPACITY; i++) {
-            chunk[i] = MemoryReference.valueOf(i);
-        }
-        start = System.currentTimeMillis();
-        GraphData[] data = graph.readReferences(chunk);
-        assertEquals(CAPACITY, data.length);
-        for (int i = 0; i < data.length; i++) {
-            assertNotNull(data[i]);
-            assertEquals(String.valueOf(i), data[i].getData().getId());
-        }
-        System.out.println("Reading " + CAPACITY + " id(s) took: "
-                + (System.currentTimeMillis() - start) + " millis");
-    }
-
-    private void initializeGraph() throws SQLException {
-        final MemoryBlock block = new MemoryBlockImpl("global", CAPACITY);
-        final MemoryBlock[] blocks = new MemoryBlock[] { block };
-        final MemoryBlockResolver resolver = new MemoryBlockResolver() {
-
-            @Override
-            public MemoryBlock resolve(Data data) {
-                return block;
-            }
-
-            @Override
-            public MemoryBlock[] blocks() {
-                return blocks;
-            }
-        };
-
-        memoryManager = new MemoryManagerImpl(resolver);
-        HSQLBookKeeper bookKeeper = new HSQLBookKeeper(DB_NAME, DB_PATH);
-        decisionMaker = new SingleNodeDecisionMaker(bookKeeper);
-        graph = new GraphImpl(memoryManager);
-        graphController = new GraphControllerImpl(graph, decisionMaker);
-
-        // register listeners for graph lifecycle events
-        graph.register(bookKeeper);
-        graph.register(decisionMaker);
-        graph.register(graphController);
-        graph.register(MemoryReference.valueOf(0));
-        graph.register(Sequence.valueOf(0));
-    }
-
-    private void writeToGraph(boolean useController)
+    private void writeToGraph()
             throws GraphException, JSONException {
-        start = System.currentTimeMillis();
-        final DateTime time = new DateTime();
 
         for (int i = 0; i < CAPACITY; i++) {
-            Data data = new DataImpl(String.valueOf(i), new DateTime(), new DateTime());
-            Decision decision =
-                    new DecisionImpl(Sequence.valueOf(i), time, GraphRequestType.PUT, data.getId() + i, data);
-            
-            if(useController) {
-                graphController.write(data);
-            }
-            else {
-                graph.write(decision);
-            }
+           Data data = new DataImpl(String.valueOf(i), new DateTime(), new DateTime());
+           graph.write(data);
         }
     }
 }

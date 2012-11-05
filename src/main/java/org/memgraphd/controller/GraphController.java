@@ -1,8 +1,10 @@
 package org.memgraphd.controller;
 
+import org.memgraphd.GraphSupervisor;
 import org.memgraphd.data.Data;
 import org.memgraphd.data.GraphData;
 import org.memgraphd.exception.GraphException;
+import org.memgraphd.memory.MemoryStats;
 /**
  * The {@link GraphController} acts as the middle man in charge of handling {@link GraphRequest}s for memgraphd data.
  * Clients will not have direct access to the Graph, they need to go through the {@link GraphController}.
@@ -10,7 +12,7 @@ import org.memgraphd.exception.GraphException;
  * @author Ilirjan Papa
  * @since August 17, 2012
  */
-public interface GraphController {
+public interface GraphController extends GraphSupervisor, MemoryStats {
     /**
      * Handles a write-request to memgraphd.
      * @param data {@link Data}

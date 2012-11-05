@@ -44,7 +44,7 @@ public abstract class AbstractBookKeeper extends PersistenceStore implements Boo
     
     private volatile AtomicBoolean bookClosed = new AtomicBoolean(true);
     
-    public AbstractBookKeeper(String dbName, String dbFilePath) throws SQLException {
+    public AbstractBookKeeper(String dbName, String dbFilePath) {
         
         super(dbName, dbFilePath);
         
