@@ -37,6 +37,7 @@ public class SingleDecisionMaker implements DecisionMaker, GraphLifecycleHandler
     public Decision decideWriteRequest(Data data) {
         Decision decision = new DecisionImpl(Sequence.valueOf(latestInUseSequence.incrementAndGet()), 
                 new DateTime(), GraphRequestType.PUT, data.getId(), data);
+        LOGGER.info(String.format("Write decision made: Assigned dataId=%s sequence=%d", data.getId(), decision.getSequence().number()));
         bookKeeper.record(decision);
         return decision;
     }
@@ -48,6 +49,7 @@ public class SingleDecisionMaker implements DecisionMaker, GraphLifecycleHandler
     public Decision decideDeleteRequest(Data data) {
         Decision decision = new DecisionImpl(Sequence.valueOf(latestInUseSequence.incrementAndGet()), 
                 new DateTime(), GraphRequestType.DELETE, data.getId(), data);
+        LOGGER.info(String.format("Delete decision made: Assigned dataId=%s sequence=%d", data.getId(), decision.getSequence().number()));
         bookKeeper.record(decision);
         return decision;
     }

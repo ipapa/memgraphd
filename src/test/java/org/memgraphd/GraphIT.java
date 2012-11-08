@@ -31,8 +31,6 @@ public class GraphIT {
 
     private Graph graph;
     private Data video, episode, season, series = null;
-    
-    private long start;
 
     @Before
     public void setUp() throws SQLException {
@@ -54,25 +52,57 @@ public class GraphIT {
     }
     
     @Test
-    public void testGraph() throws GraphException, SQLException, JSONException {
+    public void testGraph_write() throws GraphException, SQLException, JSONException {
         writeToGraph();
-        testLookingUpById();
+        assertEquals(CAPACITY, graph.capacity());
+        assertEquals(CAPACITY, graph.occupied());
+        assertEquals(0, graph.available());
+        assertEquals(0, graph.recycled());
+    }
+    
+    @Test
+    public void testGraph_readId() throws GraphException, SQLException, JSONException {
+        testGraph_write();
+        for (int i = 0; i < CAPACITY; i++) {
+            assertNotNull(graph.readId(String.valueOf(i)));
+            assertEquals(String.valueOf(i), graph.readId(String.valueOf(i)).getData().getId());
+        }
+    }
+    
+    @Test
+    public void testGraph_readSequence() throws GraphException, SQLException, JSONException {
+        testGraph_write();
+        for (int i = 0; i < CAPACITY; i++) {
+            GraphData gData = graph.readId(String.valueOf(i));
+            assertNotNull(gData);
+            GraphData seqGData = graph.readSequence(gData.getSequence());
+            assertSame(gData, seqGData);
+        }
+    }
+    
+    @Test
+    public void testGraph_delete() throws GraphException, SQLException, JSONException {
+        testGraph_write();
+        
+        for (int i = 0; i < CAPACITY; i++) {
+            graph.delete(String.valueOf(i));
+            assertNull(graph.readId(String.valueOf(i)));
+        }
+        
+        assertEquals(CAPACITY, graph.capacity());
+        assertEquals(0, graph.occupied());
+        assertEquals(CAPACITY, graph.available());
+        assertEquals(CAPACITY, graph.recycled());
     }
 
     @Test
     public void testGraphRelatedData() throws GraphException, SQLException {
-        start = System.currentTimeMillis();
         graph.write(video);
         graph.write(episode);
         graph.write(season);
         graph.write(series);
-        System.out.println("Finished writing 4 objects in " + (System.currentTimeMillis() - start)
-                + " millis.");
 
-        start = System.currentTimeMillis();
         GraphData graphVideo = graph.readId(VIDEO_ID);
-        System.out.println("Finished reading video object graph objects in "
-                + (System.currentTimeMillis() - start) + " millis.");
 
         assertNotNull(graphVideo);
         assertSame(video, graphVideo.getData());
@@ -172,17 +202,6 @@ public class GraphIT {
         assertEquals(0, graph.occupied());
         assertEquals(CAPACITY, graph.capacity());
         assertEquals(CAPACITY, graph.available());
-    }
-
-    private void testLookingUpById() throws GraphException {
-
-        start = System.currentTimeMillis();
-        for (int i = 0; i < CAPACITY; i++) {
-            assertNotNull(graph.readId(String.valueOf(i)));
-            assertEquals(String.valueOf(i), graph.readId(String.valueOf(i)).getData().getId());
-        }
-        System.out.println("Looking up items by id took: " + (System.currentTimeMillis() - start)
-                + " millis");
     }
 
     private void writeToGraph()
