@@ -44,6 +44,7 @@ public abstract class GraphSupervisorImpl implements GraphSupervisor {
         if(isRunning()) {
             throw new RuntimeException("memgraphd is already running");
         }
+        
         state = GraphState.RUNNING;
         notifyOnStartup();
     }
@@ -56,8 +57,20 @@ public abstract class GraphSupervisorImpl implements GraphSupervisor {
         if(isStopped()) {
             throw new RuntimeException("memgraphd is already stopped.");
         }
+        if(!isRunning()) {
+            throw new RuntimeException("memgraphd is not running.");
+        }
         state = GraphState.STOPPED;
         notifyOnShutdown();
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isInitialized() {
+        return GraphState.INITIALIZED.equals(state)
+                || GraphState.RUNNING.equals(state);
     }
     
     /**
@@ -76,6 +89,18 @@ public abstract class GraphSupervisorImpl implements GraphSupervisor {
         return GraphState.STOPPED.equals(state);
     }
     
+    protected void notifyOnClearAll() {
+        for(GraphLifecycleHandler h : listeners) {
+            h.onClearAll();
+        }
+    }
+
+    protected void authorize() {
+        if(!isRunning()) {
+            throw new RuntimeException("Request cannot be handled. memgraphd is stopped.");
+        }
+    }
+
     private void notifyOnStartup() {
         for(GraphLifecycleHandler h : listeners) {
             h.onStartup();
@@ -85,18 +110,6 @@ public abstract class GraphSupervisorImpl implements GraphSupervisor {
     private void notifyOnShutdown() {
         for(GraphLifecycleHandler h : listeners) {
             h.onShutdown();
-        }
-    }
-    
-    protected void notifyOnClearAll() {
-        for(GraphLifecycleHandler h : listeners) {
-            h.onClearAll();
-        }
-    }
-    
-    protected void authorize() {
-        if(!isRunning()) {
-            throw new RuntimeException("Request cannot be handled. memgraphd is stopped.");
         }
     }
 }

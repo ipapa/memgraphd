@@ -10,6 +10,7 @@ import org.memgraphd.data.event.GraphDataEventListenerManager;
 import org.memgraphd.data.relationship.DataMatchmaker;
 import org.memgraphd.data.relationship.DataRelationship;
 import org.memgraphd.decision.Decision;
+import org.memgraphd.decision.DecisionMaker;
 import org.memgraphd.exception.GraphException;
 import org.memgraphd.memory.MemoryReference;
 import org.memgraphd.memory.operation.MemoryOperations;
@@ -23,14 +24,17 @@ import org.memgraphd.memory.operation.MemoryOperations;
 public class GraphWriterImpl extends AbstractGraphAccess implements GraphWriter {
     private static final Logger LOGGER = Logger.getLogger(GraphWriterImpl.class);
     
+    private final DecisionMaker decisionMaker;
     private final GraphDataEventListenerManager eventManager;
     private final GraphMappings mappings;
     private final GraphSeeker seeker;
     private final DataMatchmaker dataMatchmaker;
     
-    public GraphWriterImpl(MemoryOperations memoryAccess, GraphDataEventListenerManager eventManager, 
-            GraphMappings mappings, GraphSeeker seeker, DataMatchmaker matchMaker) {
+    public GraphWriterImpl(MemoryOperations memoryAccess, DecisionMaker decisionMaker, 
+            GraphDataEventListenerManager eventManager, GraphMappings mappings, 
+            GraphSeeker seeker, DataMatchmaker matchMaker) {
         super(memoryAccess);
+        this.decisionMaker = decisionMaker;
         this.eventManager = eventManager;
         this.seeker = seeker;
         this.mappings = mappings;
@@ -41,26 +45,40 @@ public class GraphWriterImpl extends AbstractGraphAccess implements GraphWriter 
      * {@inheritDoc}
      */
     @Override
-    public MemoryReference write(Decision decision) throws GraphException {
+    public MemoryReference write(Data data) throws GraphException {
+        // 1. Validate data first.
+        validate(data);
         
-        validate(decision);
+        // 2. Send data to decision to get a sequence assigned to it
+        Decision decision = decisionMaker.decideWriteRequest(data);
+        
+        // 3. Instantiate the graph data wrapper for this data.
         GraphData newData = new GraphDataImpl(decision);
-        MemoryReference ref = seeker.seekById(decision.getData().getId());
-        if(ref != null) {
+        
+        // 4. Is it an update or a new write request?
+        // 4.1. Update relationships for data affected.
+        // 4.2. Notify listeners about this change.
+        MemoryReference ref = seeker.seekById(data.getId());
+        if(ref != null) { // update
             GraphData oldData = getMemoryAccess().read(ref);
             getMemoryAccess().update(ref, newData);
-            updateDataRelationships(oldData.getData(), decision.getData());
+            updateDataRelationships(oldData.getData(), data);
             eventManager.onUpdate(oldData, newData);
         }
-        else {
+        else { // new data
             ref = getMemoryAccess().write(newData);
-            mappings.put(decision.getData().getId(), ref);
+            mappings.put(data.getId(), ref);
             buildDataRelationships(newData);
             eventManager.onCreate(newData);
         }
-        setMemoryReference(ref, newData); // set reference on write (create|update)
+        
+        // 5. Set the memory reference assigned to data on write (create|update)
+        setMemoryReference(ref, newData);
+        
+        // 6. Update sequence mappings.
         mappings.put(decision.getSequence(), ref);
-        LOGGER.info(String.format("Wrote data id=%s at memory reference=%d", decision.getDataId(), ref.id()));
+        
+        LOGGER.info(String.format("Wrote data id=%s at memory reference=%d", data.getId(), ref.id()));
         return ref;
     }
     
@@ -72,10 +90,10 @@ public class GraphWriterImpl extends AbstractGraphAccess implements GraphWriter 
      * {@inheritDoc}
      */
     @Override
-    public MemoryReference[] write(Decision[] decisions) throws GraphException {
-        MemoryReference[] result = new MemoryReference[decisions.length];
-        for(int i=0; i < decisions.length; i++) {
-            result[i] = write(decisions[i]);
+    public MemoryReference[] write(Data[] data) throws GraphException {
+        MemoryReference[] result = new MemoryReference[data.length];
+        for(int i=0; i < data.length; i++) {
+            result[i] = write(data[i]);
         }
         return result;
     }
@@ -107,17 +125,14 @@ public class GraphWriterImpl extends AbstractGraphAccess implements GraphWriter 
         }
     }
     
-    private void validate(Decision decision) throws GraphException {
-        if(decision == null) {
-            throw new GraphException("Decision is null.");
-        }
+    private void validate(Data data) throws GraphException {
         
-        if(decision.getData() == null) {
+        if(data == null) {
             throw new GraphException("Data is null.");
         }
         
-        if(decision.getData() instanceof DataValidator) {
-            if(!((DataValidator) decision.getData()).isValid()) {
+        if(data instanceof DataValidator) {
+            if(!((DataValidator) data).isValid()) {
                 throw new GraphException("Data validation failed.");
             }
         }
@@ -156,6 +171,18 @@ public class GraphWriterImpl extends AbstractGraphAccess implements GraphWriter 
         for(GraphData sd : data) {
             delete(sd);
         }
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void delete(String dataId) throws GraphException {
+        MemoryReference ref = seeker.seekById(dataId);
+        if(ref == null) {
+            throw new GraphException(String.format("Data does not exist for id=%s", dataId));    
+        }
+        delete(getMemoryAccess().read(ref));
     }
 
 }

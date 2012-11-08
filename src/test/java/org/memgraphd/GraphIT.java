@@ -7,8 +7,6 @@ import org.json.JSONException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.memgraphd.controller.GraphController;
-import org.memgraphd.controller.GraphControllerImpl;
 import org.memgraphd.data.Data;
 import org.memgraphd.data.DataImpl;
 import org.memgraphd.data.GraphData;
@@ -29,9 +27,9 @@ public class GraphIT {
     private static final String TVEPISODE_ID = "TvEpisode-123";
     private static final String VIDEO_ID = "Video-123";
 
-    private final int CAPACITY = 100;
+    private final int CAPACITY = 1000;
 
-    private GraphController graph;
+    private Graph graph;
     private Data video, episode, season, series = null;
     
     private long start;
@@ -45,7 +43,9 @@ public class GraphIT {
         season = new TvSeason(TVSEASON_ID, new DateTime(), new DateTime(), "1", TVSERIES_ID);
         series = new TvSeries(TVSERIES_ID, new DateTime(), new DateTime(), "The Simpsons");
         
-        graph =  new GraphControllerImpl(CAPACITY);
+        graph =  new GraphImpl(CAPACITY);
+        
+        graph.start();
     }
     
     @After
@@ -70,7 +70,7 @@ public class GraphIT {
                 + " millis.");
 
         start = System.currentTimeMillis();
-        GraphData graphVideo = graph.read(VIDEO_ID);
+        GraphData graphVideo = graph.readId(VIDEO_ID);
         System.out.println("Finished reading video object graph objects in "
                 + (System.currentTimeMillis() - start) + " millis.");
 
@@ -105,18 +105,18 @@ public class GraphIT {
         graph.write(season);
         graph.write(series);
         
-        GraphData graphEpisode = graph.read(TVEPISODE_ID);
+        GraphData graphEpisode = graph.readId(TVEPISODE_ID);
         assertNotNull(graphEpisode);
         graph.delete(TVEPISODE_ID);
         
-        GraphData graphVideo = graph.read(VIDEO_ID);
+        GraphData graphVideo = graph.readId(VIDEO_ID);
 
-        assertNull("I just deleted you", graph.read(TVEPISODE_ID));
+        assertNull("I just deleted you", graph.readId(TVEPISODE_ID));
         assertNotNull(graphVideo);
         assertNull(graphVideo.getRelatedData().getLinks());
         assertNull(graphVideo.getRelatedData().getReferences());
 
-        GraphData graphSeason = graph.read(TVSEASON_ID);
+        GraphData graphSeason = graph.readId(TVSEASON_ID);
         assertNotNull(graphSeason);
         assertNotNull(graphSeason.getRelatedData().getLinks());
         assertNotNull(graphSeason.getRelatedData().getLinks().relationships()[0]);
@@ -128,12 +128,12 @@ public class GraphIT {
 
         graph.write(video);
 
-        GraphData graphVideo = graph.read(VIDEO_ID);
+        GraphData graphVideo = graph.readId(VIDEO_ID);
         assertNotNull(graphVideo);
         assertSame(video, graphVideo.getData());
 
         graph.delete(VIDEO_ID);
-        assertNull(graph.read(VIDEO_ID));
+        assertNull(graph.readId(VIDEO_ID));
     }
 
     @Test
@@ -147,10 +147,10 @@ public class GraphIT {
         graph.delete(TVEPISODE_ID);
         graph.delete(TVSERIES_ID);
 
-        assertNull(graph.read(TVEPISODE_ID));
-        assertNull(graph.read(TVSERIES_ID));
+        assertNull(graph.readId(TVEPISODE_ID));
+        assertNull(graph.readId(TVSERIES_ID));
 
-        GraphData graphSeason = graph.read(TVSEASON_ID);
+        GraphData graphSeason = graph.readId(TVSEASON_ID);
         assertNull(graphSeason.getRelatedData().getLinks());
         assertNull(graphSeason.getRelatedData().getReferences());
     }
@@ -178,8 +178,8 @@ public class GraphIT {
 
         start = System.currentTimeMillis();
         for (int i = 0; i < CAPACITY; i++) {
-            assertNotNull(graph.read(String.valueOf(i)));
-            assertEquals(String.valueOf(i), graph.read(String.valueOf(i)).getData().getId());
+            assertNotNull(graph.readId(String.valueOf(i)));
+            assertEquals(String.valueOf(i), graph.readId(String.valueOf(i)).getData().getId());
         }
         System.out.println("Looking up items by id took: " + (System.currentTimeMillis() - start)
                 + " millis");

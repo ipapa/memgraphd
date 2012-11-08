@@ -1,21 +1,18 @@
 package org.memgraphd;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
 import org.apache.log4j.Logger;
-import org.memgraphd.controller.GraphController;
+import org.memgraphd.data.Data;
 import org.memgraphd.data.GraphData;
-import org.memgraphd.data.event.GraphDataEventListener;
 import org.memgraphd.data.event.GraphDataEventListenerManagerImpl;
 import org.memgraphd.data.relationship.DataMatchmaker;
 import org.memgraphd.data.relationship.DataMatchmakerImpl;
-import org.memgraphd.decision.Decision;
 import org.memgraphd.decision.Sequence;
+import org.memgraphd.decision.SingleDecisionMaker;
 import org.memgraphd.exception.GraphException;
 import org.memgraphd.memory.MemoryAccess;
 import org.memgraphd.memory.MemoryBlock;
 import org.memgraphd.memory.MemoryManager;
+import org.memgraphd.memory.MemoryManagerImpl;
 import org.memgraphd.memory.MemoryReference;
 import org.memgraphd.memory.MemoryStats;
 import org.memgraphd.memory.operation.MemoryOperations;
@@ -48,16 +45,23 @@ public final class GraphImpl extends GraphSupervisorImpl implements Graph {
     
     private final MemoryOperations memoryAccess;
     private final DataMatchmaker dataMatchmaker;
+    private final MemoryStats memoryStats;
     
-    public GraphImpl(MemoryManager memoryManager) {
-        this.mappings = new GraphMappingsImpl();
-        
+    public GraphImpl(int capacity) {
+        MemoryManager memoryManager = new MemoryManagerImpl(capacity);
         this.memoryAccess = new MemoryAccess(memoryManager);
+        this.mappings = new GraphMappingsImpl();
+        this.memoryStats = (MemoryStats) memoryManager;
         this.seeker = new GraphSeekerImpl(memoryAccess, mappings);
         this.reader = new GraphReaderImpl(memoryAccess, seeker);
         this.dataMatchmaker = new DataMatchmakerImpl(memoryAccess, seeker);
+        
+        SingleDecisionMaker decisionMaker = new SingleDecisionMaker();
+        register(decisionMaker);
+ 
         this.writer = new GraphWriterImpl(memoryAccess, 
-                new GraphDataEventListenerManagerImpl(new ArrayList<GraphDataEventListener>()), 
+                decisionMaker,
+                new GraphDataEventListenerManagerImpl(), 
                 mappings, seeker, dataMatchmaker);
         this.filter = new GraphFilterImpl(memoryAccess);
     }
@@ -120,18 +124,18 @@ public final class GraphImpl extends GraphSupervisorImpl implements Graph {
      * {@inheritDoc}
      */
     @Override
-    public MemoryReference write(Decision decision) throws GraphException {
+    public MemoryReference write(Data data) throws GraphException {
         authorize();
-        return writer.write(decision);
+        return writer.write(data);
     }
     
     /**
      * {@inheritDoc}
      */
     @Override
-    public MemoryReference[] write(Decision[] decisions) throws GraphException {
+    public MemoryReference[] write(Data[] data) throws GraphException {
         authorize();
-        return writer.write(decisions);
+        return writer.write(data);
     }
     
     /**
@@ -154,110 +158,12 @@ public final class GraphImpl extends GraphSupervisorImpl implements Graph {
     
     /**
      * {@inheritDoc}
+     * @throws GraphException 
      */
     @Override
-    public MemoryReference seekById(String id) {
+    public void delete(String id) throws GraphException {
         authorize();
-        return seeker.seekById(id);
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public MemoryReference seekBySequence(Sequence seq) {
-        authorize();
-        return seeker.seekBySequence(seq);
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public MemoryReference[] seekById(String[] ids) {
-        authorize();
-        return seeker.seekById(ids);
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public MemoryReference[] seekBySequence(Sequence[] seqs) {
-        authorize();
-        return seeker.seekBySequence(seqs);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean containsId(String id) {
-        authorize();
-        return mappings.containsId(id);
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public MemoryReference getById(String id) {
-        authorize();
-        return mappings.getById(id);
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void put(String id, MemoryReference ref) {
-        authorize();
-        mappings.put(id, ref);
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void delete(String id) {
-        authorize();
-        mappings.delete(id);
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void delete(Sequence seq) {
-        authorize();
-        mappings.delete(seq);
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean containsSequence(Sequence sequence) {
-        authorize();
-        return mappings.containsSequence(sequence);
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public MemoryReference getBySequence(Sequence sequence) {
-        authorize();
-        return mappings.getBySequence(sequence);
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void put(Sequence sequence, MemoryReference ref) {
-        authorize();
-        mappings.put(sequence, ref);
+        writer.delete(id);
     }
     
     /**
@@ -321,8 +227,36 @@ public final class GraphImpl extends GraphSupervisorImpl implements Graph {
      * {@inheritDoc}
      */
     @Override
-    public final Collection<MemoryReference> getAllMemoryReferences() {
-        return mappings.getAllMemoryReferences();
+    public int capacity() {
+        authorize();
+        return memoryStats.capacity();
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int occupied() {
+        authorize();
+        return memoryStats.occupied();
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int available() {
+        authorize();
+        return memoryStats.available();
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int recycled() {
+        authorize();
+        return memoryStats.recycled();
     }
 
 }

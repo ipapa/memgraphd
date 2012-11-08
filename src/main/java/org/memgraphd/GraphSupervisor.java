@@ -27,6 +27,12 @@ public interface GraphSupervisor {
     void clear();
     
     /**
+     * Check to see if {@link Graph} is initialized before it can be started.
+     * @return true if initialization completed, false otherwise.
+     */
+    boolean isInitialized();
+    
+    /**
      * Checks to see if {@link Graph} is running.
      * @return true if it is running, false otherwise.
      */

@@ -1,6 +1,7 @@
 package org.memgraphd.data.event;
 
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.memgraphd.data.GraphData;
 
@@ -15,8 +16,8 @@ public class GraphDataEventListenerManagerImpl implements GraphDataEventListener
     
     private final List<GraphDataEventListener> listeners;
     
-    public GraphDataEventListenerManagerImpl(List<GraphDataEventListener> listeners) {
-        this.listeners = listeners;
+    public GraphDataEventListenerManagerImpl() {
+        this.listeners = new CopyOnWriteArrayList<GraphDataEventListener>();
     }
     
     /**

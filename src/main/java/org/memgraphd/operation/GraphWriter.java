@@ -1,8 +1,8 @@
 package org.memgraphd.operation;
 
 import org.memgraphd.Graph;
+import org.memgraphd.data.Data;
 import org.memgraphd.data.GraphData;
-import org.memgraphd.decision.Decision;
 import org.memgraphd.exception.GraphException;
 import org.memgraphd.memory.MemoryReference;
 /**
@@ -15,23 +15,30 @@ import org.memgraphd.memory.MemoryReference;
 public interface GraphWriter {
     
     /**
-     * Write {@link Decision} into the {@link Graph} and return the {@link MemoryReference} assigned
+     * Write {@link Data} into the {@link Graph} and return the {@link MemoryReference} assigned
      * to this data instance for future references by the caller.
      * 
-     * @param decision {@link GraphData}
+     * @param data {@link Data}
      * @return {@link MemoryReference}
      * @throws GraphException
      */
-    MemoryReference write(Decision decision) throws GraphException;
+    MemoryReference write(Data data) throws GraphException;
     
     /**
-     * Same functionality as {@link #write(Decision)} but this time we are writing more than one decision instances
+     * Same functionality as {@link #write(Data)} but this time we are writing more than one Data instances
      * into the graph and for each write event we are returning its assigned memory reference.
-     * @param data array of {@link Decision}
+     * @param data array of {@link data}
      * @return array of {@link MemoryReference}
      * @throws GraphException
      */
-    MemoryReference[] write(Decision[] decisions) throws GraphException;
+    MemoryReference[] write(Data[] data) throws GraphException;
+    
+    /**
+     * Delete {@link GraphData} by {@link Data} id.
+     * @param dataId {@link String}
+     * @throws GraphException
+     */
+    void delete(String dataId) throws GraphException;
     
     /**
      * Delete this {@link GraphData} from the {@link Graph}.

@@ -1,4 +1,4 @@
-package org.memgraphd.controller;
+package org.memgraphd.data;
 
 import java.util.List;
 
@@ -60,7 +60,7 @@ public class GraphDataInitializer {
             LOGGER.debug(String.format("Loading decision sequenceId=%d", d.getSequence().number()));
             try {
 
-                graph.write(d);
+                graph.write(d.getData());
                 
             } catch (GraphException e) {
                 LOGGER.error("Failed to write decision to Graph " + d.toString());

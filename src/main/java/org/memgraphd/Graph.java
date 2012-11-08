@@ -1,8 +1,8 @@
 package org.memgraphd;
 
+import org.memgraphd.memory.MemoryStats;
 import org.memgraphd.operation.GraphFilter;
 import org.memgraphd.operation.GraphReader;
-import org.memgraphd.operation.GraphSeeker;
 import org.memgraphd.operation.GraphWriter;
 /**
  * Represents the actual data graph with all its available operations. Thing to note here
@@ -14,7 +14,6 @@ import org.memgraphd.operation.GraphWriter;
  * @since August 17, 2012
  *
  */
-public interface Graph extends GraphReader, GraphWriter, GraphSeeker,
-    GraphMappings, GraphFilter, GraphLifecycleListenerManager, GraphSupervisor {
+public interface Graph extends GraphReader, GraphWriter, GraphFilter, GraphLifecycleListenerManager, GraphSupervisor, MemoryStats {
   
 }
