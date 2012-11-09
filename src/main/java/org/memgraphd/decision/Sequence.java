@@ -47,8 +47,10 @@ public final class Sequence implements GraphLifecycleHandler {
             throw new RuntimeException("Invalid range specified: end < start");
         }
         Sequence[] range = new Sequence[Long.valueOf(end - start + 1).intValue()];
+        int count = 0;
         for(long i=start; i <= end; i++) {
-            range[Long.valueOf(i).intValue()] = valueOf(i);
+            range[count] = valueOf(i);
+            count++;
         }
         return range;
     }

@@ -67,8 +67,10 @@ public final class MemoryReference implements GraphLifecycleHandler {
             throw new RuntimeException("Invalid range specified: end < start");
         }
         MemoryReference[] range = new MemoryReference[end - start + 1];
-        for(int i=start; i <= end; i++) {
-            range[i] = valueOf(i);
+        int count = 0;
+        for(int i= start; i <= end; i++) {
+            range[count] = valueOf(i);
+            count++;
         }
         return range;
     }
