@@ -26,7 +26,7 @@ public class SingleDecisionMaker implements DecisionMaker, GraphLifecycleHandler
     
     public SingleDecisionMaker() {
         this.bookKeeper = new HSQLBookKeeper();
-        this.latestInUseSequence = new AtomicLong();
+        this.latestInUseSequence = new AtomicLong(-1);
         LOGGER.info("Max sequence number in user is: " + latestInUseSequence);
     }
     
@@ -87,7 +87,10 @@ public class SingleDecisionMaker implements DecisionMaker, GraphLifecycleHandler
             GraphLifecycleHandler handler = (GraphLifecycleHandler) bookKeeper;
             handler.onStartup();
         }
-        latestInUseSequence.set(bookKeeper.lastTransactionId().number());
+        long seq = bookKeeper.lastTransactionId().number();
+        if(seq > 0) {
+            latestInUseSequence.set(seq);
+        }
     }
     
     /**

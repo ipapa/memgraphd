@@ -1,6 +1,6 @@
 package org.memgraphd.data;
 
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
@@ -22,7 +22,7 @@ public class GraphDataRelationshipImpl implements GraphDataRelationship {
     @SuppressWarnings("unchecked")
     @Override
     public <T> Set<T> oneToMany(Class<T> className) {
-        Set<T> set = new HashSet<T>();
+        Set<T> set = new LinkedHashSet<T>();
         for(GraphData d : data) {
            if(d.getData().getClass().equals(className)) {
                set.add((T)d.getData());

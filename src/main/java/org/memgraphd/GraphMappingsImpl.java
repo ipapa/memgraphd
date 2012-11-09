@@ -93,7 +93,7 @@ public final class GraphMappingsImpl implements GraphMappings {
      */
     @Override
     public final Collection<MemoryReference> getAllMemoryReferences() {
-        return  idMap.values();
+        return idMap.values();
     }
 
 }
