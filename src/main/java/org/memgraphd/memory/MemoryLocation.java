@@ -18,13 +18,13 @@ public interface MemoryLocation {
     
     /**
      * Returns the memory reference of this memory location.
-     * @return
+     * @return {@link MemoryReference}
      */
     MemoryReference reference();
     
     /**
      * Returns the {@link GraphData} instance stored in this memory location.
-     * @return
+     * @return {@link GraphData}
      */
     GraphData data();
     

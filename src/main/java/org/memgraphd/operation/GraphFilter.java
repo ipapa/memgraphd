@@ -28,7 +28,7 @@ public interface GraphFilter {
      * 
      * @param startRef {@link MemoryReference}
      * @param endRef {@link MemoryReference}
-     * @return
+     * @return array of {@link GraphData}
      */
     GraphData[] filterByRange(MemoryReference startRef, MemoryReference endRef);
     

@@ -41,7 +41,8 @@ public class GraphDataImpl implements GraphData {
     }
     
     /**
-     * {@inheritDoc}
+     * Set the memory reference assigned to this {@link GraphData}.
+     * @param ref {@link MemoryReference}
      */
     public final synchronized void setRefence(MemoryReference ref) {
         this.reference = ref;

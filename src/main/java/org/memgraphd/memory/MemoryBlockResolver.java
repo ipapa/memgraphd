@@ -2,7 +2,7 @@ package org.memgraphd.memory;
 
 import org.memgraphd.data.Data;
 /**
- * It is responsible for managing memory blocks and resolving a {@link GraphRequest} to a {@link MemoryBlock}.
+ * It is responsible for managing memory blocks and resolving a write/update requests to a {@link MemoryBlock}.
  * 
  * @author Ilirjan Papa
  * @since July 19, 2012

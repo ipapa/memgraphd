@@ -40,7 +40,7 @@ public interface DecisionMaker {
      * Returns list of decisions in between this range of sequences.
      * @param startSeq start {@link Sequence}
      * @param endSequence end {@link Sequence}
-     * @return
+     * @return {@link List} of {@link Decision}(s).
      */
     List<Decision> readRange(Sequence startSeq, Sequence endSequence);
     

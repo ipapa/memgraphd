@@ -27,7 +27,8 @@ import org.memgraphd.operation.GraphWriterImpl;
 
 /**
  * This is the default implementation of {@link Graph} that brings all functionality together.
- * It is not meant to be accessed directly but through the {@link GraphController}.
+ * You need to instantiate and than {@link GraphImpl#start()} the {@link Graph} before you can
+ * start using it to store and retrieve data.
  * 
  * @author Ilirjan Papa
  * @since August 17, 2012

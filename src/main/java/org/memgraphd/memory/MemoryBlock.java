@@ -32,7 +32,7 @@ public interface MemoryBlock extends MemoryStats {
     
     /**
      * Returns the next available {@link MemoryReference} in the block.
-     * @return
+     * @return {@link MemoryReference}
      */
     MemoryReference next();
     

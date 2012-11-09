@@ -27,7 +27,7 @@ public interface GraphWriter {
     /**
      * Same functionality as {@link #write(Data)} but this time we are writing more than one Data instances
      * into the graph and for each write event we are returning its assigned memory reference.
-     * @param data array of {@link data}
+     * @param data array of {@link Data}
      * @return array of {@link MemoryReference}
      * @throws GraphException
      */

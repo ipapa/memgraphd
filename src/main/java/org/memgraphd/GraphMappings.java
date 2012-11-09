@@ -51,7 +51,7 @@ public interface GraphMappings {
     /**
      * Check to see if this sequence already has a mapping.
      * @param sequence {@link Sequence}
-     * @return
+     * @return true if it is there, false otherwise.
      */
     boolean containsSequence(Sequence sequence);
     

@@ -30,14 +30,16 @@ public class GraphRelatedDataImpl implements GraphRelatedData {
     }
     
     /**
-     * {@inheritDoc}
+     * Set relationships for this instance of {@link GraphRelatedData}.
+     * @param relationships {@link GraphDataRelationship}
      */
     public final synchronized void setRelationships(GraphDataRelationship relationships) {
         this.relationships = relationships;
     }
     
     /**
-     * {@inheritDoc}
+     * Set references for this instance of {@link GraphRelatedData}.
+     * @param references {@link GraphDataRelationship}
      */
     public final synchronized void setReferences(GraphDataRelationship references) {
         this.references = references;

@@ -1,4 +1,7 @@
 package org.memgraphd.data;
+
+import org.memgraphd.Graph;
+
 /**
  * This captures all types of data relationships for a {@link GraphData} instance. The two types of
  * relationships are:<br><br>
@@ -10,7 +13,7 @@ package org.memgraphd.data;
  * 
  * @author Ilirjan Papa
  * @since August 28, 2012
- * @see GraphData
+ *
  */
 public interface GraphRelatedData {
     
