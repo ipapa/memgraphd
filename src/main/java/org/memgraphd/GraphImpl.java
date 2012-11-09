@@ -63,7 +63,7 @@ public final class GraphImpl extends GraphSupervisorImpl implements Graph {
                 decisionMaker,
                 new GraphDataEventListenerManagerImpl(), 
                 mappings, seeker, dataMatchmaker);
-        this.filter = new GraphFilterImpl(memoryAccess);
+        this.filter = new GraphFilterImpl(memoryAccess, reader);
     }
     
     /**

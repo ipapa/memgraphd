@@ -46,12 +46,31 @@ public final class MemoryReference implements GraphLifecycleHandler {
      * @return {@link MemoryReference}
      */
     public static MemoryReference valueOf(int id) {
+        validateReference(id);
+        
         if(store.containsKey(id)) {
             return store.get(id);
         }
         MemoryReference newImpl = new MemoryReference(id);
         store.put(id, newImpl);
         return newImpl;
+    }
+    
+    /**
+     * Read a range of {@link MemoryReference}(s) from start to end.
+     * @param start integer
+     * @param end integer
+     * @return array of {@link MemoryReference}(s)
+     */
+    public static MemoryReference[] rangeOf(int start, int end) {
+        if(end < start) {
+            throw new RuntimeException("Invalid range specified: end < start");
+        }
+        MemoryReference[] range = new MemoryReference[end - start + 1];
+        for(int i=start; i <= end; i++) {
+            range[i] = valueOf(i);
+        }
+        return range;
     }
     
     /**
@@ -79,5 +98,11 @@ public final class MemoryReference implements GraphLifecycleHandler {
     @Override
     public final String toString() {
         return ReflectionToStringBuilder.toString(this, ToStringStyle.MULTI_LINE_STYLE);
+    }
+
+    private static void validateReference(int number) {
+        if(number < 0) {
+            throw new RuntimeException("Memory reference should be greater than zero.");
+        }
     }
 }

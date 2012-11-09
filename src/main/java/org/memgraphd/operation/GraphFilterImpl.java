@@ -13,9 +13,11 @@ import org.memgraphd.memory.operation.MemoryOperations;
  *
  */
 public class GraphFilterImpl extends AbstractGraphAccess implements GraphFilter {
-    //TODO Show me some love and implement me
-    public GraphFilterImpl(MemoryOperations memoryAccess) {
+    private final GraphReader reader;
+    
+    public GraphFilterImpl(MemoryOperations memoryAccess, GraphReader reader) {
         super(memoryAccess);
+        this.reader = reader;
     }
     
     /**
@@ -23,8 +25,7 @@ public class GraphFilterImpl extends AbstractGraphAccess implements GraphFilter 
      */
     @Override
     public GraphData[] filterBy(MemoryBlock block) {
-        // TODO Auto-generated method stub
-        return null;
+        return filterByRange(block.startsWith(), block.endsWith());
     }
     
     /**
@@ -32,8 +33,14 @@ public class GraphFilterImpl extends AbstractGraphAccess implements GraphFilter 
      */
     @Override
     public GraphData[] filterByRange(MemoryReference startRef, MemoryReference endRef) {
-        // TODO Auto-generated method stub
-        return null;
+        MemoryReference[] refs = MemoryReference.rangeOf(startRef.id(), endRef.id());
+        GraphData[] result = new GraphData[refs.length];
+        int count = 0;
+        for(MemoryReference ref : refs) {
+            result[count] = getMemoryAccess().read(ref);
+            count++;
+        }
+        return result;
     }
     
     /**
@@ -41,8 +48,14 @@ public class GraphFilterImpl extends AbstractGraphAccess implements GraphFilter 
      */
     @Override
     public GraphData[] filterByRange(Sequence startSeq, Sequence endSeq) {
-        // TODO Auto-generated method stub
-        return null;
+        Sequence[] range = Sequence.rangeOf(startSeq.number(), endSeq.number());
+        GraphData[] result = new GraphData[range.length];
+        int count = 0;
+        for(Sequence seq : range) {
+            result[count] = reader.readSequence(seq);
+            count++;
+        }
+        return result;
     }
 
 }

@@ -42,7 +42,20 @@ public final class Sequence implements GraphLifecycleHandler {
         return hashCode() == obj.hashCode();
     }
     
+    public static final Sequence[] rangeOf(long start, long end) {
+        if(end < start) {
+            throw new RuntimeException("Invalid range specified: end < start");
+        }
+        Sequence[] range = new Sequence[Long.valueOf(end - start + 1).intValue()];
+        for(long i=start; i <= end; i++) {
+            range[Long.valueOf(i).intValue()] = valueOf(i);
+        }
+        return range;
+    }
+    
     public static final Sequence valueOf(long number) {
+        validateSequence(number);
+        
         if(store.containsKey(number)) {
             return store.get(number);
         }
@@ -77,5 +90,11 @@ public final class Sequence implements GraphLifecycleHandler {
     @Override
     public final String toString() {
         return ReflectionToStringBuilder.toString(this, ToStringStyle.MULTI_LINE_STYLE);
+    }
+
+    private static void validateSequence(long number) {
+        if(number < 0) {
+            throw new RuntimeException("Sequence numbers are greater than zero.");
+        }
     }
 }
