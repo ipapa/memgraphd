@@ -182,7 +182,7 @@ public final class GraphImpl extends GraphSupervisorImpl implements Graph {
     @Override
     public GraphData[] filterByRange(MemoryReference startRef, MemoryReference endRef) {
         authorize();
-        return filterByRange(startRef, endRef);
+        return filter.filterByRange(startRef, endRef);
     }
     
     /**
@@ -191,7 +191,7 @@ public final class GraphImpl extends GraphSupervisorImpl implements Graph {
     @Override
     public GraphData[] filterByRange(Sequence startSeq, Sequence endSeq) {
         authorize();
-        return filterByRange(startSeq, endSeq);
+        return filter.filterByRange(startSeq, endSeq);
     }
     
     /**
@@ -221,7 +221,7 @@ public final class GraphImpl extends GraphSupervisorImpl implements Graph {
     @Override
     public final boolean isEmpty() {
         authorize();
-        return ((MemoryStats)memoryAccess).occupied() == 0;
+        return memoryStats.occupied() == 0;
     }
     
     /**
