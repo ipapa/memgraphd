@@ -35,4 +35,5 @@ public interface DataMatchmaker {
      * @param data {@link DataRelationship}
      */
     void separate(DataRelationship data);
+
 }

@@ -24,9 +24,9 @@ import org.memgraphd.persistence.PersistenceStore;
 
 public abstract class AbstractBookKeeper extends PersistenceStore implements BookKeeper, Runnable, GraphLifecycleHandler {
     
-    private static final long WRITE_FREQUENCY = 3000L;
+    public static final long WRITE_FREQUENCY = 5000L;
 
-    private static final int BATCH_SIZE = 10000;
+    public static final int BATCH_SIZE = 10000;
     
     private Set<Decision> buffer;
    

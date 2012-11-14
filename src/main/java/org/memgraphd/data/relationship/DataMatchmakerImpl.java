@@ -22,7 +22,7 @@ import org.memgraphd.operation.GraphSeeker;
 public class DataMatchmakerImpl extends AbstractGraphAccess implements DataMatchmaker {
     
     private final Map<String, Set<MemoryReference>> singles;
-    private GraphSeeker seeker;
+    private final GraphSeeker seeker;
     
     public DataMatchmakerImpl(MemoryOperations memoryAccess, GraphSeeker seeker) {
         super(memoryAccess);
@@ -39,7 +39,7 @@ public class DataMatchmakerImpl extends AbstractGraphAccess implements DataMatch
                 for (MemoryReference r : getSingles().get(id)) {
                     getMemoryAccess().link(r, ref);
                 }
-                getSingles().remove(id);
+//                getSingles().remove(id);
             }
         }
     }
@@ -103,7 +103,7 @@ public class DataMatchmakerImpl extends AbstractGraphAccess implements DataMatch
                 for (MemoryReference r : getSingles().get(data.getId())) {
                     getMemoryAccess().link(r, ref);
                 }
-                getSingles().remove(data.getId());
+//                getSingles().remove(data.getId());
             }
         }
     }
