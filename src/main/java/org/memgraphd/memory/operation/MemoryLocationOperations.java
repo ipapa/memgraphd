@@ -19,5 +19,9 @@ public interface MemoryLocationOperations {
     void reference(MemoryLocation ref);
     
     void dereference(MemoryLocation ref);
+    
+    void delinkAll();
+    
+    void dereferenceAll();
 
 }

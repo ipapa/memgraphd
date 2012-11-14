@@ -125,24 +125,18 @@ public final class MemoryAccess implements MemoryOperations {
      * {@inheritDoc}
      */
     @Override
-    public void delinkAll(MemoryReference ref) {
+    public synchronized void delinkAll(MemoryReference ref) {
         MemoryLocation loc = getMemoryLocation(ref);
-        for(MemoryLocation ml : loc.links()) {
-            ((MemoryLocationOperations)loc).delink(ml);
-            ((MemoryLocationOperations)ml).dereference(loc);
-        }
+        ((MemoryLocationOperations)loc).delinkAll();
     }
     
     /**
      * {@inheritDoc}
      */
     @Override
-    public void dereferenceAll(MemoryReference ref) {
+    public synchronized void dereferenceAll(MemoryReference ref) {
         MemoryLocation loc = getMemoryLocation(ref);
-        for(MemoryLocation ml : loc.references()) {
-            ((MemoryLocationOperations)loc).dereference(ml);
-            ((MemoryLocationOperations)ml).delink(loc);
-        }
+        ((MemoryLocationOperations)loc).dereferenceAll();
     }
 
     private void linkDelink(MemoryReference ref, MemoryReference[] links, boolean isLink) {

@@ -5,6 +5,10 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.memgraphd.test.data.OnlineVideo;
+import org.memgraphd.test.data.TvEpisode;
+import org.memgraphd.test.data.TvSeason;
+import org.memgraphd.test.data.TvSeries;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 

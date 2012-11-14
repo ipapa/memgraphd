@@ -1,4 +1,4 @@
-package org.memgraphd.data;
+package org.memgraphd.test.data;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;

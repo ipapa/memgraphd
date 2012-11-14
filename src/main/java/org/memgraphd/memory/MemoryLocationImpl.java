@@ -1,7 +1,7 @@
 package org.memgraphd.memory;
 
-import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.memgraphd.data.GraphData;
 import org.memgraphd.memory.operation.MemoryBlockOperations;
@@ -24,8 +24,8 @@ public class MemoryLocationImpl implements MemoryLocation, MemoryLocationOperati
     public MemoryLocationImpl(MemoryReference ref, GraphData data) {
         this.reference = ref;
         this.data = data;
-        this.links = new HashSet<MemoryLocation>();
-        this.references = new HashSet<MemoryLocation>();
+        this.links = new CopyOnWriteArraySet<MemoryLocation>();
+        this.references = new CopyOnWriteArraySet<MemoryLocation>();
     }
     
     /**
@@ -133,5 +133,27 @@ public class MemoryLocationImpl implements MemoryLocation, MemoryLocationOperati
     
     private final synchronized void setBlock(MemoryBlock block) {
         this.block = block;
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void delinkAll() {
+        for(MemoryLocation ml : links()) {
+            delink(ml);
+            ((MemoryLocationOperations)ml).dereference(this);
+        }
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void dereferenceAll() {
+        for(MemoryLocation ml : references()) {
+            dereference(ml);
+            ((MemoryLocationOperations)ml).delink(this);
+        }
     }
 }
