@@ -95,12 +95,6 @@ public abstract class GraphSupervisorImpl implements GraphSupervisor {
         }
     }
 
-    protected void authorize() {
-        if(!isRunning()) {
-            throw new RuntimeException("Request cannot be handled. memgraphd is stopped.");
-        }
-    }
-
     private void notifyOnStartup() {
         for(GraphLifecycleHandler h : listeners) {
             h.onStartup();

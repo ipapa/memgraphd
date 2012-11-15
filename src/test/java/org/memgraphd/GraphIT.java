@@ -26,7 +26,7 @@ public class GraphIT {
     @Before
     public void setUp() throws SQLException {
         
-        graph =  new GraphImpl(CAPACITY);
+        graph =  GraphImpl.build(CAPACITY);
         
         graph.start();
     }

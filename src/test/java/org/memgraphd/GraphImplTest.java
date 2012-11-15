@@ -1,5 +1,6 @@
 package org.memgraphd;
 
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -69,7 +70,9 @@ public class GraphImplTest {
     
     @Before
     public void setUp() throws Exception {
-        graph = new GraphImpl(1);
+        Constructor<?>[] constructors = GraphImpl.class.getDeclaredConstructors();
+        constructors[0].setAccessible(true);
+        graph = (GraphImpl) constructors[0].newInstance(Integer.valueOf(1));
         
         ReflectionTestUtils.setField(graph, "writer", writer);
         ReflectionTestUtils.setField(graph, "reader", reader);

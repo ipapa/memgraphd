@@ -1,5 +1,7 @@
 package org.memgraphd;
 
+import java.lang.reflect.Constructor;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,14 +17,16 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GraphSupervisorImplTest {
-    private GraphSupervisorImpl supervisor;
+    private GraphSupervisor supervisor;
     
     @Mock
     private GraphLifecycleHandler handler;
     
     @Before
-    public void setUp() {
-        supervisor = new GraphImpl(1);
+    public void setUp() throws Exception {
+        Constructor<?>[] constructors = GraphImpl.class.getDeclaredConstructors();
+        constructors[0].setAccessible(true);
+        supervisor = (GraphImpl) constructors[0].newInstance(Integer.valueOf(1));
     }
     
     @Test
@@ -110,24 +114,6 @@ public class GraphSupervisorImplTest {
         assertFalse(supervisor.isStopped());
         supervisor.stop();
         assertTrue(supervisor.isStopped());
-    }
-
-    @Test(expected=RuntimeException.class)
-    public void testAuthorize_initialized() {
-        supervisor.authorize();
-    }
-    
-    @Test(expected=RuntimeException.class)
-    public void testAuthorize_stopped() {
-        supervisor.start();
-        supervisor.stop();
-        supervisor.authorize();
-    }
-    
-    @Test
-    public void testAuthorize_running() {
-        supervisor.start();
-        supervisor.authorize();
     }
 
 }

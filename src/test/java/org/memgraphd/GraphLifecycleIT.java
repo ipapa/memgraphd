@@ -32,7 +32,7 @@ public class GraphLifecycleIT {
  
     @Before
     public void setUp() throws SQLException {
-        graph =  new GraphImpl(CAPACITY);
+        graph =  GraphImpl.build(CAPACITY);
         data = new DataImpl(String.valueOf(1), new DateTime(), new DateTime());
     }
     
