@@ -2,7 +2,6 @@ package org.memgraphd;
 
 import java.lang.reflect.Proxy;
 
-import org.apache.log4j.Logger;
 import org.memgraphd.data.Data;
 import org.memgraphd.data.GraphData;
 import org.memgraphd.data.event.GraphDataEventListenerManagerImpl;
@@ -38,8 +37,6 @@ import org.memgraphd.operation.GraphWriterImpl;
  * 
  */
 public final class GraphImpl extends GraphSupervisorImpl implements Graph {
-
-    private static final Logger LOGGER = Logger.getLogger(GraphImpl.class);
 
     private final GraphMappings mappings;
     private final GraphFilter filter;
@@ -181,7 +178,7 @@ public final class GraphImpl extends GraphSupervisorImpl implements Graph {
     public GraphData[] filterByRange(Sequence startSeq, Sequence endSeq) {
         return filter.filterByRange(startSeq, endSeq);
     }
-
+    
     /**
      * {@inheritDoc}
      */
@@ -203,47 +200,7 @@ public final class GraphImpl extends GraphSupervisorImpl implements Graph {
         notifyOnClearAll();
 
     }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final boolean isEmpty() {
-        return memoryStats.occupied() == 0;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int capacity() {
-        return memoryStats.capacity();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int occupied() {
-        return memoryStats.occupied();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int available() {
-        return memoryStats.available();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int recycled() {
-        return memoryStats.recycled();
-    }
-
+    
     public static final Graph build(int capacity) {
         return createProxy(new GraphImpl(capacity));
     }
@@ -251,5 +208,10 @@ public final class GraphImpl extends GraphSupervisorImpl implements Graph {
     private static final Graph createProxy(Graph liveGraph) {
         return (Graph) Proxy.newProxyInstance(GraphImpl.class.getClassLoader(),
                 new Class[] { Graph.class }, new GraphInvocationHandler(liveGraph));
+    }
+    
+    @Override
+    protected final MemoryStats getMemoryStats() {
+        return memoryStats;
     }
 }

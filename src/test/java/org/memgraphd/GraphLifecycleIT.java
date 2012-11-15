@@ -46,9 +46,9 @@ public class GraphLifecycleIT {
         graph.clear();
     }
     
-    @Test(expected=RuntimeException.class)
+    @Test
     public void testGraphNotStarted_ThrowsExceptionOnIsEmpty() throws GraphException {
-        graph.isEmpty();
+        assertTrue(graph.isEmpty());
     }
     
     @Test(expected=RuntimeException.class)
@@ -233,7 +233,7 @@ public class GraphLifecycleIT {
     public void testGraphStopped_ThrowsExceptionOnIsEmpty() throws GraphException {
         graph.start();
         graph.stop();
-        graph.isEmpty();
+        graph.readId("someId");
     }
 
     @Test(expected=RuntimeException.class)

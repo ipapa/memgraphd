@@ -1,4 +1,7 @@
 package org.memgraphd;
+
+import org.memgraphd.memory.MemoryStats;
+
 /**
  * It is in charge of managing the state of the {@link Graph}.
  * 
@@ -6,7 +9,7 @@ package org.memgraphd;
  * @since Oct 1, 2012
  *
  */
-public interface GraphSupervisor {
+public interface GraphSupervisor extends GraphLifecycleListenerManager, MemoryStats {
     
     /**
      * Starts the {@link Graph} and changes the state to {@link GraphState#RUNNING}.
@@ -49,16 +52,5 @@ public interface GraphSupervisor {
      * @return true if the {@link Graph} has not data stored in it, false otherwise.
      */
     boolean isEmpty();
-    
-    /**
-     * Register here to be notified when the {@link Graph} start/stops.
-     * @param bean {@link GraphLifecycleHandler}
-     */
-    public void register(GraphLifecycleHandler bean);
-    
-    /**
-     * Unregister this bean if the bean no longer wants to be notified of start/stop events.
-     * @param bean {@link GraphLifecycleHandler}
-     */
-    public void unregister(GraphLifecycleHandler bean);
+
 }

@@ -53,12 +53,6 @@ public class GraphSupervisorImplTest {
         
         verifyZeroInteractions(handler);
     }
-
-    @Test(expected=RuntimeException.class)
-    public void testStart_alreadyRunning() {
-        supervisor.start();
-        supervisor.start();
-    }
     
     @Test
     public void testStart() {
@@ -89,22 +83,6 @@ public class GraphSupervisorImplTest {
         assertTrue(supervisor.isRunning());
         supervisor.stop();
         assertFalse(supervisor.isRunning());
-    }
-    
-    @Test(expected=RuntimeException.class)
-    public void testStop_alreadyStopped() {
-        supervisor.register(handler);
-        supervisor.start();
-        supervisor.stop();
-        supervisor.stop();
-        
-        verify(handler).onStartup();
-        verify(handler).onShutdown();
-    }
-    
-    @Test(expected=RuntimeException.class)
-    public void testStop_notRunning() {
-        supervisor.stop();
     }
     
     @Test

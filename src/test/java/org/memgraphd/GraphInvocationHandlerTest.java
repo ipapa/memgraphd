@@ -72,10 +72,34 @@ public class GraphInvocationHandlerTest {
         verify(graph).start();
     }
     
+    @Test(expected=RuntimeException.class)
+    public void testInvoke_start_AlreadyStarted() throws Throwable {
+        when(graph.isRunning()).thenReturn(true);
+        handler.invoke(proxy, GraphSupervisor.class.getMethod("start", new Class<?>[] {}), null);
+        verify(graph).isRunning();
+    }
+    
     @Test
     public void testInvoke_stop() throws Throwable {
+        when(graph.isStopped()).thenReturn(false);
+        when(graph.isRunning()).thenReturn(true);
         handler.invoke(proxy, GraphSupervisor.class.getMethod("stop", new Class<?>[] {}), null);
+        verify(graph).isStopped();
+        verify(graph).isRunning();
         verify(graph).stop();
+    }
+    
+    @Test(expected=RuntimeException.class)
+    public void testInvoke_stop_AlreadyStopped() throws Throwable {
+        when(graph.isStopped()).thenReturn(true);
+        handler.invoke(proxy, GraphSupervisor.class.getMethod("stop", new Class<?>[] {}), null);
+    }
+    
+    @Test(expected=RuntimeException.class)
+    public void testInvoke_stop_NotRunning() throws Throwable {
+        when(graph.isStopped()).thenReturn(false);
+        when(graph.isRunning()).thenReturn(false);
+        handler.invoke(proxy, GraphSupervisor.class.getMethod("stop", new Class<?>[] {}), null);
     }
     
     @Test

@@ -1,6 +1,5 @@
 package org.memgraphd;
 
-import org.memgraphd.memory.MemoryStats;
 import org.memgraphd.operation.GraphFilter;
 import org.memgraphd.operation.GraphReader;
 import org.memgraphd.operation.GraphWriter;
@@ -14,6 +13,6 @@ import org.memgraphd.operation.GraphWriter;
  * @since August 17, 2012
  *
  */
-public interface Graph extends GraphReader, GraphWriter, GraphFilter, GraphLifecycleListenerManager, GraphSupervisor, MemoryStats {
+public interface Graph extends GraphReader, GraphWriter, GraphFilter, GraphSupervisor {
   
 }

@@ -3,6 +3,9 @@ package org.memgraphd;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.apache.log4j.Logger;
+import org.memgraphd.memory.MemoryStats;
+
 /**
  * Default implementation of {@link GraphSupervisor} which is responsible for starting/stopping
  * the service and alerting all listeners when such life-cycle events occur.
@@ -12,6 +15,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
  *
  */
 public abstract class GraphSupervisorImpl implements GraphSupervisor {
+
+    protected static final Logger LOGGER = Logger.getLogger(GraphImpl.class);
+    
     private final List<GraphLifecycleHandler> listeners;
     private volatile GraphState state;
     
@@ -19,6 +25,8 @@ public abstract class GraphSupervisorImpl implements GraphSupervisor {
         this.listeners = new CopyOnWriteArrayList<GraphLifecycleHandler>();
         this.state = GraphState.INITIALIZED;
     }
+    
+    protected abstract MemoryStats getMemoryStats();
     
     /**
      * {@inheritDoc}
@@ -40,11 +48,7 @@ public abstract class GraphSupervisorImpl implements GraphSupervisor {
      * {@inheritDoc}
      */
     @Override
-    public synchronized void start() {
-        if(isRunning()) {
-            throw new RuntimeException("memgraphd is already running");
-        }
-        
+    public synchronized void start() { 
         state = GraphState.RUNNING;
         notifyOnStartup();
     }
@@ -54,12 +58,6 @@ public abstract class GraphSupervisorImpl implements GraphSupervisor {
      */
     @Override
     public synchronized void stop() {
-        if(isStopped()) {
-            throw new RuntimeException("memgraphd is already stopped.");
-        }
-        if(!isRunning()) {
-            throw new RuntimeException("memgraphd is not running.");
-        }
         state = GraphState.STOPPED;
         notifyOnShutdown();
     }
@@ -87,6 +85,46 @@ public abstract class GraphSupervisorImpl implements GraphSupervisor {
     @Override
     public boolean isStopped() {
         return GraphState.STOPPED.equals(state);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final boolean isEmpty() {
+        return getMemoryStats().occupied() == 0;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int capacity() {
+        return getMemoryStats().capacity();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int occupied() {
+        return getMemoryStats().occupied();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int available() {
+        return getMemoryStats().available();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int recycled() {
+        return getMemoryStats().recycled();
     }
     
     protected void notifyOnClearAll() {
