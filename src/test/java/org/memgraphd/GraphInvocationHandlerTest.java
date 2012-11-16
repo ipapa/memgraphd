@@ -4,14 +4,17 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.memgraphd.data.Data;
+import org.memgraphd.exception.GraphException;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.powermock.reflect.exceptions.MethodInvocationException;
 
 import static org.junit.Assert.assertNotNull;
 
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.spy;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GraphInvocationHandlerTest {
@@ -64,6 +67,34 @@ public class GraphInvocationHandlerTest {
         handler.invoke(proxy, Graph.class.getMethod("write", new Class<?>[] { Data.class }), new Object[] { data });
         verify(graph).isRunning();
         verify(graph).write(data);
+    }
+    
+    @Test
+    public void testInvoke_clear() throws Throwable {
+        when(graph.isStopped()).thenReturn(false);
+        when(graph.isRunning()).thenReturn(true);
+        handler.invoke(proxy, GraphSupervisor.class.getMethod("clear", new Class<?>[] {}), null);
+        verify(graph).isStopped();
+        verify(graph).isRunning();
+        verify(graph).clear();
+    }
+    
+    @Test(expected=RuntimeException.class)
+    public void testInvoke_clear_notRunning() throws Throwable {
+        when(graph.isStopped()).thenReturn(false);
+        when(graph.isRunning()).thenReturn(false);
+        handler.invoke(proxy, GraphSupervisor.class.getMethod("clear", new Class<?>[] {}), null);
+        verify(graph).isStopped();
+        verify(graph).isRunning();
+        verify(graph).clear();
+    }
+    
+    @Test(expected=RuntimeException.class)
+    public void testInvoke_clear_Stopped() throws Throwable {
+        when(graph.isStopped()).thenReturn(true);
+        handler.invoke(proxy, GraphSupervisor.class.getMethod("clear", new Class<?>[] {}), null);
+        verify(graph).isStopped();
+        verify(graph).clear();
     }
     
     @Test
@@ -132,6 +163,27 @@ public class GraphInvocationHandlerTest {
         GraphLifecycleHandler arg = mock(GraphLifecycleHandler.class);
         handler.invoke(proxy, GraphSupervisor.class.getMethod("unregister", new Class<?>[] { GraphLifecycleHandler.class }), new Object[] {arg});
         verify(graph).unregister(arg);
+    }
+    
+    @Test(expected=Throwable.class)
+    public void testInvoke_throwExceptionWithNoCause() throws Throwable {
+        GraphInvocationHandler newHandler = spy(handler);
+        Throwable exception = mock(Throwable.class);
+        when(exception.getCause()).thenReturn(null);
+        when(newHandler.invoke(proxy, GraphSupervisor.class.getMethod("isInitialized", new Class<?>[] {}), null)).thenThrow(exception);
+        
+        graph.isInitialized();
+        
+        verify(newHandler).invoke(proxy, GraphSupervisor.class.getMethod("isInitialized", new Class<?>[] {}), null);
+    }
+    
+    @Test(expected=RuntimeException.class)
+    public void testInvoke_throwExceptionWithCause() throws Throwable {
+        when(graph.isInitialized()).thenThrow(new RuntimeException());
+        
+        graph.isInitialized();
+        
+        verify(graph).isInitialized();
     }
 
 }

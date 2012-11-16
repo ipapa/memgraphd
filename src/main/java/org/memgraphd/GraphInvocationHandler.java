@@ -3,7 +3,7 @@ package org.memgraphd;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
-public final class GraphInvocationHandler implements InvocationHandler {
+public class GraphInvocationHandler implements InvocationHandler {
     private final Graph graph;
   
     public GraphInvocationHandler(Graph graph) {
@@ -31,7 +31,7 @@ public final class GraphInvocationHandler implements InvocationHandler {
         return invokeGraph(method, args);
     }
 
-    private Object invokeGraph(Method method, Object[] args) throws Throwable, Exception {
+    private Object invokeGraph(Method method, Object[] args) throws Throwable {
         try {
             return method.invoke(graph, args);
         } catch (Exception e) {
@@ -64,11 +64,11 @@ public final class GraphInvocationHandler implements InvocationHandler {
     }
     
     private void onClear() {
-        if(!graph.isRunning()) {
-            throw new RuntimeException("memgraphd is not running");
-        }
         if(graph.isStopped()) {
             throw new RuntimeException("memgraphd is stopped.");
+        }
+        if(!graph.isRunning()) {
+            throw new RuntimeException("memgraphd is not running");
         }
     }
 }
