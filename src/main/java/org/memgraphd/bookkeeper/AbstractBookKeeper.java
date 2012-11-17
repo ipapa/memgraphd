@@ -16,15 +16,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.memgraphd.GraphLifecycleHandler;
 import org.memgraphd.decision.Decision;
 import org.memgraphd.decision.Sequence;
 import org.memgraphd.persistence.PersistenceStore;
 
 
-public abstract class AbstractBookKeeper extends PersistenceStore implements BookKeeper, Runnable, GraphLifecycleHandler {
+public abstract class AbstractBookKeeper extends PersistenceStore implements BookKeeper, Runnable {
     
-    public static final long WRITE_FREQUENCY = 5000L;
+    public static final long WRITE_FREQUENCY = 2000L;
 
     public static final int BATCH_SIZE = 10000;
     
@@ -186,19 +185,5 @@ public abstract class AbstractBookKeeper extends PersistenceStore implements Boo
     protected final AtomicLong getLastFlushedToDisk() {
         return lastTimeFlushedToDisk;
     }
-    
-    @Override
-    public void onStartup() {
-        openBook();
-    }
-    
-    @Override
-    public void onShutdown() {
-        closeBook();
-    }
-    
-    @Override
-    public void onClearAll() {
-    }
-  
+   
 }

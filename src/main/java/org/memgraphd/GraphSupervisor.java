@@ -1,33 +1,31 @@
 package org.memgraphd;
 
+import org.memgraphd.data.GraphDataSnapshotManager;
+import org.memgraphd.exception.GraphException;
 import org.memgraphd.memory.MemoryStats;
 
 /**
  * It is in charge of managing the state of the {@link Graph}.
  * 
  * @author Ilirjan Papa
- * @since Oct 1, 2012
+ * @since October 1, 2012
  *
  */
-public interface GraphSupervisor extends GraphLifecycleListenerManager, MemoryStats {
+public interface GraphSupervisor extends GraphLifecycleListenerManager, GraphDataSnapshotManager, MemoryStats {
     
     /**
      * Starts the {@link Graph} and changes the state to {@link GraphState#RUNNING}.
      * It also notifies all the listeners that {@link Graph} just started.
+     * @throws GraphException
      */
-    void start();
+    void run() throws GraphException;
     
     /**
      * Stops the {@link Graph} and changes the state to {@link GraphState#STOPPED}.
      * It also notifies all the listeners that {@link Graph} just stopped. 
+     * @throws GraphException
      */
-    void stop();
-    
-    /**
-     * Wipes out all the data from the {@link Graph}.<br>
-     * <b>WARNING: This will permanently wipe out all the data you have stored in this {@link Graph}.</b> 
-     */
-    void clear();
+    void shutdown() throws GraphException;
     
     /**
      * Check to see if {@link Graph} is initialized before it can be started.
@@ -42,10 +40,10 @@ public interface GraphSupervisor extends GraphLifecycleListenerManager, MemorySt
     boolean isRunning();
     
     /**
-     * Checks to see if {@link Graph} is stopped.
-     * @return true if it is stopped, false otherwise.
+     * Checks to see if {@link Graph} is shut down.
+     * @return true if it is shut down, false otherwise.
      */
-    boolean isStopped();
+    boolean isShutdown();
     
     /**
      * Returns true if the {@link Graph} is empty, has no data stored in it.

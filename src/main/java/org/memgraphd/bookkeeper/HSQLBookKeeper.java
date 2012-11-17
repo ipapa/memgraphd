@@ -1,6 +1,7 @@
 package org.memgraphd.bookkeeper;
 
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
@@ -63,17 +64,40 @@ public class HSQLBookKeeper extends AbstractBookKeeper {
      * {@inheritDoc}
      */
     @Override
-    public void wipe(Decision decision) {
+    public synchronized void wipe(Decision decision) {
+        LOGGER.info(String.format("Wiping out decision with sequence=%d", decision.getSequence().number()));
+        Statement stmt = null;
         try {
-            openConnection().createStatement().executeUpdate(
-                    String.format("DELETE FROM %s WHERE SEQUENCE_ID=%d", 
+            stmt = openConnection().createStatement();
+            stmt.executeUpdate(
+                    String.format("DELETE FROM %s WHERE SEQUENCE_ID=%d;", 
                             getDatabaseName(), decision.getSequence().number()));
+            stmt.executeUpdate("COMMIT;");
         } catch (SQLException e) {
             String msg = String.format("Failed to delete decision with sequence=", 
                                             decision.getSequence().number());
             LOGGER.error(msg, e);
             throw new RuntimeException(msg, e);
         }
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public synchronized void wipeAll() {
+        LOGGER.info("Wiping out *ALL* transactions from the book");
+        try {
+            Statement stmt = openConnection().createStatement();
+            stmt.executeUpdate(
+                    String.format("DELETE FROM %s;", getDatabaseName()));
+            stmt.executeUpdate("COMMIT;");
+        } catch (SQLException e) {
+            String msg = String.format("Failed to delete all decisions.");
+            LOGGER.error(msg, e);
+            throw new RuntimeException(msg, e);
+        }
+        
     }
     
 }

@@ -3,6 +3,7 @@ package org.memgraphd.operation;
 import org.memgraphd.Graph;
 import org.memgraphd.data.Data;
 import org.memgraphd.data.GraphData;
+import org.memgraphd.decision.Decision;
 import org.memgraphd.exception.GraphException;
 import org.memgraphd.memory.MemoryReference;
 /**
@@ -34,6 +35,16 @@ public interface GraphWriter {
     MemoryReference[] write(Data[] data) throws GraphException;
     
     /**
+     * It will write an already made decision. Meant to be used only when the
+     * {@link Graph} restarts and replays the transaction log of previous decisions
+     * so it can reach the previous state before the {@link Graph} was stopped.
+     * 
+     * @param decision {@link Decision}
+     * @return {@link MemoryReference}
+     */
+    MemoryReference write(Decision decision) throws GraphException;
+    
+    /**
      * Delete {@link GraphData} by {@link Data} id.
      * @param dataId {@link String}
      * @throws GraphException
@@ -53,5 +64,14 @@ public interface GraphWriter {
      * @throws GraphException
      */
     void delete(GraphData[] data) throws GraphException;
+    
+    /**
+     * It will handle a delete decision that has already been made.
+     * It is meant to be used by {@link Graph} on startup to replay
+     * a transaction log of old decisions.
+     * @param decision {@link Decision}
+     * @throws GraphException
+     */
+    void delete(Decision decision) throws GraphException;
     
 }

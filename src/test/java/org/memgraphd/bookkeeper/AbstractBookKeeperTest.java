@@ -1,6 +1,7 @@
 package org.memgraphd.bookkeeper;
 
 import org.joda.time.DateTime;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,6 +21,7 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AbstractBookKeeperTest {
+    
     private AbstractBookKeeper keeper;
     
     @Mock
@@ -30,10 +32,16 @@ public class AbstractBookKeeperTest {
     @Before
     public void setUp() throws Exception {
         keeper =  new HSQLBookKeeper();
+        keeper.wipeAll();
         data = new DataImpl("someId", new DateTime(), new DateTime());
         when(decision.getData()).thenReturn(data);
     }
-
+    
+    @After
+    public void tearDown() {
+        keeper.wipeAll();
+    }
+    
     @Test
     public void testAbstractBookKeeper() {
         assertNotNull(keeper);

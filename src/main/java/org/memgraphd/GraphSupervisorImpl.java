@@ -3,7 +3,8 @@ package org.memgraphd;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.apache.log4j.Logger;
+import org.memgraphd.data.GraphDataSnapshotManager;
+import org.memgraphd.exception.GraphException;
 import org.memgraphd.memory.MemoryStats;
 
 /**
@@ -14,19 +15,17 @@ import org.memgraphd.memory.MemoryStats;
  * @since October 1, 2012
  *
  */
-public abstract class GraphSupervisorImpl implements GraphSupervisor {
-
-    protected static final Logger LOGGER = Logger.getLogger(GraphImpl.class);
-    
+public final class GraphSupervisorImpl implements GraphSupervisor {
+    private final GraphDataSnapshotManager snapshotManager;
+    private final MemoryStats memoryStats;
     private final List<GraphLifecycleHandler> listeners;
     private volatile GraphState state;
     
-    public GraphSupervisorImpl() {
+    public GraphSupervisorImpl(GraphDataSnapshotManager snapshotManager, MemoryStats memoryStats) {
+        this.snapshotManager = snapshotManager;
         this.listeners = new CopyOnWriteArrayList<GraphLifecycleHandler>();
-        this.state = GraphState.INITIALIZED;
+        this.memoryStats = memoryStats;
     }
-    
-    protected abstract MemoryStats getMemoryStats();
     
     /**
      * {@inheritDoc}
@@ -48,20 +47,37 @@ public abstract class GraphSupervisorImpl implements GraphSupervisor {
      * {@inheritDoc}
      */
     @Override
-    public synchronized void start() { 
-        state = GraphState.RUNNING;
+    public synchronized void run() throws GraphException {
         notifyOnStartup();
+        state = GraphState.RUNNING;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public synchronized void stop() {
-        state = GraphState.STOPPED;
+    public synchronized void shutdown() throws GraphException {
         notifyOnShutdown();
+        state = GraphState.STOPPED;
     }
     
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void initialize() throws GraphException {
+        snapshotManager.initialize();
+        state = GraphState.INITIALIZED;
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void clear() throws GraphException {
+        snapshotManager.clear();
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -83,7 +99,7 @@ public abstract class GraphSupervisorImpl implements GraphSupervisor {
      * {@inheritDoc}
      */
     @Override
-    public boolean isStopped() {
+    public boolean isShutdown() {
         return GraphState.STOPPED.equals(state);
     }
 
@@ -92,7 +108,7 @@ public abstract class GraphSupervisorImpl implements GraphSupervisor {
      */
     @Override
     public final boolean isEmpty() {
-        return getMemoryStats().occupied() == 0;
+        return memoryStats.occupied() == 0;
     }
 
     /**
@@ -100,7 +116,7 @@ public abstract class GraphSupervisorImpl implements GraphSupervisor {
      */
     @Override
     public int capacity() {
-        return getMemoryStats().capacity();
+        return memoryStats.capacity();
     }
 
     /**
@@ -108,7 +124,7 @@ public abstract class GraphSupervisorImpl implements GraphSupervisor {
      */
     @Override
     public int occupied() {
-        return getMemoryStats().occupied();
+        return memoryStats.occupied();
     }
 
     /**
@@ -116,7 +132,7 @@ public abstract class GraphSupervisorImpl implements GraphSupervisor {
      */
     @Override
     public int available() {
-        return getMemoryStats().available();
+        return memoryStats.available();
     }
 
     /**
@@ -124,15 +140,9 @@ public abstract class GraphSupervisorImpl implements GraphSupervisor {
      */
     @Override
     public int recycled() {
-        return getMemoryStats().recycled();
+        return memoryStats.recycled();
     }
     
-    protected void notifyOnClearAll() {
-        for(GraphLifecycleHandler h : listeners) {
-            h.onClearAll();
-        }
-    }
-
     private void notifyOnStartup() {
         for(GraphLifecycleHandler h : listeners) {
             h.onStartup();
@@ -144,4 +154,5 @@ public abstract class GraphSupervisorImpl implements GraphSupervisor {
             h.onShutdown();
         }
     }
+
 }

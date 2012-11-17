@@ -1,14 +1,13 @@
 package org.memgraphd;
 
 import java.lang.reflect.Constructor;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.memgraphd.data.Data;
 import org.memgraphd.data.GraphData;
+import org.memgraphd.data.GraphDataSnapshotManager;
 import org.memgraphd.data.relationship.DataMatchmaker;
 import org.memgraphd.decision.Sequence;
 import org.memgraphd.exception.GraphException;
@@ -37,6 +36,8 @@ import static org.mockito.Mockito.when;
 public class GraphImplTest {
     
     private GraphImpl graph;
+
+    private GraphSupervisor supervisor;
     
     @Mock
     private GraphData gData;
@@ -68,11 +69,15 @@ public class GraphImplTest {
     @Mock
     private GraphMappings mappings;
     
+    @Mock
+    private GraphDataSnapshotManager snapshotManager;
+    
     @Before
     public void setUp() throws Exception {
         Constructor<?>[] constructors = GraphImpl.class.getDeclaredConstructors();
         constructors[0].setAccessible(true);
         graph = (GraphImpl) constructors[0].newInstance(Integer.valueOf(1));
+        supervisor = new GraphSupervisorImpl(snapshotManager, memoryStats);
         
         ReflectionTestUtils.setField(graph, "writer", writer);
         ReflectionTestUtils.setField(graph, "reader", reader);
@@ -80,10 +85,10 @@ public class GraphImplTest {
         ReflectionTestUtils.setField(graph, "seeker", seeker);
         ReflectionTestUtils.setField(graph, "mappings", mappings);
         ReflectionTestUtils.setField(graph, "memoryAccess", memoryAccess);
-        ReflectionTestUtils.setField(graph, "memoryStats", memoryStats);
+        ReflectionTestUtils.setField(graph, "supervisor", supervisor);
         ReflectionTestUtils.setField(graph, "dataMatchmaker", dataMatchmaker);
         
-        graph.start();
+        graph.run();
     }
 
     @Test
@@ -215,18 +220,10 @@ public class GraphImplTest {
 
     @Test
     public void testClear() throws GraphException {
-        List<MemoryReference> refs = new ArrayList<MemoryReference>();
-        refs.add(MemoryReference.valueOf(1));
-        when(mappings.getAllMemoryReferences()).thenReturn(refs);
-        when(reader.readReference(MemoryReference.valueOf(1))).thenReturn(gData);
-        when(gData.getData()).thenReturn(data);
-        when(data.getId()).thenReturn("someId");
-        
+ 
         graph.clear();
         
-        verify(mappings).getAllMemoryReferences();
-        verify(reader).readReference(MemoryReference.valueOf(1));
-        verify(writer).delete(gData);
+        verify(snapshotManager).clear();
     }
 
     @Test

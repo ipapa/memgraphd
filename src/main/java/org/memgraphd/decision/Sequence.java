@@ -73,14 +73,7 @@ public final class Sequence implements GraphLifecycleHandler {
     @Override
     public synchronized void onStartup() {
     }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public synchronized void onClearAll() {
-    }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -96,7 +89,7 @@ public final class Sequence implements GraphLifecycleHandler {
 
     private static void validateSequence(long number) {
         if(number < 0) {
-            throw new RuntimeException("Sequence numbers are greater than zero.");
+            throw new RuntimeException("Sequence numbers are greater than zero");
         }
     }
 }

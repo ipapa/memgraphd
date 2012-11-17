@@ -78,12 +78,6 @@ public class MemoryReferenceTest {
     }
 
     @Test
-    public void testOnClearAll() {
-        reference.onClearAll();
-        assertSame(reference, MemoryReference.valueOf(1));
-    }
-
-    @Test
     public void testOnShutdown() {
         reference.onShutdown();
         assertFalse(reference == MemoryReference.valueOf(1));

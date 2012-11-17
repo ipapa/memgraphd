@@ -86,13 +86,6 @@ public final class MemoryReference implements GraphLifecycleHandler {
      * {@inheritDoc}
      */
     @Override
-    public synchronized void onClearAll() {
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public synchronized void onShutdown() {
         store.clear();
     }

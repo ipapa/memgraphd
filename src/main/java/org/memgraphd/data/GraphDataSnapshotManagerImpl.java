@@ -4,10 +4,15 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.memgraphd.Graph;
+import org.memgraphd.GraphMappings;
+import org.memgraphd.GraphRequestType;
 import org.memgraphd.decision.Decision;
 import org.memgraphd.decision.DecisionMaker;
 import org.memgraphd.decision.Sequence;
 import org.memgraphd.exception.GraphException;
+import org.memgraphd.memory.MemoryReference;
+import org.memgraphd.operation.GraphReader;
+import org.memgraphd.operation.GraphWriter;
 /**
  * Its sole responsibility is to replay all decision stored in the book on application startup
  * so that the {@link Graph}'s state can be restored.
@@ -16,19 +21,27 @@ import org.memgraphd.exception.GraphException;
  * @since October 27, 2012
  *
  */
-public class GraphDataInitializer {
-    private static final Logger LOGGER = Logger.getLogger(GraphDataInitializer.class);
+public class GraphDataSnapshotManagerImpl implements GraphDataSnapshotManager {
+    private static final Logger LOGGER = Logger.getLogger(GraphDataSnapshotManagerImpl.class);
     private static final long BATCH_READ_SIZE = 10000;
     
-    private final Graph graph;
+    private final GraphWriter writer;
+    private final GraphReader reader;
+    private final GraphMappings mappings;
     private final DecisionMaker decisionMaker;
     
-    public GraphDataInitializer(Graph graph, DecisionMaker decisionMaker) {
-        this.graph = graph;
+    public GraphDataSnapshotManagerImpl(GraphReader reader, GraphWriter writer, GraphMappings mappings, DecisionMaker decisionMaker) {
+        this.reader = reader;
+        this.mappings = mappings;
+        this.writer = writer;
         this.decisionMaker = decisionMaker;
     }
     
-    public void initialize() {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public synchronized void initialize() {
         Sequence zeroSequence = Sequence.valueOf(0);
         Sequence totalDecisions = decisionMaker.latestDecision();
         LOGGER.info(String.format("GraphDataInitializer is replaying %d decisions from disk", totalDecisions.number()));
@@ -51,6 +64,28 @@ public class GraphDataInitializer {
         }
     }
     
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public synchronized void clear() throws GraphException {
+        LOGGER.info("Wiping out all graph data.");
+        for (MemoryReference ref : mappings.getAllMemoryReferences()) {
+            GraphData gData = reader.readReference(ref);
+            try {
+                LOGGER.info(String.format("Deleting graph data id=%s", gData.getData().getId()));
+                writer.delete(gData);
+            } catch (GraphException e) {
+                LOGGER.error(
+                        String.format("Failed to delete graph data id=%s", gData.getData().getId()),
+                        e);
+            }
+        }
+        // clear all enacted decisions as well.
+        decisionMaker.reverseAll();
+
+    }
+
     private void replayDecisionRange(Sequence start, Sequence end) {
         long startTime = System.currentTimeMillis();
         List<Decision> allDecsions = decisionMaker.readRange(start, end);
@@ -59,8 +94,12 @@ public class GraphDataInitializer {
         for(Decision d : allDecsions) {
             LOGGER.debug(String.format("Loading decision sequenceId=%d", d.getSequence().number()));
             try {
-
-                graph.write(d.getData());
+                if(GraphRequestType.DELETE == d.getRequestType()) {
+                    writer.delete(d);
+                }
+                else if(GraphRequestType.PUT == d.getRequestType())  {
+                    writer.write(d);
+                }
                 
             } catch (GraphException e) {
                 LOGGER.error("Failed to write decision to Graph " + d.toString());

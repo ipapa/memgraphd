@@ -37,7 +37,7 @@ public class GraphRelationshipsIT {
     private Data video, video2, episode, season, series, movie1, movie2, network = null;
 
     @Before
-    public void setUp() throws SQLException {
+    public void setUp() throws SQLException, GraphException {
 
         video = new OnlineVideo(VIDEO_ID, new DateTime(), new DateTime(), "Video #1", TVEPISODE_ID);
         video2 = new OnlineVideo(VIDEO_ID + 1, new DateTime(), new DateTime(), "Video #1", TVEPISODE_ID);
@@ -51,13 +51,13 @@ public class GraphRelationshipsIT {
         
         graph =  GraphImpl.build(CAPACITY);
         
-        graph.start();
+        graph.run();
     }
     
     @After
-    public void tearDown() {
+    public void tearDown() throws GraphException {
         graph.clear();
-        graph.stop();
+        graph.shutdown();
     }
     
     @Test

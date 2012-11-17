@@ -24,17 +24,17 @@ public class GraphIT {
     private Graph graph;
 
     @Before
-    public void setUp() throws SQLException {
+    public void setUp() throws Exception {
         
         graph =  GraphImpl.build(CAPACITY);
         
-        graph.start();
+        graph.run();
     }
     
     @After
-    public void tearDown() {
+    public void tearDown() throws Exception {
         graph.clear();
-        graph.stop();
+        graph.shutdown();
     }
     
     @Test

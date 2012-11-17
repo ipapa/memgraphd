@@ -21,7 +21,7 @@ public interface DecisionMaker {
      * @param data {@link Data}
      * @return {@link Decision}
      */
-    Decision decideWriteRequest(Data data);
+    Decision decidePutRequest(Data data);
     
     /**
      * Orders a write event to memgraphd.
@@ -49,5 +49,10 @@ public interface DecisionMaker {
      * @param decision {@link Decision}
      */
     void reverse(Decision decision);
+    
+    /**
+     * Reverses <b>ALL</b> enacted decisions. This action cannot be undone.
+     */
+    void reverseAll();
 
 }

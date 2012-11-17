@@ -5,10 +5,8 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
-import org.memgraphd.GraphLifecycleHandler;
 import org.memgraphd.GraphRequestType;
 import org.memgraphd.bookkeeper.BookKeeper;
-import org.memgraphd.bookkeeper.HSQLBookKeeper;
 import org.memgraphd.data.Data;
 
 /**
@@ -18,26 +16,25 @@ import org.memgraphd.data.Data;
  * @since July 27, 2012
  *
  */
-public class SingleDecisionMaker implements DecisionMaker, GraphLifecycleHandler {
+public class SingleDecisionMaker implements DecisionMaker {
     private final Logger LOGGER = Logger.getLogger(getClass());
     
     private final BookKeeper bookKeeper;
     private final AtomicLong latestInUseSequence;
     
-    public SingleDecisionMaker() {
-        this.bookKeeper = new HSQLBookKeeper();
-        this.latestInUseSequence = new AtomicLong(-1);
-        LOGGER.info("Max sequence number in user is: " + latestInUseSequence);
+    public SingleDecisionMaker(BookKeeper bookKeeper) {
+        this.bookKeeper = bookKeeper;
+        this.latestInUseSequence = new AtomicLong();
     }
     
     /**
      * {@inheritDoc}
      */
     @Override
-    public Decision decideWriteRequest(Data data) {
+    public Decision decidePutRequest(Data data) {
         Decision decision = new DecisionImpl(Sequence.valueOf(latestInUseSequence.incrementAndGet()), 
                 new DateTime(), GraphRequestType.PUT, data.getId(), data);
-        LOGGER.info(String.format("Write decision made: Assigned dataId=%s sequence=%d", data.getId(), decision.getSequence().number()));
+        LOGGER.info(String.format("Write decision: Assigned dataId=%s sequence=%d", data.getId(), decision.getSequence().number()));
         bookKeeper.record(decision);
         return decision;
     }
@@ -49,7 +46,7 @@ public class SingleDecisionMaker implements DecisionMaker, GraphLifecycleHandler
     public Decision decideDeleteRequest(Data data) {
         Decision decision = new DecisionImpl(Sequence.valueOf(latestInUseSequence.incrementAndGet()), 
                 new DateTime(), GraphRequestType.DELETE, data.getId(), data);
-        LOGGER.info(String.format("Delete decision made: Assigned dataId=%s sequence=%d", data.getId(), decision.getSequence().number()));
+        LOGGER.info(String.format("Delete decision: Assigned dataId=%s sequence=%d", data.getId(), decision.getSequence().number()));
         bookKeeper.record(decision);
         return decision;
     }
@@ -67,53 +64,27 @@ public class SingleDecisionMaker implements DecisionMaker, GraphLifecycleHandler
      */
     @Override
     public Sequence latestDecision() {
-        return Sequence.valueOf(latestInUseSequence.get());
+        Sequence seq = Sequence.valueOf(latestInUseSequence.get());
+        LOGGER.info("Latest in-use decision sequence is: " + seq.number());
+        return seq;
     }
     
     /**
      * {@inheritDoc}
      */
     @Override
-    public void reverse(Decision decision) {
+    public synchronized void reverse(Decision decision) {
+        LOGGER.info(String.format("Wiping out decision with sequence=%d", decision.getSequence().number()));
         bookKeeper.wipe(decision);
     }
     
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void onStartup() {
-        if(bookKeeper instanceof GraphLifecycleHandler) {
-            GraphLifecycleHandler handler = (GraphLifecycleHandler) bookKeeper;
-            handler.onStartup();
-        }
-        long seq = bookKeeper.lastTransactionId().number();
-        if(seq > 0) {
-            latestInUseSequence.set(seq);
-        }
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public synchronized void onShutdown() {
-        if(bookKeeper instanceof GraphLifecycleHandler) {
-            GraphLifecycleHandler handler = (GraphLifecycleHandler) bookKeeper;
-            handler.onShutdown();
-        }
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public synchronized void onClearAll() {
-        if(bookKeeper instanceof GraphLifecycleHandler) {
-            GraphLifecycleHandler handler = (GraphLifecycleHandler) bookKeeper;
-            handler.onClearAll();
-        }
-        latestInUseSequence.set(bookKeeper.lastTransactionId().number());
+    public synchronized void reverseAll() {
+        LOGGER.info("Wiping out ALL decisions.");
+        bookKeeper.wipeAll();
+        Sequence seq = bookKeeper.lastTransactionId();
+        LOGGER.info("Latest in-use decision sequence is: " + seq.number());
+        latestInUseSequence.set(seq.number());
     }
 
 }

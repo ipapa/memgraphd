@@ -1,10 +1,11 @@
 package org.memgraphd;
 
-import java.lang.reflect.Constructor;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.memgraphd.data.GraphDataSnapshotManager;
+import org.memgraphd.exception.GraphException;
+import org.memgraphd.memory.MemoryStats;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
@@ -22,11 +23,15 @@ public class GraphSupervisorImplTest {
     @Mock
     private GraphLifecycleHandler handler;
     
+    @Mock
+    private GraphDataSnapshotManager snapshotManager;
+    
+    @Mock
+    private MemoryStats memoryStats;
+    
     @Before
     public void setUp() throws Exception {
-        Constructor<?>[] constructors = GraphImpl.class.getDeclaredConstructors();
-        constructors[0].setAccessible(true);
-        supervisor = (GraphImpl) constructors[0].newInstance(Integer.valueOf(1));
+        supervisor = new GraphSupervisorImpl(snapshotManager, memoryStats);
     }
     
     @Test
@@ -35,63 +40,65 @@ public class GraphSupervisorImplTest {
     }
 
     @Test
-    public void testRegister() {
+    public void testRegister() throws GraphException {
         supervisor.register(handler);
-        supervisor.start();
+        supervisor.run();
         verify(handler).onStartup();
     }
 
     @Test
-    public void testUnregister() {
+    public void testUnregister() throws GraphException {
         // no exception unregistering something not registered
         supervisor.unregister(handler);
         
         supervisor.register(handler);
         supervisor.unregister(handler);
         
-        supervisor.start();
+        supervisor.run();
         
         verifyZeroInteractions(handler);
     }
     
     @Test
-    public void testStart() {
+    public void testStart() throws GraphException {
         supervisor.register(handler);
-        supervisor.start();
+        supervisor.run();
         assertTrue(supervisor.isRunning());
         verify(handler).onStartup();
     }
 
     @Test
-    public void testStop() {
+    public void testShutdown() throws GraphException {
         supervisor.register(handler);
-        supervisor.start();
-        supervisor.stop();
-        assertTrue(supervisor.isStopped());
+        supervisor.run();
+        supervisor.shutdown();
+        assertTrue(supervisor.isShutdown());
         verify(handler).onShutdown();
     }
 
     @Test
-    public void testIsInitialized() {
+    public void testIsInitialized() throws GraphException {
+        assertFalse(supervisor.isInitialized());
+        supervisor.initialize();
         assertTrue(supervisor.isInitialized());
     }
 
     @Test
-    public void testIsRunning() {
+    public void testIsRunning() throws GraphException {
         assertFalse(supervisor.isRunning());
-        supervisor.start();
+        supervisor.run();
         assertTrue(supervisor.isRunning());
-        supervisor.stop();
+        supervisor.shutdown();
         assertFalse(supervisor.isRunning());
     }
     
     @Test
-    public void testIsStopped() {
-        assertFalse(supervisor.isStopped());
-        supervisor.start();
-        assertFalse(supervisor.isStopped());
-        supervisor.stop();
-        assertTrue(supervisor.isStopped());
+    public void testIsShutdown() throws GraphException {
+        assertFalse(supervisor.isShutdown());
+        supervisor.run();
+        assertFalse(supervisor.isShutdown());
+        supervisor.shutdown();
+        assertTrue(supervisor.isShutdown());
     }
 
 }

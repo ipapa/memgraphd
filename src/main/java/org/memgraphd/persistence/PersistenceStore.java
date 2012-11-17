@@ -14,15 +14,11 @@ public abstract class PersistenceStore {
     
     private final String dbFilePath;
     
-    private Connection connection;
-    
     protected PersistenceStore(String dbName, String dbFilePath) {
         this.dbName = dbName;
         this.dbFilePath =dbFilePath;
         
         loadJDBCDriver();
-        
-        connection = createNewConnection();
         
         if(!doesTableExist()) {
             LOGGER.info("Database does not exist, creating it...");
@@ -68,19 +64,6 @@ public abstract class PersistenceStore {
     }
     
     protected synchronized Connection openConnection() {
-        try {
-            if(connection == null || connection.isClosed()) {
-                LOGGER.error("Databace connection has been closed, opening new one.");
-                connection = createNewConnection();
-            }
-        } catch (SQLException e) {
-            LOGGER.error("Failed to check state of data conenction, opening new one.");
-            connection = createNewConnection();
-        }
-        return connection;
-    }
-    
-    protected Connection createNewConnection() {
         try {
             LOGGER.info("Creating a new database connection");
             String connectionString = String.format("jdbc:hsqldb:file:%s;", dbFilePath);

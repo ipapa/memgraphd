@@ -4,17 +4,16 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.memgraphd.data.Data;
-import org.memgraphd.exception.GraphException;
+import org.memgraphd.data.GraphDataSnapshotManager;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.powermock.reflect.exceptions.MethodInvocationException;
 
 import static org.junit.Assert.assertNotNull;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.spy;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GraphInvocationHandlerTest {
@@ -70,67 +69,91 @@ public class GraphInvocationHandlerTest {
     }
     
     @Test
-    public void testInvoke_clear() throws Throwable {
-        when(graph.isStopped()).thenReturn(false);
+    public void testInvoke_initialize() throws Throwable {
+        handler.invoke(proxy, GraphDataSnapshotManager.class.getMethod("initialize", new Class<?>[] {}), null);
+        verify(graph).initialize();
+    }
+    
+    @Test(expected=RuntimeException.class)
+    public void testInvoke_initialize_Running() throws Throwable {
         when(graph.isRunning()).thenReturn(true);
-        handler.invoke(proxy, GraphSupervisor.class.getMethod("clear", new Class<?>[] {}), null);
-        verify(graph).isStopped();
+        handler.invoke(proxy, GraphDataSnapshotManager.class.getMethod("initialize", new Class<?>[] {}), null);
+        verify(graph).isRunning();
+        verify(graph).initialize();
+    }
+    
+    @Test(expected=RuntimeException.class)
+    public void testInvoke_initialize_Stopped() throws Throwable {
+        when(graph.isRunning()).thenReturn(false);
+        when(graph.isShutdown()).thenReturn(true);
+        handler.invoke(proxy, GraphDataSnapshotManager.class.getMethod("initialize", new Class<?>[] {}), null);
+        verify(graph).isRunning();
+        verify(graph).isShutdown();
+        verify(graph).initialize();
+    }
+    
+    @Test
+    public void testInvoke_clear() throws Throwable {
+        when(graph.isShutdown()).thenReturn(false);
+        when(graph.isRunning()).thenReturn(true);
+        handler.invoke(proxy, GraphDataSnapshotManager.class.getMethod("clear", new Class<?>[] {}), null);
+        verify(graph).isShutdown();
         verify(graph).isRunning();
         verify(graph).clear();
     }
     
     @Test(expected=RuntimeException.class)
     public void testInvoke_clear_notRunning() throws Throwable {
-        when(graph.isStopped()).thenReturn(false);
+        when(graph.isShutdown()).thenReturn(false);
         when(graph.isRunning()).thenReturn(false);
-        handler.invoke(proxy, GraphSupervisor.class.getMethod("clear", new Class<?>[] {}), null);
-        verify(graph).isStopped();
+        handler.invoke(proxy, GraphDataSnapshotManager.class.getMethod("clear", new Class<?>[] {}), null);
+        verify(graph).isShutdown();
         verify(graph).isRunning();
         verify(graph).clear();
     }
     
     @Test(expected=RuntimeException.class)
     public void testInvoke_clear_Stopped() throws Throwable {
-        when(graph.isStopped()).thenReturn(true);
-        handler.invoke(proxy, GraphSupervisor.class.getMethod("clear", new Class<?>[] {}), null);
-        verify(graph).isStopped();
+        when(graph.isShutdown()).thenReturn(true);
+        handler.invoke(proxy, GraphDataSnapshotManager.class.getMethod("clear", new Class<?>[] {}), null);
+        verify(graph).isShutdown();
         verify(graph).clear();
     }
     
     @Test
-    public void testInvoke_start() throws Throwable {
-        handler.invoke(proxy, GraphSupervisor.class.getMethod("start", new Class<?>[] {}), null);
-        verify(graph).start();
+    public void testInvoke_run() throws Throwable {
+        handler.invoke(proxy, GraphSupervisor.class.getMethod("run", new Class<?>[] {}), null);
+        verify(graph).run();
     }
     
     @Test(expected=RuntimeException.class)
-    public void testInvoke_start_AlreadyStarted() throws Throwable {
+    public void testInvoke_run_AlreadyStarted() throws Throwable {
         when(graph.isRunning()).thenReturn(true);
-        handler.invoke(proxy, GraphSupervisor.class.getMethod("start", new Class<?>[] {}), null);
+        handler.invoke(proxy, GraphSupervisor.class.getMethod("run", new Class<?>[] {}), null);
         verify(graph).isRunning();
     }
     
     @Test
-    public void testInvoke_stop() throws Throwable {
-        when(graph.isStopped()).thenReturn(false);
+    public void testInvoke_shutdown() throws Throwable {
+        when(graph.isShutdown()).thenReturn(false);
         when(graph.isRunning()).thenReturn(true);
-        handler.invoke(proxy, GraphSupervisor.class.getMethod("stop", new Class<?>[] {}), null);
-        verify(graph).isStopped();
+        handler.invoke(proxy, GraphSupervisor.class.getMethod("shutdown", new Class<?>[] {}), null);
+        verify(graph).isShutdown();
         verify(graph).isRunning();
-        verify(graph).stop();
+        verify(graph).shutdown();
     }
     
     @Test(expected=RuntimeException.class)
-    public void testInvoke_stop_AlreadyStopped() throws Throwable {
-        when(graph.isStopped()).thenReturn(true);
-        handler.invoke(proxy, GraphSupervisor.class.getMethod("stop", new Class<?>[] {}), null);
+    public void testInvoke_shutdown_AlreadyStopped() throws Throwable {
+        when(graph.isShutdown()).thenReturn(true);
+        handler.invoke(proxy, GraphSupervisor.class.getMethod("shutdown", new Class<?>[] {}), null);
     }
     
     @Test(expected=RuntimeException.class)
-    public void testInvoke_stop_NotRunning() throws Throwable {
-        when(graph.isStopped()).thenReturn(false);
+    public void testInvoke_shutdown_NotRunning() throws Throwable {
+        when(graph.isShutdown()).thenReturn(false);
         when(graph.isRunning()).thenReturn(false);
-        handler.invoke(proxy, GraphSupervisor.class.getMethod("stop", new Class<?>[] {}), null);
+        handler.invoke(proxy, GraphSupervisor.class.getMethod("shutdown", new Class<?>[] {}), null);
     }
     
     @Test
@@ -140,9 +163,9 @@ public class GraphInvocationHandlerTest {
     }
     
     @Test
-    public void testInvoke_isStopped() throws Throwable {
-        handler.invoke(proxy, GraphSupervisor.class.getMethod("isStopped", new Class<?>[] {}), null);
-        verify(graph).isStopped();
+    public void testInvoke_isShutdown() throws Throwable {
+        handler.invoke(proxy, GraphSupervisor.class.getMethod("isShutdown", new Class<?>[] {}), null);
+        verify(graph).isShutdown();
     }
     
     @Test

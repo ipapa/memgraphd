@@ -3,6 +3,8 @@ package org.memgraphd;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
+import org.memgraphd.data.GraphDataSnapshotManager;
+
 public class GraphInvocationHandler implements InvocationHandler {
     private final Graph graph;
   
@@ -14,13 +16,17 @@ public class GraphInvocationHandler implements InvocationHandler {
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
       
         if(method.getDeclaringClass() == GraphSupervisor.class
-                || method.getDeclaringClass() == GraphLifecycleListenerManager.class) {
+                || method.getDeclaringClass() == GraphLifecycleListenerManager.class
+                || method.getDeclaringClass() == GraphDataSnapshotManager.class) {
             
-            if(method.getName().equals("start")) {
-                onStart();
+            if(method.getName().equals("initialize")) {
+                onInitialize();
             }
-            else if(method.getName().equals("stop")) {
-                onStop();
+            else if(method.getName().equals("run")) {
+                onRun();
+            }
+            else if(method.getName().equals("shutdown")) {
+                onShutdown();
             }
             else if(method.getName().equals("clear")) {
                 onClear();
@@ -48,14 +54,23 @@ public class GraphInvocationHandler implements InvocationHandler {
         }
     }
     
-    private void onStart() {
+    private void onInitialize() {
+        if(graph.isRunning()) {
+            throw new RuntimeException("memgraphd is already running");
+        }
+        if(graph.isShutdown()) {
+            throw new RuntimeException("memgraphd is shut down");
+        }
+    }
+    
+    private void onRun() {
         if(graph.isRunning()) {
             throw new RuntimeException("memgraphd is already running");
         }
     }
     
-    private void onStop() {
-        if(graph.isStopped()) {
+    private void onShutdown() {
+        if(graph.isShutdown()) {
             throw new RuntimeException("memgraphd is already stopped.");
         }
         if(!graph.isRunning()) {
@@ -64,8 +79,8 @@ public class GraphInvocationHandler implements InvocationHandler {
     }
     
     private void onClear() {
-        if(graph.isStopped()) {
-            throw new RuntimeException("memgraphd is stopped.");
+        if(graph.isShutdown()) {
+            throw new RuntimeException("memgraphd is shut down.");
         }
         if(!graph.isRunning()) {
             throw new RuntimeException("memgraphd is not running");

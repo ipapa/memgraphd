@@ -71,12 +71,6 @@ public class SequenceTest {
     }
 
     @Test
-    public void testOnClearAll() {
-        sequence.onClearAll();
-        assertSame(sequence, Sequence.valueOf(1));
-    }
-
-    @Test
     public void testOnShutdown() {
         sequence.onShutdown();
         assertNotSame(sequence, Sequence.valueOf(1));

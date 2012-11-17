@@ -2,11 +2,17 @@ package org.memgraphd;
 
 import java.lang.reflect.Proxy;
 
+import org.memgraphd.bookkeeper.BookKeeper;
+import org.memgraphd.bookkeeper.HSQLBookKeeper;
 import org.memgraphd.data.Data;
 import org.memgraphd.data.GraphData;
+import org.memgraphd.data.GraphDataSnapshotManager;
+import org.memgraphd.data.GraphDataSnapshotManagerImpl;
 import org.memgraphd.data.event.GraphDataEventListenerManagerImpl;
 import org.memgraphd.data.relationship.DataMatchmaker;
 import org.memgraphd.data.relationship.DataMatchmakerImpl;
+import org.memgraphd.decision.Decision;
+import org.memgraphd.decision.DecisionMaker;
 import org.memgraphd.decision.Sequence;
 import org.memgraphd.decision.SingleDecisionMaker;
 import org.memgraphd.exception.GraphException;
@@ -29,40 +35,56 @@ import org.memgraphd.operation.GraphWriterImpl;
 /**
  * This is the default implementation of {@link Graph} that brings all
  * functionality together. You need to instantiate and than
- * {@link GraphImpl#start()} the {@link Graph} before you can start using it to
+ * {@link GraphImpl#run()} the {@link Graph} before you can start using it to
  * store and retrieve data.
  * 
  * @author Ilirjan Papa
  * @since August 17, 2012
  * 
  */
-public final class GraphImpl extends GraphSupervisorImpl implements Graph {
-
+public final class GraphImpl implements Graph {
+    
     private final GraphMappings mappings;
     private final GraphFilter filter;
     private final GraphReader reader;
     private final GraphWriter writer;
     private final GraphSeeker seeker;
-
+    
     private final MemoryOperations memoryAccess;
     private final DataMatchmaker dataMatchmaker;
-    private final MemoryStats memoryStats;
-
+    private final GraphSupervisor supervisor;
+    private final DecisionMaker decisionMaker;
+    private final BookKeeper bookKeeper;
+    
     private GraphImpl(int capacity) {
         MemoryManager memoryManager = new MemoryManagerImpl(capacity);
         this.memoryAccess = new MemoryAccess(memoryManager);
         this.mappings = new GraphMappingsImpl();
-        this.memoryStats = (MemoryStats) memoryManager;
+
         this.seeker = new GraphSeekerImpl(memoryAccess, mappings);
         this.reader = new GraphReaderImpl(memoryAccess, seeker);
         this.dataMatchmaker = new DataMatchmakerImpl(memoryAccess, seeker);
-
-        SingleDecisionMaker decisionMaker = new SingleDecisionMaker();
-        register(decisionMaker);
-
+        
+        this.bookKeeper = new HSQLBookKeeper();
+        this.decisionMaker = new SingleDecisionMaker(bookKeeper);
+        
         this.writer = new GraphWriterImpl(memoryAccess, decisionMaker,
                 new GraphDataEventListenerManagerImpl(), mappings, seeker, dataMatchmaker);
         this.filter = new GraphFilterImpl(memoryAccess, reader);
+        
+        GraphDataSnapshotManager snapshotManager = new GraphDataSnapshotManagerImpl(reader, writer, mappings, decisionMaker);
+        this.supervisor = new GraphSupervisorImpl(snapshotManager, (MemoryStats) memoryManager);
+    }
+
+    private static final Graph createProxy(Graph liveGraph) {
+        return (Graph) Proxy.newProxyInstance(GraphImpl.class.getClassLoader(),
+                new Class[] { Graph.class }, new GraphInvocationHandler(liveGraph));
+    }
+
+    public static final Graph build(int capacity) throws GraphException {
+        Graph graph = createProxy(new GraphImpl(capacity));
+        graph.initialize();
+        return graph;
     }
 
     /**
@@ -128,6 +150,14 @@ public final class GraphImpl extends GraphSupervisorImpl implements Graph {
     public MemoryReference[] write(Data[] data) throws GraphException {
         return writer.write(data);
     }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public MemoryReference write(Decision decision) throws GraphException {
+        return writer.write(decision);
+    }
 
     /**
      * {@inheritDoc}
@@ -148,11 +178,18 @@ public final class GraphImpl extends GraphSupervisorImpl implements Graph {
     /**
      * {@inheritDoc}
      * 
-     * @throws GraphException
      */
     @Override
     public void delete(String id) throws GraphException {
         writer.delete(id);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void delete(Decision decision) throws GraphException {
+        writer.delete(decision);
     }
 
     /**
@@ -183,35 +220,121 @@ public final class GraphImpl extends GraphSupervisorImpl implements Graph {
      * {@inheritDoc}
      */
     @Override
-    public final synchronized void clear() {
-        LOGGER.info("Wiping out all graph data.");
-        for (MemoryReference ref : mappings.getAllMemoryReferences()) {
-            GraphData gData = readReference(ref);
-            try {
-                LOGGER.info(String.format("Deleting graph data id=%s", gData.getData().getId()));
-                delete(gData);
-            } catch (GraphException e) {
-                LOGGER.error(
-                        String.format("Failed to delete graph data id=%s", gData.getData().getId()),
-                        e);
-            }
+    public void run() throws GraphException {
+        if(!bookKeeper.isBookOpen()) {
+            bookKeeper.openBook();
         }
-
-        notifyOnClearAll();
-
+        supervisor.run();
     }
     
-    public static final Graph build(int capacity) {
-        return createProxy(new GraphImpl(capacity));
-    }
-
-    private static final Graph createProxy(Graph liveGraph) {
-        return (Graph) Proxy.newProxyInstance(GraphImpl.class.getClassLoader(),
-                new Class[] { Graph.class }, new GraphInvocationHandler(liveGraph));
-    }
-    
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    protected final MemoryStats getMemoryStats() {
-        return memoryStats;
+    public void shutdown() throws GraphException {
+        if(bookKeeper.isBookOpen()) {
+            bookKeeper.closeBook();
+        }
+        supervisor.shutdown();
     }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isInitialized() {
+        return supervisor.isInitialized();
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isRunning() {
+        return supervisor.isRunning();
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isShutdown() {
+        return supervisor.isShutdown();
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isEmpty() {
+        return supervisor.isEmpty();
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void register(GraphLifecycleHandler handler) {
+        supervisor.register(handler);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void unregister(GraphLifecycleHandler handler) {
+        supervisor.unregister(handler);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int capacity() {
+        return supervisor.capacity();
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int occupied() {
+        return supervisor.occupied();
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int available() {
+        return supervisor.available();
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int recycled() {
+        return supervisor.recycled();
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void initialize() throws GraphException {
+        if(!bookKeeper.isBookOpen()) {
+            bookKeeper.openBook();
+        }
+        supervisor.initialize();
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void clear() throws GraphException {
+        supervisor.clear();
+    }
+
 }

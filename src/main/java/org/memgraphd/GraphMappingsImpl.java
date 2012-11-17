@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.log4j.Logger;
 import org.memgraphd.data.GraphData;
 import org.memgraphd.decision.Sequence;
 import org.memgraphd.memory.MemoryReference;
@@ -16,6 +17,8 @@ import org.memgraphd.memory.MemoryReference;
  * @since July 27, 2012
  */
 public final class GraphMappingsImpl implements GraphMappings {
+    private static final Logger LOGGER = Logger.getLogger(GraphMappingsImpl.class);
+    
     private final Map<String, MemoryReference> idMap;
     private final Map<Sequence, MemoryReference> seqMap;
     
@@ -45,6 +48,7 @@ public final class GraphMappingsImpl implements GraphMappings {
      */
     @Override
     public void put(String id, MemoryReference ref) {
+        LOGGER.info(String.format("PUT ID: %s -> %d", id, ref.id()));
         idMap.put(id, ref);
     }
     
@@ -69,6 +73,7 @@ public final class GraphMappingsImpl implements GraphMappings {
      */
     @Override
     public void put(Sequence sequence, MemoryReference ref) {
+        LOGGER.info(String.format("PUT SEQ: %d -> %d", sequence.number(), ref.id()));
         seqMap.put(sequence, ref);
     }
     
@@ -77,6 +82,7 @@ public final class GraphMappingsImpl implements GraphMappings {
      */
     @Override
     public void delete(String id) {
+        LOGGER.info(String.format("DELETE ID: id=%s", id));
         idMap.remove(id);
     }
 
@@ -85,6 +91,7 @@ public final class GraphMappingsImpl implements GraphMappings {
      */
     @Override
     public void delete(Sequence seq) {
+        LOGGER.info(String.format("Mappings DELETE SEQ: number=%s", seq.number()));
         seqMap.remove(seq);
     }
     

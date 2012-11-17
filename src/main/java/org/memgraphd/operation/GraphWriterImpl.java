@@ -50,11 +50,113 @@ public class GraphWriterImpl extends AbstractGraphAccess implements GraphWriter 
         validate(data);
         
         // 2. Send data to decision to get a sequence assigned to it
-        Decision decision = decisionMaker.decideWriteRequest(data);
+        Decision decision = decisionMaker.decidePutRequest(data);
         
+        return write(decision);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public MemoryReference[] write(Data[] data) throws GraphException {
+        MemoryReference[] result = new MemoryReference[data.length];
+        for(int i=0; i < data.length; i++) {
+            result[i] = write(data[i]);
+        }
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public MemoryReference write(Decision decision) {
         // 3. Instantiate the graph data wrapper for this data.
-        GraphData newData = new GraphDataImpl(decision);
+        GraphDataImpl newData = new GraphDataImpl(decision);
         
+        // 4. Update data snapshot
+        MemoryReference ref = insertUpdateState(decision.getData(), newData);
+        
+        // 5. Set the memory reference assigned to data on write (create|update)
+        newData.setRefence(ref);
+        
+        // 6. Update sequence mappings.
+        mappings.put(decision.getSequence(), ref);
+        
+        LOGGER.info(String.format("Wrote data id=%s at memory reference=%d", decision.getData().getId(), ref.id()));
+        
+        return ref;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void delete(GraphData gData) throws GraphException {
+        Data data = gData.getData();
+        
+        validate(data);
+        
+        Decision decision = decisionMaker.decideDeleteRequest(data);
+        
+        deleteState(gData, decision);
+ 
+    }
+
+    private void deleteState(GraphData gData, Decision decision) {
+        if(decision.getData() instanceof DataRelationship) {
+            DataRelationship relationships = (DataRelationship) decision.getData();         
+            // separate existing relationships
+            dataMatchmaker.separate(relationships);
+        }
+        else { // it might be simple Data and we need to clean up lingering references.
+            getMemoryAccess().dereferenceAll(gData.getReference());
+        }
+        // free the actual memory
+        getMemoryAccess().free(gData.getReference());
+        
+        // clear old mappings
+        mappings.delete(decision.getDataId());
+        mappings.delete(gData.getSequence());
+        
+        LOGGER.info(String.format("Deleting data id=%s at memory reference=%d", decision.getDataId(), gData.getReference().id()));
+        
+        // alert listeners
+        eventManager.onDelete(gData);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void delete(GraphData[] data) throws GraphException {
+        for(GraphData sd : data) {
+            delete(sd);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void delete(String dataId) throws GraphException {
+        MemoryReference ref = seeker.seekById(dataId);
+        if(ref == null) {
+            throw new GraphException(String.format("Data does not exist for id=%s", dataId));    
+        }
+        delete(getMemoryAccess().read(ref));
+    }
+
+    @Override
+    public void delete(Decision decision) throws GraphException {
+        MemoryReference ref = seeker.seekById(decision.getDataId());
+        if(ref == null) {
+            throw new GraphException(String.format("Data does not exist for id=%s", decision.getDataId()));    
+        }
+        deleteState(getMemoryAccess().read(ref), decision);
+    }
+
+    private MemoryReference insertUpdateState(Data data, GraphData newData) {
         // 4. Is it an update or a new write request?
         // 4.1. Update relationships for data affected.
         // 4.2. Notify listeners about this change.
@@ -71,31 +173,7 @@ public class GraphWriterImpl extends AbstractGraphAccess implements GraphWriter 
             buildDataRelationships(newData);
             eventManager.onCreate(newData);
         }
-        
-        // 5. Set the memory reference assigned to data on write (create|update)
-        setMemoryReference(ref, newData);
-        
-        // 6. Update sequence mappings.
-        mappings.put(decision.getSequence(), ref);
-        
-        LOGGER.info(String.format("Wrote data id=%s at memory reference=%d", data.getId(), ref.id()));
         return ref;
-    }
-    
-    private void setMemoryReference(MemoryReference ref, GraphData data) {
-        ((GraphDataImpl)data).setRefence(ref);
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public MemoryReference[] write(Data[] data) throws GraphException {
-        MemoryReference[] result = new MemoryReference[data.length];
-        for(int i=0; i < data.length; i++) {
-            result[i] = write(data[i]);
-        }
-        return result;
     }
     
     private void buildDataRelationships(GraphData data) {
@@ -136,53 +214,6 @@ public class GraphWriterImpl extends AbstractGraphAccess implements GraphWriter 
                 throw new GraphException("Data validation failed.");
             }
         }
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void delete(GraphData gData) throws GraphException {
-        Data data = gData.getData();
-        if(data instanceof DataRelationship) {
-            DataRelationship relationships = (DataRelationship) data;         
-            // separate existing relationships
-            dataMatchmaker.separate(relationships);
-        }
-        else { // it might be simple Data and we need to clean up lingering references.
-            getMemoryAccess().dereferenceAll(gData.getReference());
-        }
-        // free the actual memory
-        getMemoryAccess().free(gData.getReference());
-        
-        // clear old mappings
-        mappings.delete(data.getId());
-        mappings.delete(gData.getSequence());
-        
-        // alert listeners
-        eventManager.onDelete(gData);
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void delete(GraphData[] data) throws GraphException {
-        for(GraphData sd : data) {
-            delete(sd);
-        }
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void delete(String dataId) throws GraphException {
-        MemoryReference ref = seeker.seekById(dataId);
-        if(ref == null) {
-            throw new GraphException(String.format("Data does not exist for id=%s", dataId));    
-        }
-        delete(getMemoryAccess().read(ref));
     }
 
 }

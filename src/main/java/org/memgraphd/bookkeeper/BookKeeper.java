@@ -34,6 +34,11 @@ public interface BookKeeper {
     void wipe(Decision decision);
     
     /**
+     * It will wipe off <b>ALL</b> pre-recorded decisons. This action cannot be undone.
+     */
+    void wipeAll();
+    
+    /**
      * Read a range of decisions from the book starting at start and ending at end sequence.
      * @param start {@link Sequence}
      * @param end {@link Sequence}
