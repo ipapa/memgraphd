@@ -14,5 +14,6 @@ import org.memgraphd.operation.GraphWriter;
  *
  */
 public interface Graph extends GraphReader, GraphWriter, GraphFilter, GraphSupervisor {
-  
+    
+    String getName();
 }

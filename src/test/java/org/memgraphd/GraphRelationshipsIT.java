@@ -49,7 +49,7 @@ public class GraphRelationshipsIT {
         movie1 = new Movie("Movie-1", "Gone with the wind", NETWORK_ID, new DateTime(), new DateTime());
         movie2 = new Movie("Movie-2", "Batman", NETWORK_ID, new DateTime(), new DateTime());
         
-        graph =  GraphImpl.build(CAPACITY);
+        graph =  GraphImpl.build(new GraphConfigDefaults("myGraph", CAPACITY));
         
         graph.run();
     }

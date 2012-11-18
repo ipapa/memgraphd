@@ -30,7 +30,7 @@ public class GraphLifecycleIT {
  
     @Before
     public void setUp() throws Exception {
-        graph =  GraphImpl.build(CAPACITY);
+        graph =  GraphImpl.build(new GraphConfigDefaults("someGraph", CAPACITY));
         data = new DataImpl(String.valueOf(1), new DateTime(), new DateTime());
     }
     

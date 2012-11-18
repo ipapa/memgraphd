@@ -13,6 +13,7 @@ import static org.junit.Assert.assertTrue;
 
 public class GraphDataSnapshotManagerIT {
     private static Graph graph;
+    private static GraphConfig config = new GraphConfigDefaults("someGraph", 5);
     private static Data data1 = new DataImpl("id-1", DateTime.now(), DateTime.now());
     private static Data data2 = new DataImpl("id-2", DateTime.now(), DateTime.now());
     private static Data data3 = new DataImpl("id-3", DateTime.now(), DateTime.now());
@@ -21,7 +22,7 @@ public class GraphDataSnapshotManagerIT {
 
     @Test
     public void testGraphInitializedAndEmpty() throws GraphException {
-        graph = GraphImpl.build(5);
+        graph = GraphImpl.build(config);
         assertTrue(graph.isInitialized());
         assertFalse(graph.isRunning());
         assertFalse(graph.isShutdown());
@@ -58,7 +59,6 @@ public class GraphDataSnapshotManagerIT {
     
     @Test
     public void testGraphRestart() throws GraphException {
-//        graph = GraphImpl.build(5);
         graph.run();
         chekGraphStats();
         readDataFromGraph();

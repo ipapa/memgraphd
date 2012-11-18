@@ -5,6 +5,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.memgraphd.GraphConfig;
 import org.memgraphd.data.Data;
 import org.memgraphd.data.DataImpl;
 import org.memgraphd.decision.Decision;
@@ -31,7 +32,7 @@ public class AbstractBookKeeperTest {
     
     @Before
     public void setUp() throws Exception {
-        keeper =  new HSQLBookKeeper();
+        keeper =  new HSQLBookKeeper(GraphConfig.DEFAULT_DB_NAME, GraphConfig.DEFAULT_DB_PATH);
         keeper.wipeAll();
         data = new DataImpl("someId", new DateTime(), new DateTime());
         when(decision.getData()).thenReturn(data);

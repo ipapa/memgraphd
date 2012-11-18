@@ -5,12 +5,16 @@ import java.lang.reflect.Constructor;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.memgraphd.bookkeeper.BookKeeper;
 import org.memgraphd.data.Data;
 import org.memgraphd.data.GraphData;
 import org.memgraphd.data.GraphDataSnapshotManager;
 import org.memgraphd.data.relationship.DataMatchmaker;
+import org.memgraphd.decision.DecisionMaker;
 import org.memgraphd.decision.Sequence;
 import org.memgraphd.exception.GraphException;
+import org.memgraphd.memory.MemoryBlock;
+import org.memgraphd.memory.MemoryBlockResolver;
 import org.memgraphd.memory.MemoryReference;
 import org.memgraphd.memory.MemoryStats;
 import org.memgraphd.memory.operation.MemoryOperations;
@@ -72,13 +76,38 @@ public class GraphImplTest {
     @Mock
     private GraphDataSnapshotManager snapshotManager;
     
+    @Mock
+    private GraphConfig config; 
+    
+    @Mock
+    private MemoryBlockResolver memoryBlockResolver;
+    
+    @Mock
+    private DecisionMaker decisionMaker;
+    
+    @Mock
+    private BookKeeper bookKeeper;
+    
     @Before
     public void setUp() throws Exception {
+        when(config.getName()).thenReturn("someName");
+        when(config.getCapacity()).thenReturn(10);
+        when(config.getBookKeeperDatabaseName()).thenReturn("dbName");
+        when(config.getBookKeeperDatabasePath()).thenReturn("/tmp/book/");
+        when(config.getMemoryBlockResolver()).thenReturn(memoryBlockResolver);
+        when(config.getBookKeeper()).thenReturn(bookKeeper);
+        when(config.getDecisionMaker()).thenReturn(decisionMaker);
+        
+        when(memoryBlockResolver.blocks()).thenReturn(new MemoryBlock[] {});
+        when(decisionMaker.latestDecision()).thenReturn(Sequence.valueOf(10));
+        
         Constructor<?>[] constructors = GraphImpl.class.getDeclaredConstructors();
         constructors[0].setAccessible(true);
-        graph = (GraphImpl) constructors[0].newInstance(Integer.valueOf(1));
-        supervisor = new GraphSupervisorImpl(snapshotManager, memoryStats);
+        graph = (GraphImpl) constructors[0].newInstance(config);
         
+        supervisor = new GraphSupervisorImpl(snapshotManager, memoryStats);
+        supervisor = new GraphSupervisorImpl(snapshotManager, memoryStats);
+       
         ReflectionTestUtils.setField(graph, "writer", writer);
         ReflectionTestUtils.setField(graph, "reader", reader);
         ReflectionTestUtils.setField(graph, "filter", filter);

@@ -26,7 +26,7 @@ public class GraphIT {
     @Before
     public void setUp() throws Exception {
         
-        graph =  GraphImpl.build(CAPACITY);
+        graph =  GraphImpl.build(new GraphConfigDefaults("someGraph", CAPACITY));
         
         graph.run();
     }

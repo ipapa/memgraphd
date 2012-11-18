@@ -2,8 +2,6 @@ package org.memgraphd;
 
 import java.lang.reflect.Proxy;
 
-import org.memgraphd.bookkeeper.BookKeeper;
-import org.memgraphd.bookkeeper.HSQLBookKeeper;
 import org.memgraphd.data.Data;
 import org.memgraphd.data.GraphData;
 import org.memgraphd.data.GraphDataSnapshotManager;
@@ -12,9 +10,7 @@ import org.memgraphd.data.event.GraphDataEventListenerManagerImpl;
 import org.memgraphd.data.relationship.DataMatchmaker;
 import org.memgraphd.data.relationship.DataMatchmakerImpl;
 import org.memgraphd.decision.Decision;
-import org.memgraphd.decision.DecisionMaker;
 import org.memgraphd.decision.Sequence;
-import org.memgraphd.decision.SingleDecisionMaker;
 import org.memgraphd.exception.GraphException;
 import org.memgraphd.memory.MemoryAccess;
 import org.memgraphd.memory.MemoryBlock;
@@ -44,6 +40,7 @@ import org.memgraphd.operation.GraphWriterImpl;
  */
 public final class GraphImpl implements Graph {
     
+    private final String name;
     private final GraphMappings mappings;
     private final GraphFilter filter;
     private final GraphReader reader;
@@ -53,11 +50,12 @@ public final class GraphImpl implements Graph {
     private final MemoryOperations memoryAccess;
     private final DataMatchmaker dataMatchmaker;
     private final GraphSupervisor supervisor;
-    private final DecisionMaker decisionMaker;
-    private final BookKeeper bookKeeper;
+    private final GraphConfig config;
     
-    private GraphImpl(int capacity) {
-        MemoryManager memoryManager = new MemoryManagerImpl(capacity);
+    private GraphImpl(GraphConfig config) {
+        this.config = config;
+        this.name = config.getName();
+        MemoryManager memoryManager = new MemoryManagerImpl(config.getMemoryBlockResolver());
         this.memoryAccess = new MemoryAccess(memoryManager);
         this.mappings = new GraphMappingsImpl();
 
@@ -65,14 +63,11 @@ public final class GraphImpl implements Graph {
         this.reader = new GraphReaderImpl(memoryAccess, seeker);
         this.dataMatchmaker = new DataMatchmakerImpl(memoryAccess, seeker);
         
-        this.bookKeeper = new HSQLBookKeeper();
-        this.decisionMaker = new SingleDecisionMaker(bookKeeper);
-        
-        this.writer = new GraphWriterImpl(memoryAccess, decisionMaker,
+        this.writer = new GraphWriterImpl(memoryAccess, config.getDecisionMaker(),
                 new GraphDataEventListenerManagerImpl(), mappings, seeker, dataMatchmaker);
         this.filter = new GraphFilterImpl(memoryAccess, reader);
         
-        GraphDataSnapshotManager snapshotManager = new GraphDataSnapshotManagerImpl(reader, writer, mappings, decisionMaker);
+        GraphDataSnapshotManager snapshotManager = new GraphDataSnapshotManagerImpl(reader, writer, mappings, config.getDecisionMaker());
         this.supervisor = new GraphSupervisorImpl(snapshotManager, (MemoryStats) memoryManager);
     }
 
@@ -81,12 +76,19 @@ public final class GraphImpl implements Graph {
                 new Class[] { Graph.class }, new GraphInvocationHandler(liveGraph));
     }
 
-    public static final Graph build(int capacity) throws GraphException {
-        Graph graph = createProxy(new GraphImpl(capacity));
+    public static final Graph build(GraphConfig config) throws GraphException {
+        Graph graph = createProxy(new GraphImpl(config));
         graph.initialize();
         return graph;
     }
-
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final String getName() {
+        return name;
+    }
     /**
      * {@inheritDoc}
      */
@@ -221,8 +223,8 @@ public final class GraphImpl implements Graph {
      */
     @Override
     public void run() throws GraphException {
-        if(!bookKeeper.isBookOpen()) {
-            bookKeeper.openBook();
+        if(!config.getBookKeeper().isBookOpen()) {
+            config.getBookKeeper().openBook();
         }
         supervisor.run();
     }
@@ -232,8 +234,8 @@ public final class GraphImpl implements Graph {
      */
     @Override
     public void shutdown() throws GraphException {
-        if(bookKeeper.isBookOpen()) {
-            bookKeeper.closeBook();
+        if(config.getBookKeeper().isBookOpen()) {
+            config.getBookKeeper().closeBook();
         }
         supervisor.shutdown();
     }
@@ -323,8 +325,8 @@ public final class GraphImpl implements Graph {
      */
     @Override
     public void initialize() throws GraphException {
-        if(!bookKeeper.isBookOpen()) {
-            bookKeeper.openBook();
+        if(!config.getBookKeeper().isBookOpen()) {
+            config.getBookKeeper().openBook();
         }
         supervisor.initialize();
     }
