@@ -281,6 +281,50 @@ public class GraphRelationshipsIT {
     }
     
     @Test
+    public void testDeleteReference() throws GraphException, SQLException,
+            InterruptedException {
+
+        graph.write(video);
+        graph.write(episode);
+   
+        graph.delete(VIDEO_ID);
+        
+        assertNull(graph.readId(VIDEO_ID));
+
+        GraphData graphEpisode = graph.readId(episode.getId());
+        assertNotNull(graphEpisode);
+        assertNull(graphEpisode.getRelatedData().getLinks());
+        assertNull(graphEpisode.getRelatedData().getReferences());
+    }
+    
+    @Test
+    public void testWriteDeleteWrite() throws GraphException, SQLException,
+            InterruptedException {
+
+        graph.write(video);
+        graph.write(episode);
+   
+        graph.delete(VIDEO_ID);
+        
+        assertNull(graph.readId(VIDEO_ID));
+
+        GraphData graphEpisode = graph.readId(episode.getId());
+        assertNotNull(graphEpisode);
+        assertNull(graphEpisode.getRelatedData().getLinks());
+        assertNull(graphEpisode.getRelatedData().getReferences());
+        
+        // write video again
+        graph.write(video);
+        
+        GraphData videoGraph = graph.readId(video.getId());
+        assertSame(episode, videoGraph.getRelatedData().getLinks().oneToOne(TvEpisode.class));
+        assertNull(videoGraph.getRelatedData().getReferences());
+        
+        GraphData episodeGraph = graph.readId(episode.getId());
+        assertSame(video, episodeGraph.getRelatedData().getReferences().oneToOne(OnlineVideo.class));
+    }
+    
+    @Test
     public void testDeleteLinkInTheMiddleOfGraph() throws GraphException, SQLException,
             InterruptedException {
 

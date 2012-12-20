@@ -11,7 +11,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import static org.junit.Assert.assertNotNull;
 
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -43,9 +42,9 @@ public class GraphInvocationHandlerTest {
         verify(graph).isRunning();
     }
     
-    @Test(expected=RuntimeException.class)
-    public void testInvokeWriteData_notRunning() throws Throwable {
-        when(graph.isRunning()).thenReturn(false);
+    @Test
+    public void testInvokeWriteData_Running() throws Throwable {
+        when(graph.isRunning()).thenReturn(true);
         Data data = mock(Data.class);
         handler.invoke(proxy, Graph.class.getMethod("write", new Class<?>[] { Data.class }), new Object[] { data });
         verify(graph).isRunning();
@@ -78,8 +77,6 @@ public class GraphInvocationHandlerTest {
     public void testInvoke_initialize_Running() throws Throwable {
         when(graph.isRunning()).thenReturn(true);
         handler.invoke(proxy, GraphDataSnapshotManager.class.getMethod("initialize", new Class<?>[] {}), null);
-        verify(graph).isRunning();
-        verify(graph).initialize();
     }
     
     @Test(expected=RuntimeException.class)
@@ -87,9 +84,6 @@ public class GraphInvocationHandlerTest {
         when(graph.isRunning()).thenReturn(false);
         when(graph.isShutdown()).thenReturn(true);
         handler.invoke(proxy, GraphDataSnapshotManager.class.getMethod("initialize", new Class<?>[] {}), null);
-        verify(graph).isRunning();
-        verify(graph).isShutdown();
-        verify(graph).initialize();
     }
     
     @Test
@@ -188,25 +182,4 @@ public class GraphInvocationHandlerTest {
         verify(graph).unregister(arg);
     }
     
-    @Test(expected=Throwable.class)
-    public void testInvoke_throwExceptionWithNoCause() throws Throwable {
-        GraphInvocationHandler newHandler = spy(handler);
-        Throwable exception = mock(Throwable.class);
-        when(exception.getCause()).thenReturn(null);
-        when(newHandler.invoke(proxy, GraphSupervisor.class.getMethod("isInitialized", new Class<?>[] {}), null)).thenThrow(exception);
-        
-        graph.isInitialized();
-        
-        verify(newHandler).invoke(proxy, GraphSupervisor.class.getMethod("isInitialized", new Class<?>[] {}), null);
-    }
-    
-    @Test(expected=RuntimeException.class)
-    public void testInvoke_throwExceptionWithCause() throws Throwable {
-        when(graph.isInitialized()).thenThrow(new RuntimeException());
-        
-        graph.isInitialized();
-        
-        verify(graph).isInitialized();
-    }
-
 }

@@ -5,7 +5,7 @@ import org.memgraphd.data.Data;
 import org.memgraphd.data.GraphData;
 /**
  * This interface should be implemented by all interested parties that want to listen in
- * for Graph data updates.
+ * for Graph data updates. You also need to register with {@link Graph#register(org.memgraphd.GraphLifecycleHandler)}.
  * 
  * @author Ilirjan Papa
  * @since September 12, 2012

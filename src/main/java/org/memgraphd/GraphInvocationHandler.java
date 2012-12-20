@@ -33,11 +33,13 @@ public class GraphInvocationHandler implements InvocationHandler {
             }
             return invokeGraph(method, args);
         }
-        authorize();
+        if(!graph.isRunning()) {
+            throw new RuntimeException("Request cannot be handled. memgraphd is stopped.");
+        }
         return invokeGraph(method, args);
     }
 
-    private Object invokeGraph(Method method, Object[] args) throws Throwable {
+    protected Object invokeGraph(Method method, Object[] args) throws Throwable {
         try {
             return method.invoke(graph, args);
         } catch (Exception e) {
@@ -45,12 +47,6 @@ public class GraphInvocationHandler implements InvocationHandler {
                 throw e.getCause();
             }
             throw e;
-        }
-    }
-    
-    private void authorize() {
-        if(!graph.isRunning()) {
-            throw new RuntimeException("Request cannot be handled. memgraphd is stopped.");
         }
     }
     

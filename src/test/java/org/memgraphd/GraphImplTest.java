@@ -2,21 +2,21 @@ package org.memgraphd;
 
 import java.lang.reflect.Constructor;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.memgraphd.bookkeeper.BookKeeper;
 import org.memgraphd.data.Data;
 import org.memgraphd.data.GraphData;
-import org.memgraphd.data.GraphDataSnapshotManager;
 import org.memgraphd.data.relationship.DataMatchmaker;
+import org.memgraphd.decision.Decision;
 import org.memgraphd.decision.DecisionMaker;
 import org.memgraphd.decision.Sequence;
 import org.memgraphd.exception.GraphException;
 import org.memgraphd.memory.MemoryBlock;
 import org.memgraphd.memory.MemoryBlockResolver;
 import org.memgraphd.memory.MemoryReference;
-import org.memgraphd.memory.MemoryStats;
 import org.memgraphd.memory.operation.MemoryOperations;
 import org.memgraphd.operation.GraphFilter;
 import org.memgraphd.operation.GraphReader;
@@ -32,6 +32,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -40,7 +41,8 @@ import static org.mockito.Mockito.when;
 public class GraphImplTest {
     
     private GraphImpl graph;
-
+    
+    @Mock
     private GraphSupervisor supervisor;
     
     @Mock
@@ -65,16 +67,10 @@ public class GraphImplTest {
     private MemoryOperations memoryAccess;
     
     @Mock
-    private MemoryStats memoryStats;
-    
-    @Mock
     private DataMatchmaker dataMatchmaker;
     
     @Mock
     private GraphMappings mappings;
-    
-    @Mock
-    private GraphDataSnapshotManager snapshotManager;
     
     @Mock
     private GraphConfig config; 
@@ -104,9 +100,6 @@ public class GraphImplTest {
         Constructor<?>[] constructors = GraphImpl.class.getDeclaredConstructors();
         constructors[0].setAccessible(true);
         graph = (GraphImpl) constructors[0].newInstance(config);
-        
-        supervisor = new GraphSupervisorImpl(snapshotManager, memoryStats);
-        supervisor = new GraphSupervisorImpl(snapshotManager, memoryStats);
        
         ReflectionTestUtils.setField(graph, "writer", writer);
         ReflectionTestUtils.setField(graph, "reader", reader);
@@ -119,12 +112,28 @@ public class GraphImplTest {
         
         graph.run();
     }
+    
+    @After
+    public void tearDown() throws GraphException {
+        graph.clear();
+        graph.shutdown();
+    }
 
     @Test
     public void testGraphImpl() {
         assertNotNull(graph);
     }
-
+    
+    @Test
+    public void testGraphImpl_build() throws GraphException {
+        assertNotNull(GraphImpl.build(config));
+    }
+    
+    @Test
+    public void testGetName() {
+        assertEquals("someName", graph.getName());
+    }
+    
     @Test
     public void testReadId() {
         when(reader.readId("some id")).thenReturn(gData);
@@ -194,6 +203,16 @@ public class GraphImplTest {
         
         verify(writer).write(arrayOfData);
     }
+    
+    @Test
+    public void testWriteDecision() throws GraphException {
+        Decision dec = mock(Decision.class);
+        when(writer.write(dec)).thenReturn(MemoryReference.valueOf(1));
+        
+        assertEquals(MemoryReference.valueOf(1), graph.write(dec));
+
+        verify(writer).write(dec);
+    }
 
     @Test
     public void testDeleteGraphData() throws GraphException {
@@ -215,6 +234,13 @@ public class GraphImplTest {
     public void testDeleteString() throws GraphException {
         graph.delete("someId");
         verify(writer).delete("someId");
+    }
+    
+    @Test
+    public void testDeleteDecision() throws GraphException {
+        Decision dec = mock(Decision.class);
+        graph.delete(dec);
+        verify(writer).delete(dec);
     }
 
     @Test
@@ -246,56 +272,162 @@ public class GraphImplTest {
         
         verify(filter).filterByRange(Sequence.valueOf(1), Sequence.valueOf(2));
     }
-
+    
+    @Test
+    public void testRegister() throws GraphException {
+        GraphLifecycleHandler handler = mock(GraphLifecycleHandler.class);
+     
+        graph.register(handler);
+        
+        verify(supervisor).register(handler);
+    }
+    
+    @Test
+    public void testUnregister() throws GraphException {
+        GraphLifecycleHandler handler = mock(GraphLifecycleHandler.class);
+     
+        graph.unregister(handler);
+        
+        verify(supervisor).unregister(handler);
+    }
+    
+    @Test
+    public void testIsInitialized() throws GraphException {
+        when(supervisor.isInitialized()).thenReturn(true);
+        
+        assertTrue(graph.isInitialized());
+        
+        verify(supervisor).isInitialized();
+    }
+    
+    @Test
+    public void testInitialize() throws GraphException {
+      
+        graph.initialize();
+        
+        verify(supervisor).initialize();
+    }
+    
+    @Test
+    public void testInitialize_bookClosed() throws GraphException {
+        when(bookKeeper.isBookOpen()).thenReturn(false);
+        
+        graph.initialize();
+        
+        verify(bookKeeper, times(2)).isBookOpen();
+        verify(bookKeeper, times(2)).openBook();
+        verify(supervisor).initialize();
+    }
+    
+    @Test
+    public void testInitialize_bookOpen() throws GraphException {
+        when(bookKeeper.isBookOpen()).thenReturn(true);
+        
+        graph.initialize();
+        
+        verify(bookKeeper, times(2)).isBookOpen();
+        verify(supervisor).initialize();
+    }
+    
+    @Test
+    public void testRun() throws GraphException {
+ 
+        graph.run();
+        
+        verify(supervisor, times(2)).run();
+    }
+    
+    @Test
+    public void testRun_bookClosed() throws GraphException {
+        when(bookKeeper.isBookOpen()).thenReturn(false);
+        
+        graph.run();
+        
+        verify(bookKeeper, times(2)).isBookOpen();
+        verify(bookKeeper, times(2)).openBook();
+        verify(supervisor, times(2)).run();
+    }
+    
+    @Test
+    public void testRun_bookOpen() throws GraphException {
+        when(bookKeeper.isBookOpen()).thenReturn(true);
+        
+        graph.run();
+        
+        verify(bookKeeper, times(2)).isBookOpen();
+        verify(supervisor, times(2)).run();
+    }
+    
+    @Test
+    public void testShutdown() throws GraphException {
+      
+        graph.shutdown();
+        
+        verify(supervisor).shutdown();
+    }
+    
+    @Test
+    public void testShutdown_bookOpen() throws GraphException {
+        when(bookKeeper.isBookOpen()).thenReturn(true);
+        
+        graph.shutdown();
+        
+        verify(bookKeeper, times(2)).isBookOpen();
+        verify(bookKeeper).closeBook();
+        verify(supervisor).shutdown();
+    }
+    
     @Test
     public void testClear() throws GraphException {
  
         graph.clear();
         
-        verify(snapshotManager).clear();
+        verify(supervisor).clear();
     }
 
     @Test
     public void testIsEmpty() throws GraphException {
+        when(supervisor.isEmpty()).thenReturn(true);
+        
         assertTrue(graph.isEmpty());
         
-        when(memoryStats.occupied()).thenReturn(1);
+        when(supervisor.isEmpty()).thenReturn(false);
         
         assertFalse(graph.isEmpty());
         
-        verify(memoryStats, times(2)).occupied();
+        verify(supervisor, times(2)).isEmpty();
     }
 
     @Test
     public void testCapacity() {
-        when(memoryStats.capacity()).thenReturn(1);
+        when(supervisor.capacity()).thenReturn(1);
         assertEquals(1, graph.capacity());
         
-        verify(memoryStats).capacity();
+        verify(supervisor).capacity();
     }
 
     @Test
     public void testOccupied() {
-        when(memoryStats.occupied()).thenReturn(1);
+        when(supervisor.occupied()).thenReturn(1);
         assertEquals(1, graph.occupied());
         
-        verify(memoryStats).occupied();
+        verify(supervisor).occupied();
     }
 
     @Test
     public void testAvailable() {
-        when(memoryStats.available()).thenReturn(1);
+        when(supervisor.available()).thenReturn(1);
         assertEquals(1, graph.available());
         
-        verify(memoryStats).available();
+        verify(supervisor).available();
     }
 
     @Test
     public void testRecycled() {
-        when(memoryStats.recycled()).thenReturn(1);
+        when(supervisor.recycled()).thenReturn(1);
         assertEquals(1, graph.recycled());
         
-        verify(memoryStats).recycled();
+        verify(supervisor).recycled();
     }
 
 }
