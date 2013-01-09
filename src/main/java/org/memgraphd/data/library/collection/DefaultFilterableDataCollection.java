@@ -1,10 +1,11 @@
-package org.memgraphd.data.library;
+package org.memgraphd.data.library.collection;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.memgraphd.data.GraphData;
+import org.memgraphd.data.library.Category;
+import org.memgraphd.data.library.DataPredicate;
 
 /**
  * Default implementation of the {@link FilterableDataCollection} interface.
@@ -14,9 +15,13 @@ import org.memgraphd.data.GraphData;
  */
 public class DefaultFilterableDataCollection implements FilterableDataCollection {
     
-    private final GraphData[] graphData;
+    private final List<GraphData> graphData;
     
-    public DefaultFilterableDataCollection(GraphData[] graphData) {
+    /**
+     * Constructs a new instance.
+     * @param graphData List of {@link GraphData} objects.
+     */
+    public DefaultFilterableDataCollection(List<GraphData> graphData) {
         this.graphData = graphData;
     }
     
@@ -24,29 +29,29 @@ public class DefaultFilterableDataCollection implements FilterableDataCollection
      * {@inheritDoc}
      */
     @Override
-    public final SortableDataCollection filterBy() {
-        return new DefaultSortableDataCollection(Arrays.asList(graphData));
+    public final LibraryDataCollection filterBy() {
+        return new DefaultLibraryDataCollection(graphData);
     }
     
     /**
      * {@inheritDoc}
      */
     @Override
-    public final SortableDataCollection filterBy(Category category) {
+    public final LibraryDataCollection filterBy(Category category) {
         List<GraphData> result = new ArrayList<GraphData>();
         for(GraphData gd : graphData) {
             if(category.getPredicate().apply(gd)) {
                 result.add(gd);
             }
         }
-        return new DefaultSortableDataCollection(result);
+        return new DefaultLibraryDataCollection(result);
     }
     
     /**
      * {@inheritDoc}
      */
     @Override
-    public final SortableDataCollection filterByAll(Category[] categories) {
+    public final LibraryDataCollection filterByAll(Category[] categories) {
         List<GraphData> result = new ArrayList<GraphData>();
         for(GraphData gd : graphData) {
             boolean verdict = true;
@@ -60,14 +65,14 @@ public class DefaultFilterableDataCollection implements FilterableDataCollection
                 result.add(gd);
             }
         }
-        return new DefaultSortableDataCollection(result);
+        return new DefaultLibraryDataCollection(result);
     }
     
     /**
      * {@inheritDoc}
      */
     @Override
-    public final SortableDataCollection filterByAny(Category[] categories) {
+    public final LibraryDataCollection filterByAny(Category[] categories) {
         List<GraphData> result = new ArrayList<GraphData>();
         for(GraphData gd : graphData) {
             boolean verdict = false;
@@ -81,21 +86,21 @@ public class DefaultFilterableDataCollection implements FilterableDataCollection
                 result.add(gd);
             }
         }
-        return new DefaultSortableDataCollection(result);
+        return new DefaultLibraryDataCollection(result);
     }
     
     /**
      * {@inheritDoc}
      */
     @Override
-    public final SortableDataCollection filterBy(DataPredicate predicate) {
+    public final LibraryDataCollection filterBy(DataPredicate predicate) {
         List<GraphData> result = new ArrayList<GraphData>();
         for(GraphData gd : graphData) {
             if(predicate.apply(gd)) {
                 result.add(gd);
             }
         }
-        return new DefaultSortableDataCollection(result);
+        return new DefaultLibraryDataCollection(result);
     }
 
 }

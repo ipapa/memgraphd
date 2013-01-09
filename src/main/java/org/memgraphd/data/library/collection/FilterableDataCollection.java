@@ -1,6 +1,8 @@
-package org.memgraphd.data.library;
+package org.memgraphd.data.library.collection;
 
 import org.memgraphd.data.GraphData;
+import org.memgraphd.data.library.Category;
+import org.memgraphd.data.library.DataPredicate;
 
 /**
  * Given a set of {@link GraphData}, you can filter it down to what you want.
@@ -12,37 +14,37 @@ public interface FilterableDataCollection {
     
     /**
      * Filter by nothing - in other words - do not filter, return the data set as-is.
-     * @return {@link SortableDataCollection}
+     * @return {@link LibraryDataCollection}
      */
-    SortableDataCollection filterBy();
+    LibraryDataCollection filterBy();
     
     /**
      * Filter by a data category.
      * @param category {@link Category}
-     * @return {@link SortableDataCollection}
+     * @return {@link LibraryDataCollection}
      */
-    SortableDataCollection filterBy(Category category);
+    LibraryDataCollection filterBy(Category category);
     
     /**
      * Filter by a list of data categories. It will return all items in this collection 
      * that belong to <b>ALL</b> categories provided.
      * @param categories array of {@link Category}
-     * @return {@link SortableDataCollection}
+     * @return {@link LibraryDataCollection}
      */
-    SortableDataCollection filterByAll(Category[] categories);
+    LibraryDataCollection filterByAll(Category[] categories);
     
     /**
      * Filter by a list of data categories. It will return all items in this collection
      *  that belong to <b>ANY</b> categories provided.
      * @param categories array of {@link Category}
-     * @return {@link SortableDataCollection}
+     * @return {@link LibraryDataCollection}
      */
-    SortableDataCollection filterByAny(Category[] categories);
+    LibraryDataCollection filterByAny(Category[] categories);
     
     /**
      * Filter by using the {@link DataPredicate} provided. 
      * @param predicate {@link DataPredicate}
-     * @return {@link SortableDataCollection}
+     * @return {@link LibraryDataCollection}
      */
-    SortableDataCollection filterBy(DataPredicate predicate);
+    LibraryDataCollection filterBy(DataPredicate predicate);
 }

@@ -1,4 +1,4 @@
-package org.memgraphd.data.library;
+package org.memgraphd.data.library.collection;
 
 import java.util.Collections;
 import java.util.List;
@@ -21,27 +21,27 @@ public class DefaultSortableDataCollection implements SortableDataCollection {
      * {@inheritDoc}
      */
     @Override
-    public List<GraphData> sortById(SortOrder order) {
+    public LibraryDataCollection sortById(SortOrder order) {
         Collections.sort(graphData, new IdComparator(order));
-        return graphData;
+        return new DefaultLibraryDataCollection(graphData);
     }
     
     /**
      * {@inheritDoc}
      */
     @Override
-    public List<GraphData> sortByCreatedDate(SortOrder order) {
+    public LibraryDataCollection sortByCreatedDate(SortOrder order) {
         Collections.sort(graphData, new CreatedDateComparator(order));
-        return graphData;
+        return new DefaultLibraryDataCollection(graphData);
     }
     
     /**
      * {@inheritDoc}
      */
     @Override
-    public List<GraphData> sortByLastModifiedDate(SortOrder order) {
+    public LibraryDataCollection sortByLastModifiedDate(SortOrder order) {
         Collections.sort(graphData, new LastModifiedDateComparator(order));
-        return graphData;
+        return new DefaultLibraryDataCollection(graphData);
     }
 
 }
