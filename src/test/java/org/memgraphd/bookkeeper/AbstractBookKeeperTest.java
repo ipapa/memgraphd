@@ -32,7 +32,8 @@ public class AbstractBookKeeperTest {
     
     @Before
     public void setUp() throws Exception {
-        keeper =  new HSQLBookKeeper(GraphConfig.DEFAULT_DB_NAME, GraphConfig.DEFAULT_DB_PATH);
+        keeper =  new HSQLBookKeeper(GraphConfig.DEFAULT_DB_NAME, GraphConfig.DEFAULT_DB_PATH, 
+                                GraphConfig.DEFAULT_BATCH_SIZE, GraphConfig.DEFAULT_WRITE_FREQUENCY);
         keeper.wipeAll();
         data = new DataImpl("someId", new DateTime(), new DateTime());
         when(decision.getData()).thenReturn(data);

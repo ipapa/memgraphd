@@ -24,31 +24,75 @@ public class GraphConfigDefaults implements GraphConfig {
     private final BookKeeper bookKeeper;
     private final String bookKeeperDBName;
     private final String bookKeeperDBPath;
+    private final long bookeKeeperBatchSize;
+    private final long bookeKeeperWriteFrequency;
     
+    /**
+     * Default constructor that will use predefined default settings to instantiate a new instance.
+     * @see GraphConfig
+     */
     public GraphConfigDefaults() {
-        this(DEFAULT_NAME, DEFAULT_CAPACITY, DEFAULT_DB_NAME, DEFAULT_DB_PATH);
+        this(DEFAULT_NAME, DEFAULT_CAPACITY, DEFAULT_DB_NAME, DEFAULT_DB_PATH, DEFAULT_BATCH_SIZE, DEFAULT_WRITE_FREQUENCY);
     }
     
+    /**
+     * Constructor that will use predefined default settings to instantiate a new instance with the
+     * only exception of the name.
+     * @param name the name of the instance as {@link String}
+     * @see GraphConfig
+     */
     public GraphConfigDefaults(String name) {
-        this(name, DEFAULT_CAPACITY, DEFAULT_DB_NAME, DEFAULT_DB_PATH);
+        this(name, DEFAULT_CAPACITY, DEFAULT_DB_NAME, DEFAULT_DB_PATH, DEFAULT_BATCH_SIZE, DEFAULT_WRITE_FREQUENCY);
     }
     
+    /**
+     * Constructor that will use predefined default settings to instantiate a new instance with the
+     * exception of the name and capacity.
+     * @param name the name of the instance as {@link String}
+     * @param capacity the capacity objects to store in memory as integer.
+     * @see GraphConfig
+     */
     public GraphConfigDefaults(String name, int capacity) {
-        this(name, capacity, DEFAULT_DB_NAME, DEFAULT_DB_PATH);
+        this(name, capacity, DEFAULT_DB_NAME, DEFAULT_DB_PATH, DEFAULT_BATCH_SIZE, DEFAULT_WRITE_FREQUENCY);
     }
     
-    public GraphConfigDefaults(String name, int capacity, String dbName) {
-        this(name, capacity, dbName, DEFAULT_DB_PATH);
-    }
-    
+    /**
+     * Constructor that will use predefined default settings to instantiate a new instance with the
+     * exception of the name, capacity, dbName, dbPath.
+     * @param name the name of the instance as {@link String}
+     * @param capacity the capacity objects to store in memory as integer.
+     * @param dbName database name to use to store the decisions.
+     * @param dbPath the path where to store the database data.
+     * @see GraphConfig
+     */
     public GraphConfigDefaults(String name, int capacity, String dbName, String dbPath) {
+        this(name, capacity, dbName, dbPath, DEFAULT_BATCH_SIZE, DEFAULT_WRITE_FREQUENCY);
+    }
+    
+    /**
+     * Constructor that will use predefined default settings to instantiate a new instance with the
+     * exception of the name, capacity and dbName.
+     * @param name the name of the instance as {@link String}
+     * @param capacity the capacity objects to store in memory as integer.
+     * @param dbName database name to use to store the decisions.
+     * @param dbPath the path where to store the database data.
+     * @param batchSize how many decisions to read or write in a batch transaction
+     * @param writeFrequency long frequency in milliseconds to persist to disk decisions already made.
+     * @see GraphConfig
+     */
+    public GraphConfigDefaults(String name, int capacity, String dbName, String dbPath,
+                            long batchSize, long writeFrequency) {
         this.name = name;
         this.bookKeeperDBName = dbName;
         this.bookKeeperDBPath = dbPath;
+        this.bookeKeeperBatchSize = batchSize;
+        this.bookeKeeperWriteFrequency = writeFrequency;
         this.capacity = capacity;
         this.memoryBlockResolver = new DefaultMemoryBlockResolver(getCapacity());
-        this.bookKeeper = new HSQLBookKeeper(getBookKeeperDatabaseName(), getBookKeeperDatabasePath());
-        this.decisionMaker = new SingleDecisionMaker(getBookKeeper());
+        this.bookKeeper = new HSQLBookKeeper(getBookKeeperDatabaseName(), getBookKeeperDatabasePath(),
+                                        getBookKeeperOperationBatchSize(), getBookKeeperWriteFrequency());
+        this.decisionMaker = new SingleDecisionMaker(getBookKeeper(), batchSize);
+        
     }
     
     /**
@@ -105,6 +149,22 @@ public class GraphConfigDefaults implements GraphConfig {
     @Override
     public final BookKeeper getBookKeeper() {
         return bookKeeper;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final long getBookKeeperOperationBatchSize() {
+        return bookeKeeperBatchSize;
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final long getBookKeeperWriteFrequency() {
+        return bookeKeeperWriteFrequency;
     }
 
 }

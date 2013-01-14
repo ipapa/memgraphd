@@ -93,9 +93,11 @@ public class GraphImplTest {
         when(config.getMemoryBlockResolver()).thenReturn(memoryBlockResolver);
         when(config.getBookKeeper()).thenReturn(bookKeeper);
         when(config.getDecisionMaker()).thenReturn(decisionMaker);
+        when(config.getBookKeeperOperationBatchSize()).thenReturn(1000L);
         
         when(memoryBlockResolver.blocks()).thenReturn(new MemoryBlock[] {});
         when(decisionMaker.latestDecision()).thenReturn(Sequence.valueOf(10));
+        when(decisionMaker.getReadWriteBatchSize()).thenReturn(1000L);
         
         Constructor<?>[] constructors = GraphImpl.class.getDeclaredConstructors();
         constructors[0].setAccessible(true);

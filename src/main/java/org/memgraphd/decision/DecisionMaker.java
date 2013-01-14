@@ -54,5 +54,11 @@ public interface DecisionMaker {
      * Reverses <b>ALL</b> enacted decisions. This action cannot be undone.
      */
     void reverseAll();
+    
+    /**
+     * Returns the number of decisions that will read or write at a time as part of a batch operation.
+     * @return long
+     */
+    long getReadWriteBatchSize();
 
 }

@@ -2,6 +2,7 @@ package org.memgraphd;
 
 import org.memgraphd.bookkeeper.BookKeeper;
 import org.memgraphd.data.Data;
+import org.memgraphd.decision.Decision;
 import org.memgraphd.decision.DecisionMaker;
 import org.memgraphd.memory.MemoryBlock;
 import org.memgraphd.memory.MemoryBlockResolver;
@@ -34,6 +35,16 @@ public interface GraphConfig {
     static final String DEFAULT_DB_PATH = "/tmp/book/";
     
     /**
+     * Default size of a batch operation by {@link BookKeeper} to read/write {@link Decision}(s).
+     */
+    static final long DEFAULT_BATCH_SIZE = 1000L;
+    
+    /**
+     * Default time interval to be used by {@link BookKeeper} to write decisions to disk.
+     */
+    static final long DEFAULT_WRITE_FREQUENCY = 2000L;
+    
+    /**
      * Returns the {@link Graph}'s name to use. 
      * @return {@link String}
      */
@@ -56,6 +67,19 @@ public interface GraphConfig {
      * @return {@link String}
      */
     String getBookKeeperDatabasePath();
+    
+    /**
+     * Returns the number of read/write operations {@link BookKeeper} in a batch transaction.
+     * @return long
+     */
+    long getBookKeeperOperationBatchSize();
+    
+    /**
+     * Returns the time interval in milliseconds to write buffered decisions in the book.
+     * This setting is related to {@link #getBookKeeperOperationBatchSize()}.
+     * @return long
+     */
+    long getBookKeeperWriteFrequency();
     
     /**
      * In charge of determining in which memory {@link MemoryBlock} to store {@link Data} that

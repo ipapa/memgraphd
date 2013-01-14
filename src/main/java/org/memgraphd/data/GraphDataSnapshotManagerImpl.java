@@ -23,14 +23,14 @@ import org.memgraphd.operation.GraphWriter;
  */
 public class GraphDataSnapshotManagerImpl implements GraphDataSnapshotManager {
     private static final Logger LOGGER = Logger.getLogger(GraphDataSnapshotManagerImpl.class);
-    private static final long BATCH_READ_SIZE = 10000;
     
     private final GraphWriter writer;
     private final GraphReader reader;
     private final GraphMappings mappings;
     private final DecisionMaker decisionMaker;
-    
-    public GraphDataSnapshotManagerImpl(GraphReader reader, GraphWriter writer, GraphMappings mappings, DecisionMaker decisionMaker) {
+
+    public GraphDataSnapshotManagerImpl(GraphReader reader, GraphWriter writer, GraphMappings mappings, 
+            DecisionMaker decisionMaker) {
         this.reader = reader;
         this.mappings = mappings;
         this.writer = writer;
@@ -42,25 +42,20 @@ public class GraphDataSnapshotManagerImpl implements GraphDataSnapshotManager {
      */
     @Override
     public synchronized void initialize() {
-        Sequence zeroSequence = Sequence.valueOf(0);
         Sequence totalDecisions = decisionMaker.latestDecision();
         LOGGER.info(String.format("GraphDataInitializer is replaying %d decisions from disk", totalDecisions.number()));
-        if(totalDecisions.number() <= BATCH_READ_SIZE) {
-            replayDecisionRange(zeroSequence, totalDecisions);
+
+        long iterations = totalDecisions.number() / decisionMaker.getReadWriteBatchSize();
+        long remainder = totalDecisions.number() % decisionMaker.getReadWriteBatchSize();
+        for(int i=0; i < iterations; i++) {
+            Sequence start = Sequence.valueOf(i * decisionMaker.getReadWriteBatchSize());
+            Sequence end = Sequence.valueOf(start.number() + decisionMaker.getReadWriteBatchSize());
+            replayDecisionRange(start, end);
         }
-        else {
-            long iterations = totalDecisions.number() / BATCH_READ_SIZE;
-            long remainder = totalDecisions.number() % BATCH_READ_SIZE;
-            for(int i=0; i < iterations; i++) {
-                Sequence start = Sequence.valueOf(i * BATCH_READ_SIZE);
-                Sequence end = Sequence.valueOf(start.number() + BATCH_READ_SIZE);
-                replayDecisionRange(start, end);
-            }
-            if(remainder > 0) {
-                Sequence start = Sequence.valueOf(iterations * BATCH_READ_SIZE);
-                Sequence end = Sequence.valueOf(start.number() + remainder);
-                replayDecisionRange(start, end);
-            }
+        if(remainder > 0) {
+            Sequence start = Sequence.valueOf(iterations * decisionMaker.getReadWriteBatchSize());
+            Sequence end = Sequence.valueOf(start.number() + remainder);
+            replayDecisionRange(start, end);
         }
     }
     
@@ -99,6 +94,9 @@ public class GraphDataSnapshotManagerImpl implements GraphDataSnapshotManager {
                 }
                 else if(GraphRequestType.PUT == d.getRequestType())  {
                     writer.write(d);
+                }
+                else {
+                    LOGGER.warn(String.format("Ignoring decision sequenceId=%d with bad request type=%s", d.getSequence().number(), d.getRequestType()));
                 }
                 
             } catch (GraphException e) {

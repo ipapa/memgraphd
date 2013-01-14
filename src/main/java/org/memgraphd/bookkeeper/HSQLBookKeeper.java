@@ -20,8 +20,15 @@ import org.memgraphd.decision.Decision;
 public class HSQLBookKeeper extends AbstractBookKeeper {
     private static final Logger LOGGER = Logger.getLogger(HSQLBookKeeper.class);
     
-    public HSQLBookKeeper(String dbName, String dbPath) {
-        super(dbName, dbPath);
+    /**
+     * 
+     * @param dbName database name as {@link String}
+     * @param dbPath database path to location where to store data as {@link String}
+     * @param batchSize size of read/write batch transactions as long.
+     * @param writeFrequency how often to write to disk in milliseconds as long.
+     */
+    public HSQLBookKeeper(String dbName, String dbPath, long batchSize, long writeFrequency) {
+        super(dbName, dbPath, batchSize, writeFrequency);
     }
   
     public void run() {

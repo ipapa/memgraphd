@@ -23,10 +23,6 @@ import org.memgraphd.persistence.PersistenceStore;
 
 public abstract class AbstractBookKeeper extends PersistenceStore implements BookKeeper, Runnable {
     
-    public static final long WRITE_FREQUENCY = 2000L;
-
-    public static final int BATCH_SIZE = 10000;
-    
     private Set<Decision> buffer;
    
     private final ReentrantLock bufferLock = new ReentrantLock();
@@ -43,9 +39,17 @@ public abstract class AbstractBookKeeper extends PersistenceStore implements Boo
     
     private volatile AtomicBoolean bookClosed = new AtomicBoolean(true);
     
-    public AbstractBookKeeper(String dbName, String dbFilePath) {
+    private final long batchSize;
+    
+    private final long writeFrequencyMillis;
+    
+    public AbstractBookKeeper(String dbName, String dbFilePath, long batchSize, long writeFrequency) {
         
         super(dbName, dbFilePath);
+        
+        this.batchSize = batchSize;
+        
+        this.writeFrequencyMillis = writeFrequency;
         
         this.buffer = new HashSet<Decision>();
     
@@ -67,7 +71,7 @@ public abstract class AbstractBookKeeper extends PersistenceStore implements Boo
                 }
             };
             scheduler = Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors(), threadFactory);
-            scheduler.schedule(this, WRITE_FREQUENCY, TimeUnit.MILLISECONDS);
+            scheduler.schedule(this, writeFrequencyMillis, TimeUnit.MILLISECONDS);
             
             executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         }
@@ -132,8 +136,8 @@ public abstract class AbstractBookKeeper extends PersistenceStore implements Boo
     }
     
     protected boolean isFlushToDiskTime() {
-        return  buffer.size() >= BATCH_SIZE ||
-                (System.currentTimeMillis() - lastTimeFlushedToDisk.get()) > WRITE_FREQUENCY; 
+        return  buffer.size() >= batchSize ||
+                (System.currentTimeMillis() - lastTimeFlushedToDisk.get()) > writeFrequencyMillis; 
     }
     
     protected Set<Decision> swapBuffer() {
@@ -160,7 +164,7 @@ public abstract class AbstractBookKeeper extends PersistenceStore implements Boo
         List<Set<Decision>> batchSet = new ArrayList<Set<Decision>>();
         Set<Decision> newSet = new HashSet<Decision>();
         for(Decision d : decisions) {
-            if(newSet.size() < BATCH_SIZE) {
+            if(newSet.size() < batchSize) {
                 newSet.add(d);
             }
             else {

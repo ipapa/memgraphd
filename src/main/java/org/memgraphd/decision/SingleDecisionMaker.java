@@ -21,17 +21,24 @@ public class SingleDecisionMaker implements DecisionMaker {
     
     private final BookKeeper bookKeeper;
     private final AtomicLong latestInUseSequence;
+    private final long batchSize;
     
-    public SingleDecisionMaker(BookKeeper bookKeeper) {
+    /**
+     * Constructs a new instance of a {@link SingleDecisionMaker}.
+     * @param bookKeeper {@link BookKeeper}
+     * @param batchSize the size of data that goes into a batch read/write operation as long
+     */
+    public SingleDecisionMaker(BookKeeper bookKeeper, long batchSize) {
         this.bookKeeper = bookKeeper;
         this.latestInUseSequence = new AtomicLong();
+        this.batchSize = batchSize;
     }
     
     /**
      * {@inheritDoc}
      */
     @Override
-    public Decision decidePutRequest(Data data) {
+    public final Decision decidePutRequest(Data data) {
         Decision decision = new DecisionImpl(Sequence.valueOf(latestInUseSequence.incrementAndGet()), 
                 new DateTime(), GraphRequestType.PUT, data.getId(), data);
         LOGGER.info(String.format("Write decision: Assigned dataId=%s sequence=%d", data.getId(), decision.getSequence().number()));
@@ -43,7 +50,7 @@ public class SingleDecisionMaker implements DecisionMaker {
      * {@inheritDoc}
      */
     @Override
-    public Decision decideDeleteRequest(Data data) {
+    public final Decision decideDeleteRequest(Data data) {
         Decision decision = new DecisionImpl(Sequence.valueOf(latestInUseSequence.incrementAndGet()), 
                 new DateTime(), GraphRequestType.DELETE, data.getId(), data);
         LOGGER.info(String.format("Delete decision: Assigned dataId=%s sequence=%d", data.getId(), decision.getSequence().number()));
@@ -55,7 +62,7 @@ public class SingleDecisionMaker implements DecisionMaker {
      * {@inheritDoc}
      */
     @Override
-    public List<Decision> readRange(Sequence start, Sequence end) {
+    public final List<Decision> readRange(Sequence start, Sequence end) {
         return bookKeeper.readRange(start, end);
     }
     
@@ -63,7 +70,7 @@ public class SingleDecisionMaker implements DecisionMaker {
      * {@inheritDoc}
      */
     @Override
-    public Sequence latestDecision() {
+    public final Sequence latestDecision() {
         Sequence seq = Sequence.valueOf(latestInUseSequence.get());
         LOGGER.info("Latest in-use decision sequence is: " + seq.number());
         return seq;
@@ -73,18 +80,23 @@ public class SingleDecisionMaker implements DecisionMaker {
      * {@inheritDoc}
      */
     @Override
-    public synchronized void reverse(Decision decision) {
+    public final synchronized void reverse(Decision decision) {
         LOGGER.info(String.format("Wiping out decision with sequence=%d", decision.getSequence().number()));
         bookKeeper.wipe(decision);
     }
     
     @Override
-    public synchronized void reverseAll() {
+    public final synchronized void reverseAll() {
         LOGGER.info("Wiping out ALL decisions.");
         bookKeeper.wipeAll();
         Sequence seq = bookKeeper.lastTransactionId();
         LOGGER.info("Latest in-use decision sequence is: " + seq.number());
         latestInUseSequence.set(seq.number());
+    }
+
+    @Override
+    public final long getReadWriteBatchSize() {
+        return batchSize;
     }
 
 }

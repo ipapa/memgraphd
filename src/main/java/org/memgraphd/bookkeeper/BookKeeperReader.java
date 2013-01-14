@@ -3,6 +3,7 @@ package org.memgraphd.bookkeeper;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,7 +34,7 @@ public class BookKeeperReader extends BookKeeperBase {
      * @return {@link List} of {@link Decision}.
      * @throws Exception
      */
-    public List<Decision> readRange(Sequence start, Sequence end) throws Exception {
+    public List<Decision> readRange(Sequence start, Sequence end) throws SQLException {
         List<Decision> result = new ArrayList<Decision>();
         PreparedStatement statement = 
            getConnection().prepareStatement(

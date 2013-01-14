@@ -13,7 +13,7 @@ import org.apache.log4j.Logger;
  * @since August 21, 2012
  *
  */
-public class BookKeeperBase {
+public abstract class BookKeeperBase {
     protected final Logger LOGGER = Logger.getLogger(getClass());
     
     private final String threadName;
@@ -23,7 +23,13 @@ public class BookKeeperBase {
     private final AtomicBoolean completed = new AtomicBoolean(false);
     private final AtomicBoolean errorOccurred = new AtomicBoolean(false);
     
-    public BookKeeperBase(String threadName, String dbName, Connection connection) {
+    /**
+     * Constructs an instance of {@link BookKeeperBase} that stores the basic data.
+     * @param threadName thread name as {@link String}
+     * @param dbName database name as {@link String}
+     * @param connection {@link Connection}
+     */
+    protected BookKeeperBase(String threadName, String dbName, Connection connection) {
         this.threadName = threadName;
         this.dbName = dbName;
         this.connection = connection;

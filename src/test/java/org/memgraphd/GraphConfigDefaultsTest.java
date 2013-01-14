@@ -18,8 +18,8 @@ public class GraphConfigDefaultsTest {
         configZero = new GraphConfigDefaults();
         configOne = new GraphConfigDefaults("name");
         configTwo = new GraphConfigDefaults("name", 1);
-        configThree = new GraphConfigDefaults("name", 1, "dbName");
-        configFour = new GraphConfigDefaults("name", 1, "dbName", "/tmp/dbPath");
+        configThree = new GraphConfigDefaults("name", 1, "dbName", "/tmp/dbPath");
+        configFour = new GraphConfigDefaults("name", 1, "dbName", "/tmp/dbPath", 1000L, 2000L);
     }
 
     @Test
@@ -63,8 +63,26 @@ public class GraphConfigDefaultsTest {
         assertEquals(GraphConfig.DEFAULT_DB_PATH, configZero.getBookKeeperDatabasePath());
         assertEquals(GraphConfig.DEFAULT_DB_PATH, configOne.getBookKeeperDatabasePath());
         assertEquals(GraphConfig.DEFAULT_DB_PATH, configTwo.getBookKeeperDatabasePath());
-        assertEquals(GraphConfig.DEFAULT_DB_PATH, configThree.getBookKeeperDatabasePath());
+        assertEquals("/tmp/dbPath", configThree.getBookKeeperDatabasePath());
         assertEquals("/tmp/dbPath", configFour.getBookKeeperDatabasePath());
+    }
+    
+    @Test
+    public void testBatchSize() {
+        assertEquals(GraphConfig.DEFAULT_BATCH_SIZE, configZero.getBookKeeperOperationBatchSize());
+        assertEquals(GraphConfig.DEFAULT_BATCH_SIZE, configOne.getBookKeeperOperationBatchSize());
+        assertEquals(GraphConfig.DEFAULT_BATCH_SIZE, configTwo.getBookKeeperOperationBatchSize());
+        assertEquals(GraphConfig.DEFAULT_BATCH_SIZE, configThree.getBookKeeperOperationBatchSize());
+        assertEquals(1000L, configFour.getBookKeeperOperationBatchSize());
+    }
+    
+    @Test
+    public void testWriteFrequency() {
+        assertEquals(GraphConfig.DEFAULT_WRITE_FREQUENCY, configZero.getBookKeeperWriteFrequency());
+        assertEquals(GraphConfig.DEFAULT_WRITE_FREQUENCY, configOne.getBookKeeperWriteFrequency());
+        assertEquals(GraphConfig.DEFAULT_WRITE_FREQUENCY, configTwo.getBookKeeperWriteFrequency());
+        assertEquals(GraphConfig.DEFAULT_WRITE_FREQUENCY, configThree.getBookKeeperWriteFrequency());
+        assertEquals(2000L, configFour.getBookKeeperWriteFrequency());
     }
 
     @Test

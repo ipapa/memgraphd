@@ -24,11 +24,9 @@ public class GraphDataEventListenerManagerImpl implements GraphDataEventListener
      * {@inheritDoc}
      */
     @Override
-    public void addEventListener(GraphDataEventListener event) {
+    public final void addEventListener(GraphDataEventListener event) {
         if(event != null && !getListeners().contains(event)) {
-            synchronized (getListeners()) {
-                getListeners().add(event);
-            }
+            getListeners().add(event);
         }
     }
     
@@ -36,19 +34,15 @@ public class GraphDataEventListenerManagerImpl implements GraphDataEventListener
      * {@inheritDoc}
      */
     @Override
-    public void removeEventListener(GraphDataEventListener event) {
-        if(event != null && getListeners().contains(event)) {
-            synchronized (getListeners()) {
-                getListeners().remove(event);
-            }
-        }
+    public final void removeEventListener(GraphDataEventListener event) {
+        listeners.remove(event);
     }
     
     /**
      * {@inheritDoc}
      */
     @Override
-    public synchronized void onCreate(GraphData data) {
+    public final synchronized void onCreate(GraphData data) {
         for(GraphDataEventListener listener : getListeners()) {
             listener.getHandler().onCreate(data);
         }
@@ -58,7 +52,7 @@ public class GraphDataEventListenerManagerImpl implements GraphDataEventListener
      * {@inheritDoc}
      */
     @Override
-    public synchronized void onUpdate(GraphData oldData, GraphData newData) {
+    public final synchronized void onUpdate(GraphData oldData, GraphData newData) {
         for(GraphDataEventListener listener : getListeners()) {
             listener.getHandler().onUpdate(oldData, newData);
         }
@@ -68,7 +62,7 @@ public class GraphDataEventListenerManagerImpl implements GraphDataEventListener
      * {@inheritDoc}
      */
     @Override
-    public synchronized void onDelete(GraphData data) {
+    public final synchronized void onDelete(GraphData data) {
         for(GraphDataEventListener listener : getListeners()) {
             listener.getHandler().onDelete(data);
         }
