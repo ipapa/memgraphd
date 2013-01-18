@@ -1,6 +1,7 @@
 package org.memgraphd;
 
 import org.memgraphd.bookkeeper.BookKeeper;
+import org.memgraphd.bookkeeper.PersistenceStore;
 import org.memgraphd.data.Data;
 import org.memgraphd.decision.Decision;
 import org.memgraphd.decision.DecisionMaker;
@@ -99,5 +100,11 @@ public interface GraphConfig {
      * @return {@link BookKeeper}
      */
     BookKeeper getBookKeeper();
+    
+    /**
+     * Returns the persistence store implementation to use.
+     * @return {@link PersistenceStore}
+     */
+    PersistenceStore getPersistenceStore();
     
 }

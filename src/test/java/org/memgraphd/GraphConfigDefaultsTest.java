@@ -1,15 +1,24 @@
 package org.memgraphd;
 
+import java.sql.SQLException;
+
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.memgraphd.bookkeeper.HSQLBookKeeper;
+import org.memgraphd.bookkeeper.HSQLPersistenceStore;
 import org.memgraphd.decision.SingleDecisionMaker;
 import org.memgraphd.memory.DefaultMemoryBlockResolver;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({HSQLPersistenceStore.class})
 public class GraphConfigDefaultsTest {
     private GraphConfig configZero, configOne, configTwo, configThree, configFour;
     
@@ -29,6 +38,12 @@ public class GraphConfigDefaultsTest {
         assertNotNull(configTwo);
         assertNotNull(configThree);
         assertNotNull(configFour);
+    }
+    
+    @Test(expected=RuntimeException.class)
+    public void testGraphConfigDefaults_throwsSQLException() {
+        PowerMockito.doThrow(new SQLException()).when(HSQLPersistenceStore.class);
+        new GraphConfigDefaults("name", 1, "dbName", "/tmp/dbPath", 1000L, 2000L);
     }
 
     @Test
@@ -137,6 +152,24 @@ public class GraphConfigDefaultsTest {
         
         assertNotNull(configFour.getBookKeeper());
         assertTrue(configFour.getBookKeeper() instanceof HSQLBookKeeper);
+    }
+    
+    @Test
+    public void testGetPersistenceStore() {
+        assertNotNull(configZero.getPersistenceStore());
+        assertTrue(configZero.getPersistenceStore() instanceof HSQLPersistenceStore);
+        
+        assertNotNull(configOne.getPersistenceStore());
+        assertTrue(configOne.getPersistenceStore() instanceof HSQLPersistenceStore);
+        
+        assertNotNull(configTwo.getPersistenceStore());
+        assertTrue(configTwo.getPersistenceStore() instanceof HSQLPersistenceStore);
+        
+        assertNotNull(configThree.getPersistenceStore());
+        assertTrue(configThree.getPersistenceStore() instanceof HSQLPersistenceStore);
+        
+        assertNotNull(configFour.getPersistenceStore());
+        assertTrue(configFour.getPersistenceStore() instanceof HSQLPersistenceStore);
     }
 
 }

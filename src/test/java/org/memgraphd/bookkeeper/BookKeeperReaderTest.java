@@ -40,9 +40,13 @@ public class BookKeeperReaderTest {
     @Mock
     private ResultSet resultSet;
     
+    @Mock
+    private PersistenceStore persistenceStore;
+    
     @Before
     public void setUp() throws Exception {
-        reader = new BookKeeperReader("thread name", "db name", connection);
+        reader = new BookKeeperReader("thread name", persistenceStore);
+        when(persistenceStore.openConnection()).thenReturn(connection);
     }
 
     @Test

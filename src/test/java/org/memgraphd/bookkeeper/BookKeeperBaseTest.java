@@ -29,16 +29,22 @@ public class BookKeeperBaseTest {
     private static final String DB_NAME = "some db name";
     
     @Mock
-    Connection connection;
+    private Connection connection;
     
     @Mock
-    Statement statement;
+    private Statement statement;
+    
+    @Mock
+    private PersistenceStore persistenceStore;
     
     @Before
     public void setUp() throws Exception {
-        base = new BookKeeperReader(THREAD_NAME, DB_NAME, connection);
+        base = new BookKeeperReader(THREAD_NAME, persistenceStore);
         when(connection.createStatement()).thenReturn(statement);
         when(statement.executeUpdate("COMMIT;")).thenReturn(1);
+        
+        when(persistenceStore.getDatabaseName()).thenReturn(DB_NAME);
+        when(persistenceStore.openConnection()).thenReturn(connection);
     }
 
     @Test
@@ -53,12 +59,12 @@ public class BookKeeperBaseTest {
 
     @Test
     public void testGetDbName() {
-        assertEquals(DB_NAME, base.getDbName());
+        assertEquals(DB_NAME, base.getPersistenceStore().getDatabaseName());
     }
 
     @Test
-    public void testGetConnection() {
-        assertSame(connection, base.getConnection());
+    public void testGetConnection() throws SQLException {
+        assertSame(connection, base.getPersistenceStore().openConnection());
     }
 
     @Test

@@ -1,7 +1,11 @@
 package org.memgraphd;
 
+import java.sql.SQLException;
+
 import org.memgraphd.bookkeeper.BookKeeper;
 import org.memgraphd.bookkeeper.HSQLBookKeeper;
+import org.memgraphd.bookkeeper.HSQLPersistenceStore;
+import org.memgraphd.bookkeeper.PersistenceStore;
 import org.memgraphd.decision.DecisionMaker;
 import org.memgraphd.decision.SingleDecisionMaker;
 import org.memgraphd.memory.DefaultMemoryBlockResolver;
@@ -26,6 +30,7 @@ public class GraphConfigDefaults implements GraphConfig {
     private final String bookKeeperDBPath;
     private final long bookeKeeperBatchSize;
     private final long bookeKeeperWriteFrequency;
+    private final PersistenceStore persistenceStore;
     
     /**
      * Default constructor that will use predefined default settings to instantiate a new instance.
@@ -89,7 +94,12 @@ public class GraphConfigDefaults implements GraphConfig {
         this.bookeKeeperWriteFrequency = writeFrequency;
         this.capacity = capacity;
         this.memoryBlockResolver = new DefaultMemoryBlockResolver(getCapacity());
-        this.bookKeeper = new HSQLBookKeeper(getBookKeeperDatabaseName(), getBookKeeperDatabasePath(),
+        try {
+            this.persistenceStore = new HSQLPersistenceStore(dbName, dbPath);
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to instantiate persistence store", e);
+        }
+        this.bookKeeper = new HSQLBookKeeper(getPersistenceStore(),
                                         getBookKeeperOperationBatchSize(), getBookKeeperWriteFrequency());
         this.decisionMaker = new SingleDecisionMaker(getBookKeeper(), batchSize);
         
@@ -165,6 +175,14 @@ public class GraphConfigDefaults implements GraphConfig {
     @Override
     public final long getBookKeeperWriteFrequency() {
         return bookeKeeperWriteFrequency;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final PersistenceStore getPersistenceStore() {
+        return persistenceStore;
     }
 
 }

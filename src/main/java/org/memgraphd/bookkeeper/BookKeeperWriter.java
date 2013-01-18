@@ -1,6 +1,5 @@
 package org.memgraphd.bookkeeper;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -21,8 +20,15 @@ class BookKeeperWriter extends BookKeeperBase implements Runnable {
 
     private final Set<Decision> decisions;
     
-    public BookKeeperWriter(String threadName, String dbName, Connection connection, Set<Decision> decisions) {
-        super(threadName, dbName, connection);
+    /**
+     * Constructs a new instance of {@link BookKeeperWriter}.
+     * 
+     * @param threadName Thread name as {@link String}.
+     * @param persistenceStore {@link PersistenceStore}
+     * @param decisions {@link Set} of {@link Decision}(s).
+     */
+    public BookKeeperWriter(String threadName, PersistenceStore persistenceStore, Set<Decision> decisions) {
+        super(threadName, persistenceStore);
         this.decisions = decisions;
     }
     
@@ -36,8 +42,9 @@ class BookKeeperWriter extends BookKeeperBase implements Runnable {
     
     private void flushBufferToDisk(Set<Decision> decisions) throws RuntimeException {
         long start = System.currentTimeMillis();
-        PreparedStatement insert = createStatement();
         try {
+            PreparedStatement insert = getPersistenceStore().openConnection().prepareStatement(
+                    String.format("INSERT INTO %s VALUES (?,?,?,?,?);", getPersistenceStore().getDatabaseName()));
             for(Decision d : decisions) {
                 insert.setLong(1, d.getSequence().number());
                 insert.setTimestamp(2, new Timestamp(d.getTime().getMillis()));
@@ -59,13 +66,5 @@ class BookKeeperWriter extends BookKeeperBase implements Runnable {
         }
         LOGGER.info(String.format("Thread %s finished writing %d decisions in %d millis. Time: %d", getThreadName(), decisions.size(), (System.currentTimeMillis() - start), System.currentTimeMillis()));
     }
-    
-    private PreparedStatement createStatement() {
-        try {
-            return getConnection().prepareStatement(String.format("INSERT INTO %s VALUES (?,?,?,?,?);", getDbName()));
-        } catch (SQLException e) {
-            LOGGER.error("Failed to crated a prepared statement", e);
-            throw new RuntimeException(e);
-        }
-    }
+
 }

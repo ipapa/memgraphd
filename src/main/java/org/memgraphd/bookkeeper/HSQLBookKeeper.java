@@ -4,7 +4,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
 import org.memgraphd.decision.Decision;
 
 
@@ -18,17 +17,15 @@ import org.memgraphd.decision.Decision;
  *
  */
 public class HSQLBookKeeper extends AbstractBookKeeper {
-    private static final Logger LOGGER = Logger.getLogger(HSQLBookKeeper.class);
     
     /**
-     * 
-     * @param dbName database name as {@link String}
-     * @param dbPath database path to location where to store data as {@link String}
+     * Constructs a new instance of {@link HSQLBookKeeper}.
+     * @param persistenceStore {@link PersistenceStore}
      * @param batchSize size of read/write batch transactions as long.
      * @param writeFrequency how often to write to disk in milliseconds as long.
      */
-    public HSQLBookKeeper(String dbName, String dbPath, long batchSize, long writeFrequency) {
-        super(dbName, dbPath, batchSize, writeFrequency);
+    public HSQLBookKeeper(PersistenceStore persistenceStore, long batchSize, long writeFrequency) {
+        super(persistenceStore, batchSize, writeFrequency);
     }
   
     public void run() {
@@ -40,21 +37,9 @@ public class HSQLBookKeeper extends AbstractBookKeeper {
             for(Set<Decision> setOfDescions : splitDecisionsIntoBatches(oldBuffer)) {
                 getExecutor().execute(
                         new BookKeeperWriter("BookKeeperWriter-Thread" + getCounter().incrementAndGet(),
-                                getDatabaseName(), openConnection(), setOfDescions));
+                                getPersistenceStore(), setOfDescions));
             }
         }
-    }
-
-    @Override
-    protected String createDatabaseSQL() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("CREATE CACHED TABLE ").append(getDatabaseName());
-        builder.append("(SEQUENCE_ID INTEGER NOT NULL PRIMARY KEY,");
-        builder.append("DECISION_TIME TIMESTAMP NOT NULL,");
-        builder.append("REQUEST_TYPE VARCHAR(10) NOT NULL,");
-        builder.append("DATA_ID VARCHAR(100) NOT NULL,");
-        builder.append("DATA OBJECT NOT NULL);");
-        return builder.toString();
     }
     
     /**
@@ -65,10 +50,10 @@ public class HSQLBookKeeper extends AbstractBookKeeper {
         LOGGER.info(String.format("Wiping out decision with sequence=%d", decision.getSequence().number()));
         Statement stmt = null;
         try {
-            stmt = openConnection().createStatement();
+            stmt = getPersistenceStore().openConnection().createStatement();
             stmt.executeUpdate(
                     String.format("DELETE FROM %s WHERE SEQUENCE_ID=%d;", 
-                            getDatabaseName(), decision.getSequence().number()));
+                            getPersistenceStore().getDatabaseName(), decision.getSequence().number()));
             stmt.executeUpdate("COMMIT;");
         } catch (SQLException e) {
             String msg = String.format("Failed to delete decision with sequence=", 
@@ -85,9 +70,9 @@ public class HSQLBookKeeper extends AbstractBookKeeper {
     public synchronized void wipeAll() {
         LOGGER.info("Wiping out *ALL* transactions from the book");
         try {
-            Statement stmt = openConnection().createStatement();
+            Statement stmt = getPersistenceStore().openConnection().createStatement();
             stmt.executeUpdate(
-                    String.format("DELETE FROM %s;", getDatabaseName()));
+                    String.format("DELETE FROM %s;", getPersistenceStore().getDatabaseName()));
             stmt.executeUpdate("COMMIT;");
         } catch (SQLException e) {
             String msg = String.format("Failed to delete all decisions.");

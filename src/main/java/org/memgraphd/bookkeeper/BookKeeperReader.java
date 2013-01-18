@@ -1,6 +1,5 @@
 package org.memgraphd.bookkeeper;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -23,8 +22,13 @@ import org.memgraphd.decision.Sequence;
  */
 public class BookKeeperReader extends BookKeeperBase {
     
-    public BookKeeperReader(String threadName, String dbName, Connection connection) {
-        super(threadName, dbName, connection);
+    /**
+     * Constructs a new instance of {@link BookKeeperReader}.
+     * @param threadName thread name as {@link String}
+     * @param persistenceStore {@link PersistenceStore}
+     */
+    public BookKeeperReader(String threadName, PersistenceStore persistenceStore) {
+        super(threadName, persistenceStore);
     }
     
     /**
@@ -37,8 +41,9 @@ public class BookKeeperReader extends BookKeeperBase {
     public List<Decision> readRange(Sequence start, Sequence end) throws SQLException {
         List<Decision> result = new ArrayList<Decision>();
         PreparedStatement statement = 
-           getConnection().prepareStatement(
-                String.format("SELECT * FROM %s WHERE SEQUENCE_ID BETWEEN ? AND ? ORDER BY SEQUENCE_ID ASC", getDbName()));
+           getPersistenceStore().openConnection().prepareStatement(
+                String.format("SELECT * FROM %s WHERE SEQUENCE_ID BETWEEN ? AND ? ORDER BY SEQUENCE_ID ASC", 
+                        getPersistenceStore().getDatabaseName()));
         statement.setLong(1, start.number());
         statement.setLong(2, end.number());
         
