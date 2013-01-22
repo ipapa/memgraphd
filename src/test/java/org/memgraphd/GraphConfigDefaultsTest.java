@@ -1,7 +1,5 @@
 package org.memgraphd;
 
-import java.sql.SQLException;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -9,7 +7,6 @@ import org.memgraphd.bookkeeper.HSQLBookKeeper;
 import org.memgraphd.bookkeeper.HSQLPersistenceStore;
 import org.memgraphd.decision.SingleDecisionMaker;
 import org.memgraphd.memory.DefaultMemoryBlockResolver;
-import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -38,12 +35,6 @@ public class GraphConfigDefaultsTest {
         assertNotNull(configTwo);
         assertNotNull(configThree);
         assertNotNull(configFour);
-    }
-    
-    @Test(expected=RuntimeException.class)
-    public void testGraphConfigDefaults_throwsSQLException() {
-        PowerMockito.doThrow(new SQLException()).when(HSQLPersistenceStore.class);
-        new GraphConfigDefaults("name", 1, "dbName", "/tmp/dbPath", 1000L, 2000L);
     }
 
     @Test

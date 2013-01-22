@@ -1,12 +1,15 @@
 package org.memgraphd;
 
+import java.lang.reflect.Method;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.memgraphd.data.Data;
 import org.memgraphd.data.GraphDataSnapshotManager;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 import static org.junit.Assert.assertNotNull;
 
@@ -14,7 +17,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({Method.class})
 public class GraphInvocationHandlerTest {
     
     @Mock
@@ -113,7 +117,7 @@ public class GraphInvocationHandlerTest {
         verify(graph).isShutdown();
         verify(graph).clear();
     }
-    
+ 
     @Test
     public void testInvoke_run() throws Throwable {
         handler.invoke(proxy, GraphSupervisor.class.getMethod("run", new Class<?>[] {}), null);

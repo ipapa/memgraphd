@@ -1,5 +1,7 @@
 package org.memgraphd;
 
+import java.sql.SQLException;
+
 import org.joda.time.DateTime;
 import org.junit.Test;
 import org.memgraphd.data.Data;
@@ -13,13 +15,20 @@ import static org.junit.Assert.assertTrue;
 
 public class GraphDataSnapshotManagerIT {
     private static Graph graph;
-    private static GraphConfig config = new GraphConfigDefaults("someGraph", 5);
+    private static GraphConfig config = createConfig();
     private static Data data1 = new DataImpl("id-1", DateTime.now(), DateTime.now());
     private static Data data2 = new DataImpl("id-2", DateTime.now(), DateTime.now());
     private static Data data3 = new DataImpl("id-3", DateTime.now(), DateTime.now());
     private static Data data4 = new DataImpl("id-4", DateTime.now(), DateTime.now());
     private static Data data5 = new DataImpl("id-5", DateTime.now(), DateTime.now());
-
+    
+    private static GraphConfig createConfig() {
+        try {
+            return new GraphConfigDefaults("someGraph", 5);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
     @Test
     public void testGraphInitializedAndEmpty() throws GraphException {
         graph = GraphImpl.build(config);

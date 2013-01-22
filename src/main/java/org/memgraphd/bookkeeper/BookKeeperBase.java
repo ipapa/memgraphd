@@ -24,7 +24,7 @@ public abstract class BookKeeperBase {
     /**
      * Constructs an instance of {@link BookKeeperBase} that stores the basic data.
      * @param threadName thread name as {@link String}
-     * @param peristenceStore {@link PersistenceStore}
+     * @param persistenceStore {@link PersistenceStore}
      */
     protected BookKeeperBase(String threadName, PersistenceStore persistenceStore) {
         this.threadName = threadName;
@@ -33,7 +33,7 @@ public abstract class BookKeeperBase {
     
     /**
      * Returns the name of this thread.
-     * @return
+     * @return {@link String}
      */
     protected final String getThreadName() {
         return threadName;

@@ -44,7 +44,7 @@ public interface PersistenceStore {
     
     /**
      * Opens a new connection to the database.
-     * @return
+     * @return {@link Connection}
      * @throws SQLException
      */
     Connection openConnection() throws SQLException;

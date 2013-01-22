@@ -34,9 +34,10 @@ public class GraphConfigDefaults implements GraphConfig {
     
     /**
      * Default constructor that will use predefined default settings to instantiate a new instance.
+     * @throws SQLException 
      * @see GraphConfig
      */
-    public GraphConfigDefaults() {
+    public GraphConfigDefaults() throws SQLException {
         this(DEFAULT_NAME, DEFAULT_CAPACITY, DEFAULT_DB_NAME, DEFAULT_DB_PATH, DEFAULT_BATCH_SIZE, DEFAULT_WRITE_FREQUENCY);
     }
     
@@ -44,9 +45,10 @@ public class GraphConfigDefaults implements GraphConfig {
      * Constructor that will use predefined default settings to instantiate a new instance with the
      * only exception of the name.
      * @param name the name of the instance as {@link String}
+     * @throws SQLException 
      * @see GraphConfig
      */
-    public GraphConfigDefaults(String name) {
+    public GraphConfigDefaults(String name) throws SQLException {
         this(name, DEFAULT_CAPACITY, DEFAULT_DB_NAME, DEFAULT_DB_PATH, DEFAULT_BATCH_SIZE, DEFAULT_WRITE_FREQUENCY);
     }
     
@@ -55,9 +57,10 @@ public class GraphConfigDefaults implements GraphConfig {
      * exception of the name and capacity.
      * @param name the name of the instance as {@link String}
      * @param capacity the capacity objects to store in memory as integer.
+     * @throws SQLException 
      * @see GraphConfig
      */
-    public GraphConfigDefaults(String name, int capacity) {
+    public GraphConfigDefaults(String name, int capacity) throws SQLException {
         this(name, capacity, DEFAULT_DB_NAME, DEFAULT_DB_PATH, DEFAULT_BATCH_SIZE, DEFAULT_WRITE_FREQUENCY);
     }
     
@@ -68,9 +71,10 @@ public class GraphConfigDefaults implements GraphConfig {
      * @param capacity the capacity objects to store in memory as integer.
      * @param dbName database name to use to store the decisions.
      * @param dbPath the path where to store the database data.
+     * @throws SQLException 
      * @see GraphConfig
      */
-    public GraphConfigDefaults(String name, int capacity, String dbName, String dbPath) {
+    public GraphConfigDefaults(String name, int capacity, String dbName, String dbPath) throws SQLException {
         this(name, capacity, dbName, dbPath, DEFAULT_BATCH_SIZE, DEFAULT_WRITE_FREQUENCY);
     }
     
@@ -83,10 +87,11 @@ public class GraphConfigDefaults implements GraphConfig {
      * @param dbPath the path where to store the database data.
      * @param batchSize how many decisions to read or write in a batch transaction
      * @param writeFrequency long frequency in milliseconds to persist to disk decisions already made.
+     * @throws SQLException 
      * @see GraphConfig
      */
     public GraphConfigDefaults(String name, int capacity, String dbName, String dbPath,
-                            long batchSize, long writeFrequency) {
+                            long batchSize, long writeFrequency) throws SQLException {
         this.name = name;
         this.bookKeeperDBName = dbName;
         this.bookKeeperDBPath = dbPath;
@@ -94,11 +99,7 @@ public class GraphConfigDefaults implements GraphConfig {
         this.bookeKeeperWriteFrequency = writeFrequency;
         this.capacity = capacity;
         this.memoryBlockResolver = new DefaultMemoryBlockResolver(getCapacity());
-        try {
-            this.persistenceStore = new HSQLPersistenceStore(dbName, dbPath);
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to instantiate persistence store", e);
-        }
+        this.persistenceStore = new HSQLPersistenceStore(dbName, dbPath);
         this.bookKeeper = new HSQLBookKeeper(getPersistenceStore(),
                                         getBookKeeperOperationBatchSize(), getBookKeeperWriteFrequency());
         this.decisionMaker = new SingleDecisionMaker(getBookKeeper(), batchSize);

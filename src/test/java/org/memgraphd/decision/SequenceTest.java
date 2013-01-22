@@ -27,6 +27,12 @@ public class SequenceTest {
         assertTrue(sequence.equals(Sequence.valueOf(1)));
         assertFalse(sequence.equals(Sequence.valueOf(2)));
     }
+    
+    @Test
+    public void testEqualsObject_Not() {
+        assertFalse(sequence.equals(null));
+        assertFalse(sequence.equals(Integer.valueOf(1)));
+    }
 
     @Test
     public void testRangeOf() {

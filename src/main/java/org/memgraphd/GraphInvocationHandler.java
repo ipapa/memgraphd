@@ -14,25 +14,50 @@ public class GraphInvocationHandler implements InvocationHandler {
     
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-      
-        if(method.getDeclaringClass() == GraphSupervisor.class
-                || method.getDeclaringClass() == GraphLifecycleListenerManager.class
-                || method.getDeclaringClass() == GraphDataSnapshotManager.class) {
-            
-            if(method.getName().equals("initialize")) {
-                onInitialize();
-            }
-            else if(method.getName().equals("run")) {
-                onRun();
-            }
-            else if(method.getName().equals("shutdown")) {
-                onShutdown();
-            }
-            else if(method.getName().equals("clear")) {
-                onClear();
-            }
-            return invokeGraph(method, args);
+        
+        if(method.getDeclaringClass().equals(GraphSupervisor.class)) {
+            return handleSupervisorCall(proxy, method, args);
         }
+        
+        else if(method.getDeclaringClass().equals(GraphDataSnapshotManager.class)) {
+            return handleSnapshotManagerCall(proxy, method, args);
+        }
+        
+        else if(method.getDeclaringClass().equals(GraphLifecycleListenerManager.class)) {
+            return handleGraphLifecycleManagerCall(proxy, method, args);
+        }
+
+        return handleAnyOtherCall(proxy, method, args);  
+    }
+    
+    protected Object handleSupervisorCall(Object proxy, Method method, Object[] args) throws Throwable {
+        
+        if(method.getName().equals("run")) {
+            onRun();
+        }  
+        else if(method.getName().equals("shutdown")) {
+            onShutdown();
+        }
+        
+        return invokeGraph(method, args);
+    }
+    
+    protected Object handleSnapshotManagerCall(Object proxy, Method method, Object[] args) throws Throwable {
+        
+        if(method.getName().equals("initialize")) {
+            onInitialize();
+        }
+        else if(method.getName().equals("clear")) {
+            onClear();
+        }
+        return invokeGraph(method, args);
+    }
+    
+    protected Object handleGraphLifecycleManagerCall(Object proxy, Method method, Object[] args) throws Throwable {
+        return invokeGraph(method, args);
+    }
+    
+    protected Object handleAnyOtherCall(Object proxy, Method method, Object[] args) throws Throwable {
         if(!graph.isRunning()) {
             throw new RuntimeException("Request cannot be handled. memgraphd is stopped.");
         }
