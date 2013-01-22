@@ -69,13 +69,20 @@ public final class GraphImpl implements Graph {
         
         GraphDataSnapshotManager snapshotManager = new GraphDataSnapshotManagerImpl(reader, writer, mappings, config.getDecisionMaker());
         this.supervisor = new GraphSupervisorImpl(snapshotManager, (MemoryStats) memoryManager);
+
     }
 
     private static final Graph createProxy(Graph liveGraph) {
         return (Graph) Proxy.newProxyInstance(GraphImpl.class.getClassLoader(),
                 new Class[] { Graph.class }, new GraphInvocationHandler(liveGraph));
     }
-
+    
+    /**
+     * Constructs an immutable instance of {@link Graph}.
+     * @param config {@link GraphConfig}
+     * @return {@link Graph}
+     * @throws GraphException
+     */
     public static final Graph build(GraphConfig config) throws GraphException {
         Graph graph = createProxy(new GraphImpl(config));
         graph.initialize();

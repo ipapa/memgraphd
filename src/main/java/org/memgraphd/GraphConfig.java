@@ -3,6 +3,9 @@ package org.memgraphd;
 import org.memgraphd.bookkeeper.BookKeeper;
 import org.memgraphd.bookkeeper.PersistenceStore;
 import org.memgraphd.data.Data;
+import org.memgraphd.data.library.Librarian;
+import org.memgraphd.data.library.Library;
+import org.memgraphd.data.library.LibrarySection;
 import org.memgraphd.decision.Decision;
 import org.memgraphd.decision.DecisionMaker;
 import org.memgraphd.memory.MemoryBlock;
@@ -46,6 +49,11 @@ public interface GraphConfig {
     static final long DEFAULT_WRITE_FREQUENCY = 2000L;
     
     /**
+     * Default list of {@link LibrarySection}(s) to use by {@link Librarian}. Empty list by default.
+     */
+    static final LibrarySection[] DEFAULT_LIBRARY_SECTIONS = new LibrarySection[] {};
+    
+    /**
      * Returns the {@link Graph}'s name to use. 
      * @return {@link String}
      */
@@ -83,6 +91,12 @@ public interface GraphConfig {
     long getBookKeeperWriteFrequency();
     
     /**
+     * Returns the list of {@link LibrarySection}(s) to be kept track of by {@link Librarian}.
+     * @return array of {@link LibrarySection}
+     */
+    LibrarySection[] getLibrarySections();
+    
+    /**
      * In charge of determining in which memory {@link MemoryBlock} to store {@link Data} that
      * gets written in the {@link Graph}.
      * @return {@link MemoryBlockResolver}
@@ -106,5 +120,11 @@ public interface GraphConfig {
      * @return {@link PersistenceStore}
      */
     PersistenceStore getPersistenceStore();
+    
+    /**
+     * Returns the librarian to use to interact with {@link Library}.
+     * @return {@link Librarian}
+     */
+    Librarian getLibrarian();
     
 }

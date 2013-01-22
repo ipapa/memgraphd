@@ -5,6 +5,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.memgraphd.bookkeeper.HSQLBookKeeper;
 import org.memgraphd.bookkeeper.HSQLPersistenceStore;
+import org.memgraphd.data.library.Category;
+import org.memgraphd.data.library.DefaultLibrary;
+import org.memgraphd.data.library.LibrarySection;
+import org.memgraphd.data.library.LibrarySectionImpl;
 import org.memgraphd.decision.SingleDecisionMaker;
 import org.memgraphd.memory.DefaultMemoryBlockResolver;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -12,6 +16,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(PowerMockRunner.class)
@@ -19,13 +24,18 @@ import static org.junit.Assert.assertTrue;
 public class GraphConfigDefaultsTest {
     private GraphConfig configZero, configOne, configTwo, configThree, configFour;
     
+    private LibrarySection section;
+    private LibrarySection[] sections;
+    
     @Before
     public void setUp() throws Exception {
+        section = new LibrarySectionImpl("section1", new Category[] {});
+        sections = new LibrarySection[] { section };
         configZero = new GraphConfigDefaults();
         configOne = new GraphConfigDefaults("name");
         configTwo = new GraphConfigDefaults("name", 1);
         configThree = new GraphConfigDefaults("name", 1, "dbName", "/tmp/dbPath");
-        configFour = new GraphConfigDefaults("name", 1, "dbName", "/tmp/dbPath", 1000L, 2000L);
+        configFour = new GraphConfigDefaults("name", 1, "dbName", "/tmp/dbPath", 1000L, 2000L, sections);
     }
 
     @Test
@@ -89,6 +99,15 @@ public class GraphConfigDefaultsTest {
         assertEquals(GraphConfig.DEFAULT_WRITE_FREQUENCY, configTwo.getBookKeeperWriteFrequency());
         assertEquals(GraphConfig.DEFAULT_WRITE_FREQUENCY, configThree.getBookKeeperWriteFrequency());
         assertEquals(2000L, configFour.getBookKeeperWriteFrequency());
+    }
+    
+    @Test
+    public void testLibrarySections() {
+        assertSame(GraphConfig.DEFAULT_LIBRARY_SECTIONS, configZero.getLibrarySections());
+        assertSame(GraphConfig.DEFAULT_LIBRARY_SECTIONS, configOne.getLibrarySections());
+        assertSame(GraphConfig.DEFAULT_LIBRARY_SECTIONS, configTwo.getLibrarySections());
+        assertSame(GraphConfig.DEFAULT_LIBRARY_SECTIONS, configThree.getLibrarySections());
+        assertSame(sections, configFour.getLibrarySections());
     }
 
     @Test
@@ -161,6 +180,24 @@ public class GraphConfigDefaultsTest {
         
         assertNotNull(configFour.getPersistenceStore());
         assertTrue(configFour.getPersistenceStore() instanceof HSQLPersistenceStore);
+    }
+    
+    @Test
+    public void testGetLibrarian() {
+        assertNotNull(configZero.getLibrarian());
+        assertTrue(configZero.getLibrarian() instanceof DefaultLibrary);
+        
+        assertNotNull(configOne.getLibrarian());
+        assertTrue(configOne.getLibrarian() instanceof DefaultLibrary);
+        
+        assertNotNull(configTwo.getLibrarian());
+        assertTrue(configTwo.getLibrarian() instanceof DefaultLibrary);
+        
+        assertNotNull(configThree.getLibrarian());
+        assertTrue(configThree.getLibrarian() instanceof DefaultLibrary);
+        
+        assertNotNull(configFour.getLibrarian());
+        assertTrue(configFour.getLibrarian() instanceof DefaultLibrary);
     }
 
 }
