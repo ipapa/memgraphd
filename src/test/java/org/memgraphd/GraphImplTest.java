@@ -9,6 +9,7 @@ import org.junit.runner.RunWith;
 import org.memgraphd.bookkeeper.BookKeeper;
 import org.memgraphd.data.Data;
 import org.memgraphd.data.GraphData;
+import org.memgraphd.data.library.DefaultLibrary;
 import org.memgraphd.data.relationship.DataMatchmaker;
 import org.memgraphd.decision.Decision;
 import org.memgraphd.decision.DecisionMaker;
@@ -84,6 +85,9 @@ public class GraphImplTest {
     @Mock
     private BookKeeper bookKeeper;
     
+    @Mock
+    private DefaultLibrary librarian;
+    
     @Before
     public void setUp() throws Exception {
         when(config.getName()).thenReturn("someName");
@@ -94,6 +98,7 @@ public class GraphImplTest {
         when(config.getBookKeeper()).thenReturn(bookKeeper);
         when(config.getDecisionMaker()).thenReturn(decisionMaker);
         when(config.getBookKeeperOperationBatchSize()).thenReturn(1000L);
+        when(config.getLibrarian()).thenReturn(librarian);
         
         when(memoryBlockResolver.blocks()).thenReturn(new MemoryBlock[] {});
         when(decisionMaker.latestDecision()).thenReturn(Sequence.valueOf(10));
@@ -430,6 +435,11 @@ public class GraphImplTest {
         assertEquals(1, graph.recycled());
         
         verify(supervisor).recycled();
+    }
+    
+    @Test
+    public void testGetLibrary() {
+        assertSame(librarian, graph.getLibrary());
     }
 
 }

@@ -35,8 +35,8 @@ public class GraphDataRelationshipImplTest {
     
     @Before
     public void setUp() {
-        video1 = new OnlineVideo("1", null, null, null, null);
-        video2 = new OnlineVideo("2", null, null, null, null);
+        video1 = new OnlineVideo("1", null, null, null, null, true);
+        video2 = new OnlineVideo("2", null, null, null, null, true);
         episode = new TvEpisode(null, null, null, null, null, null, null);
         season = new TvSeason(null, null, null, null, null);
         

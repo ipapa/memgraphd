@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.log4j.Logger;
 import org.memgraphd.data.GraphData;
@@ -25,6 +26,9 @@ public class DefaultLibrary implements Librarian, Library {
     private final LibrarySection[] librarySections;
     
     private final Map<LibrarySection, Map<Category, Set<GraphData>>> map;
+    
+    private final AtomicInteger count;
+    
     /**
      * Constructs an instance of {@link Library}.
      * @param sections List of {@link LibrarySection}(s)
@@ -32,6 +36,7 @@ public class DefaultLibrary implements Librarian, Library {
     public DefaultLibrary(LibrarySection[] sections) {
         this.librarySections = sections;
         this.map = new ConcurrentHashMap<LibrarySection, Map<Category, Set<GraphData>>>();
+        this.count = new AtomicInteger();
     }
     
     /**
@@ -47,15 +52,7 @@ public class DefaultLibrary implements Librarian, Library {
      */
     @Override
     public final int size() {
-        int size = 0;
-        
-        for(Map<Category, Set<GraphData>> mapping : map.values()) {
-            for(Set<GraphData> set : mapping.values()) {
-                size += set.size();
-            }
-        }
-        
-        return size;
+        return count.get();
     }
     
     /**
@@ -63,7 +60,7 @@ public class DefaultLibrary implements Librarian, Library {
      */
     @Override
     public final void archive(GraphData gData) {
-        
+        boolean archived = false;
         for(LibrarySection section : librarySections) {
             Map<Category, Set<GraphData>> mapping = map.get(section);
             if(mapping == null) {
@@ -80,10 +77,13 @@ public class DefaultLibrary implements Librarian, Library {
                     LOGGER.info(String.format("Archiving graph data id=%s in section=%s and category=%s", 
                             gData.getData().getId(), section.getName(), cat.getName() ));
                     dataSet.add(gData);
+                    archived = true;
                 }
             }
         }
-        
+        if(archived) {
+            count.incrementAndGet();
+        }
     }
     
     /**
@@ -91,6 +91,7 @@ public class DefaultLibrary implements Librarian, Library {
      */
     @Override
     public final void unarchive(GraphData gData) {
+        boolean unarchived = false;
         for(LibrarySection section : map.keySet()) {
             for(Map.Entry<Category, Set<GraphData>> entry : map.get(section).entrySet()) {
                 Category cat = entry.getKey();
@@ -99,8 +100,12 @@ public class DefaultLibrary implements Librarian, Library {
                     LOGGER.info(String.format("Unarchiving graph data id=%s in section=%s and category=%s", 
                             gData.getData().getId(), section.getName(), cat.getName() ));
                     catValue.remove(gData);
+                    unarchived = true;
                 }
             }              
+        }
+        if(unarchived) {
+            count.decrementAndGet();
         }
     }
     

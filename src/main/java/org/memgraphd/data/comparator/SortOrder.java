@@ -9,8 +9,8 @@ package org.memgraphd.data.comparator;
  *
  */
 public enum SortOrder {
-    ASCENDING(-1),
-    DESCENDING(1);
+    ASCENDING(1),
+    DESCENDING(-1);
     
     private final int order;
     

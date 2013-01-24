@@ -16,11 +16,14 @@ public class OnlineVideo extends DataImpl implements DataRelationship, DataValid
     
     private final String title;
     private final String episodeId;
+    private final boolean isLongForm;
     
-    public OnlineVideo(String id, DateTime createdDate, DateTime lastModifiedDate, String title, String episodeId) {
+    public OnlineVideo(String id, DateTime createdDate, DateTime lastModifiedDate, String title, 
+            String episodeId, boolean isLongForm) {
         super(id, createdDate, lastModifiedDate);
         this.title = title;
         this.episodeId = episodeId;
+        this.isLongForm = isLongForm;
     }
 
     public final String getTitle() {
@@ -29,6 +32,10 @@ public class OnlineVideo extends DataImpl implements DataRelationship, DataValid
 
     public final String getEpisodeId() {
         return episodeId;
+    }
+    
+    public final boolean isLongForm() {
+        return isLongForm;
     }
 
     @Override

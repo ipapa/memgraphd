@@ -7,6 +7,7 @@ import org.memgraphd.data.GraphData;
 import org.memgraphd.data.GraphDataSnapshotManager;
 import org.memgraphd.data.GraphDataSnapshotManagerImpl;
 import org.memgraphd.data.event.GraphDataEventListenerManagerImpl;
+import org.memgraphd.data.library.Library;
 import org.memgraphd.data.relationship.DataMatchmaker;
 import org.memgraphd.data.relationship.DataMatchmakerImpl;
 import org.memgraphd.decision.Decision;
@@ -51,6 +52,7 @@ public final class GraphImpl implements Graph {
     private final DataMatchmaker dataMatchmaker;
     private final GraphSupervisor supervisor;
     private final GraphConfig config;
+    private final Library library;
     
     private GraphImpl(GraphConfig config) {
         this.config = config;
@@ -64,12 +66,12 @@ public final class GraphImpl implements Graph {
         this.dataMatchmaker = new DataMatchmakerImpl(memoryAccess, seeker);
         
         this.writer = new GraphWriterImpl(memoryAccess, config.getDecisionMaker(),
-                new GraphDataEventListenerManagerImpl(), mappings, seeker, dataMatchmaker);
+                new GraphDataEventListenerManagerImpl(), mappings, seeker, dataMatchmaker, config.getLibrarian());
         this.filter = new GraphFilterImpl(memoryAccess, reader);
         
         GraphDataSnapshotManager snapshotManager = new GraphDataSnapshotManagerImpl(reader, writer, mappings, config.getDecisionMaker());
         this.supervisor = new GraphSupervisorImpl(snapshotManager, (MemoryStats) memoryManager);
-
+        this.library = (Library) config.getLibrarian();
     }
 
     private static final Graph createProxy(Graph liveGraph) {
@@ -223,6 +225,14 @@ public final class GraphImpl implements Graph {
     @Override
     public GraphData[] filterByRange(Sequence startSeq, Sequence endSeq) {
         return filter.filterByRange(startSeq, endSeq);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final Library getLibrary() {
+        return library;
     }
     
     /**

@@ -7,6 +7,7 @@ import org.memgraphd.data.DataValidator;
 import org.memgraphd.data.GraphData;
 import org.memgraphd.data.GraphDataImpl;
 import org.memgraphd.data.event.GraphDataEventListenerManager;
+import org.memgraphd.data.library.Librarian;
 import org.memgraphd.data.relationship.DataMatchmaker;
 import org.memgraphd.data.relationship.DataRelationship;
 import org.memgraphd.decision.Decision;
@@ -29,16 +30,28 @@ public class GraphWriterImpl extends AbstractGraphAccess implements GraphWriter 
     private final GraphMappings mappings;
     private final GraphSeeker seeker;
     private final DataMatchmaker dataMatchmaker;
+    private final Librarian librarian;
     
+    /**
+     * 
+     * @param memoryAccess {@link MemoryOperations}
+     * @param decisionMaker {@link DecisionMaker}
+     * @param eventManager {@link GraphDataEventListenerManager}
+     * @param mappings {@link GraphMappings}
+     * @param seeker {@link GraphSeeker}
+     * @param matchMaker {@link DataMatchmaker}
+     * @param librarian {@link Librarian}
+     */
     public GraphWriterImpl(MemoryOperations memoryAccess, DecisionMaker decisionMaker, 
             GraphDataEventListenerManager eventManager, GraphMappings mappings, 
-            GraphSeeker seeker, DataMatchmaker matchMaker) {
+            GraphSeeker seeker, DataMatchmaker matchMaker, Librarian librarian) {
         super(memoryAccess);
         this.decisionMaker = decisionMaker;
         this.eventManager = eventManager;
         this.seeker = seeker;
         this.mappings = mappings;
         this.dataMatchmaker = matchMaker;
+        this.librarian = librarian;
     }
     
     /**
@@ -46,10 +59,10 @@ public class GraphWriterImpl extends AbstractGraphAccess implements GraphWriter 
      */
     @Override
     public MemoryReference write(Data data) throws GraphException {
-        // 1. Validate data first.
+        // Validate data first.
         validate(data);
         
-        // 2. Send data to decision to get a sequence assigned to it
+        // Send data to decision maker to get a sequence assigned to it
         Decision decision = decisionMaker.decidePutRequest(data);
         
         return write(decision);
@@ -71,17 +84,20 @@ public class GraphWriterImpl extends AbstractGraphAccess implements GraphWriter 
      * {@inheritDoc}
      */
     public MemoryReference write(Decision decision) {
-        // 3. Instantiate the graph data wrapper for this data.
+        // 1. Instantiate the graph data wrapper for this data.
         GraphDataImpl newData = new GraphDataImpl(decision);
         
-        // 4. Update data snapshot
+        // 2. Update data snapshot
         MemoryReference ref = insertUpdateState(decision.getData(), newData);
         
-        // 5. Set the memory reference assigned to data on write (create|update)
+        // 3. Set the memory reference assigned to data on write (create|update)
         newData.setRefence(ref);
         
-        // 6. Update sequence mappings.
+        // 4. Update sequence mappings.
         mappings.put(decision.getSequence(), ref);
+        
+        // 5. Let librarian know
+        librarian.archive(newData);
         
         LOGGER.info(String.format("Wrote data id=%s at memory reference=%d", decision.getData().getId(), ref.id()));
         
@@ -120,6 +136,9 @@ public class GraphWriterImpl extends AbstractGraphAccess implements GraphWriter 
         mappings.delete(gData.getSequence());
         
         LOGGER.info(String.format("Deleting data id=%s at memory reference=%d", decision.getDataId(), gData.getReference().id()));
+        
+        // alert librarian
+        librarian.unarchive(gData);
         
         // alert listeners
         eventManager.onDelete(gData);

@@ -39,8 +39,8 @@ public class GraphRelationshipsIT {
     @Before
     public void setUp() throws SQLException, GraphException {
 
-        video = new OnlineVideo(VIDEO_ID, new DateTime(), new DateTime(), "Video #1", TVEPISODE_ID);
-        video2 = new OnlineVideo(VIDEO_ID + 1, new DateTime(), new DateTime(), "Video #1", TVEPISODE_ID);
+        video = new OnlineVideo(VIDEO_ID, new DateTime(), new DateTime(), "Video #1", TVEPISODE_ID, true);
+        video2 = new OnlineVideo(VIDEO_ID + 1, new DateTime(), new DateTime(), "Video #1", TVEPISODE_ID, true);
         episode = new TvEpisode(TVEPISODE_ID, new DateTime(), new DateTime(), TVSEASON_ID,
                 "Funny episode", "1", new DateTime());
         season = new TvSeason(TVSEASON_ID, new DateTime(), new DateTime(), "1", TVSERIES_ID);

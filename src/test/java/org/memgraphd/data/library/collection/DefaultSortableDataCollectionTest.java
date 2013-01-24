@@ -67,8 +67,8 @@ public class DefaultSortableDataCollectionTest {
     }
 
     @Test
-    public void testSortById_Descending() {
-        LibraryDataCollection coll = collection.sortById(SortOrder.DESCENDING);
+    public void testSortById_Ascending() {
+        LibraryDataCollection coll = collection.sortById(SortOrder.ASCENDING);
         assertNotNull(coll);
         assertEquals(3, coll.size());
         assertSame(gData1, coll.list()[0]);
@@ -77,8 +77,8 @@ public class DefaultSortableDataCollectionTest {
     }
     
     @Test
-    public void testSortById_Ascending() {
-        LibraryDataCollection coll = collection.sortById(SortOrder.ASCENDING);
+    public void testSortById_Descending() {
+        LibraryDataCollection coll = collection.sortById(SortOrder.DESCENDING);
         assertNotNull(coll);
         assertEquals(3, coll.size());
         assertSame(gData3, coll.list()[0]);
@@ -87,8 +87,8 @@ public class DefaultSortableDataCollectionTest {
     }
     
     @Test
-    public void testSortByCreatedDate_Descending() {
-        LibraryDataCollection coll = collection.sortByCreatedDate(SortOrder.DESCENDING);
+    public void testSortByCreatedDate_Ascending() {
+        LibraryDataCollection coll = collection.sortByCreatedDate(SortOrder.ASCENDING);
         assertNotNull(coll);
         assertEquals(3, coll.size());
         assertSame(gData1, coll.list()[0]);
@@ -97,8 +97,8 @@ public class DefaultSortableDataCollectionTest {
     }
     
     @Test
-    public void testSortByCreatedDate_Ascending() {
-        LibraryDataCollection coll = collection.sortByCreatedDate(SortOrder.ASCENDING);
+    public void testSortByCreatedDate_Descending() {
+        LibraryDataCollection coll = collection.sortByCreatedDate(SortOrder.DESCENDING);
         assertNotNull(coll);
         assertEquals(3, coll.size());
         assertSame(gData3, coll.list()[0]);
@@ -107,8 +107,8 @@ public class DefaultSortableDataCollectionTest {
     }
 
     @Test
-    public void testSortByLastModifiedDate_Descending() {
-        LibraryDataCollection coll = collection.sortByLastModifiedDate(SortOrder.DESCENDING);
+    public void testSortByLastModifiedDate_Ascending() {
+        LibraryDataCollection coll = collection.sortByLastModifiedDate(SortOrder.ASCENDING);
         assertNotNull(coll);
         assertEquals(3, coll.size());
         assertSame(gData1, coll.list()[0]);
@@ -117,8 +117,8 @@ public class DefaultSortableDataCollectionTest {
     }
     
     @Test
-    public void testSortByLastModifiedDate_Ascending() {
-        LibraryDataCollection coll = collection.sortByLastModifiedDate(SortOrder.ASCENDING);
+    public void testSortByLastModifiedDate_Descending() {
+        LibraryDataCollection coll = collection.sortByLastModifiedDate(SortOrder.DESCENDING);
         assertNotNull(coll);
         assertEquals(3, coll.size());
         assertSame(gData3, coll.list()[0]);
