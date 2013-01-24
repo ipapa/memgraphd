@@ -191,7 +191,58 @@ public class GraphImplTest {
         
         verify(reader).readReferences(refs);
     }
+    
+    @Test
+    public void testReadGraphId() {
+        when(reader.readGraph("some id")).thenReturn(gData);
+        assertSame(gData, graph.readGraph("some id"));
+        verify(reader).readGraph("some id");
+    }
 
+    @Test
+    public void testReadGraphSequence() {
+        when(reader.readGraph(Sequence.valueOf(1))).thenReturn(gData);
+        assertSame(gData, graph.readGraph(Sequence.valueOf(1)));
+        verify(reader).readGraph(Sequence.valueOf(1));
+    }
+
+    @Test
+    public void testReadGraphReference() {
+        when(reader.readGraph(MemoryReference.valueOf(1))).thenReturn(gData);
+        assertSame(gData, graph.readGraph(MemoryReference.valueOf(1)));
+        verify(reader).readGraph(MemoryReference.valueOf(1));
+    }
+
+    @Test
+    public void testReadGraphIds() {
+        String[] ids = new String[] {"id1", "id2", "id3"};
+        GraphData[] values = new GraphData[] {gData, gData, gData};
+        when(reader.readGraph(ids)).thenReturn(values);
+        assertSame(values, graph.readGraph(ids));
+        
+        verify(reader).readGraph(ids);
+    }
+
+    @Test
+    public void testReadGraphSequences() {
+        Sequence[] sequences = new Sequence[] {Sequence.valueOf(1), Sequence.valueOf(2), Sequence.valueOf(3)};
+        GraphData[] values = new GraphData[] {gData, gData, gData};
+        when(reader.readGraph(sequences)).thenReturn(values);
+        assertSame(values, graph.readGraph(sequences));
+        
+        verify(reader).readGraph(sequences);
+    }
+
+    @Test
+    public void testReadGraphReferences() {
+        MemoryReference[] refs = new MemoryReference[] {MemoryReference.valueOf(1), MemoryReference.valueOf(2), MemoryReference.valueOf(3)};
+        GraphData[] values = new GraphData[] {gData, gData, gData};
+        when(reader.readGraph(refs)).thenReturn(values);
+        assertSame(values, graph.readGraph(refs));
+        
+        verify(reader).readGraph(refs);
+    }
+    
     @Test
     public void testWriteData() throws GraphException {
         when(writer.write(data)).thenReturn(MemoryReference.valueOf(1));

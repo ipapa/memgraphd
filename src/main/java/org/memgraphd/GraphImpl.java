@@ -145,7 +145,55 @@ public final class GraphImpl implements Graph {
     public GraphData[] readReferences(MemoryReference[] refs) {
         return reader.readReferences(refs);
     }
-
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public GraphData readGraph(String id) {
+        return reader.readGraph(id);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public GraphData readGraph(Sequence seq) {
+        return reader.readGraph(seq);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public GraphData readGraph(MemoryReference ref) {
+        return reader.readGraph(ref);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public GraphData[] readGraph(String[] ids) {
+        return reader.readGraph(ids);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public GraphData[] readGraph(Sequence[] seqs) {
+        return reader.readGraph(seqs);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public GraphData[] readGraph(MemoryReference[] refs) {
+        return reader.readGraph(refs);
+    }
+    
     /**
      * {@inheritDoc}
      */
