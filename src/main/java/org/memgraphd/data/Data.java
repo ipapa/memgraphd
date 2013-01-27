@@ -11,7 +11,7 @@ import org.joda.time.DateTime;
  * @since June. 11, 2012
  *
  */
-public interface Data extends Serializable {
+public interface Data extends DataPermissions, Serializable {
     /**
      * A unique identifier for this instance.
      * @return {@link String}

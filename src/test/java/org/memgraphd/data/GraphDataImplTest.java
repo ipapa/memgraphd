@@ -16,7 +16,7 @@ public class GraphDataImplTest {
     private final MemoryReference REFERENCE = MemoryReference.valueOf(1);
     private final GraphRequestType REQUEST_TYPE = GraphRequestType.PUT;
     private final String DATA_ID = "data-1";
-    private final Data DATA = new DataImpl(DATA_ID, null, null);
+    private final Data DATA = new ReadWriteData(DATA_ID, null, null);
     private final DateTime TIME = new DateTime();
     private final Sequence SEQUENCE = Sequence.valueOf(1);
     

@@ -2,13 +2,13 @@ package org.memgraphd.test.data;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
-import org.memgraphd.data.DataImpl;
+import org.memgraphd.data.ReadWriteData;
 import org.memgraphd.data.DataValidator;
 import org.memgraphd.data.relationship.DataRelationship;
 
 
 
-public class TvEpisode extends DataImpl implements DataValidator, DataRelationship {
+public class TvEpisode extends ReadWriteData implements DataValidator, DataRelationship {
     /**
      * 
      */

@@ -8,7 +8,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.memgraphd.data.Data;
-import org.memgraphd.data.DataImpl;
+import org.memgraphd.data.ReadWriteData;
 import org.memgraphd.data.GraphData;
 import org.memgraphd.exception.GraphException;
 
@@ -104,7 +104,7 @@ public class GraphIT {
             throws GraphException, JSONException {
 
         for (int i = 0; i < CAPACITY; i++) {
-           Data data = new DataImpl(String.valueOf(i), new DateTime(), new DateTime());
+           Data data = new ReadWriteData(String.valueOf(i), new DateTime(), new DateTime());
            graph.write(data);
         }
     }

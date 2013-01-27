@@ -11,7 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.memgraphd.GraphRequestType;
-import org.memgraphd.data.DataImpl;
+import org.memgraphd.data.ReadWriteData;
 import org.memgraphd.decision.Decision;
 import org.memgraphd.decision.Sequence;
 import org.mockito.Mock;
@@ -66,7 +66,7 @@ public class BookKeeperReaderTest {
        when(resultSet.getTimestamp("DECISION_TIME")).thenReturn(new Timestamp(System.currentTimeMillis()));
        when(resultSet.getString("REQUEST_TYPE")).thenReturn("PUT");
        when(resultSet.getString("DATA_ID")).thenReturn("id");
-       when(resultSet.getObject("DATA")).thenReturn(new DataImpl("id", null, null));
+       when(resultSet.getObject("DATA")).thenReturn(new ReadWriteData("id", null, null));
        
        List<Decision> decisions = reader.readRange(seq_start, seq_end);
        assertNotNull(decisions);

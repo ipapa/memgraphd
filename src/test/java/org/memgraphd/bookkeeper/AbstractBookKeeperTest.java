@@ -14,7 +14,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.memgraphd.data.Data;
-import org.memgraphd.data.DataImpl;
+import org.memgraphd.data.ReadWriteData;
 import org.memgraphd.decision.Decision;
 import org.memgraphd.decision.Sequence;
 import org.mockito.Mock;
@@ -68,7 +68,7 @@ public class AbstractBookKeeperTest {
     @Before
     public void setUp() throws Exception {
         keeper =  new HSQLBookKeeper(persistenceStore, 5, 5);
-        data = new DataImpl("someId", new DateTime(), new DateTime());
+        data = new ReadWriteData("someId", new DateTime(), new DateTime());
         when(decision.getData()).thenReturn(data);
     }
     

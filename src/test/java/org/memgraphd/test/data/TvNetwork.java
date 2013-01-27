@@ -1,9 +1,9 @@
 package org.memgraphd.test.data;
 
 import org.joda.time.DateTime;
-import org.memgraphd.data.DataImpl;
+import org.memgraphd.data.ReadWriteData;
 
-public class TvNetwork extends DataImpl {
+public class TvNetwork extends ReadWriteData {
 
     /**
      * 

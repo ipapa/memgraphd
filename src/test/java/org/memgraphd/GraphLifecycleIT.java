@@ -5,7 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.memgraphd.data.Data;
-import org.memgraphd.data.DataImpl;
+import org.memgraphd.data.ReadWriteData;
 import org.memgraphd.data.GraphData;
 import org.memgraphd.data.GraphDataImpl;
 import org.memgraphd.decision.Sequence;
@@ -31,7 +31,7 @@ public class GraphLifecycleIT {
     @Before
     public void setUp() throws Exception {
         graph =  GraphImpl.build(new GraphConfigDefaults("someGraph", CAPACITY));
-        data = new DataImpl(String.valueOf(1), new DateTime(), new DateTime());
+        data = new ReadWriteData(String.valueOf(1), new DateTime(), new DateTime());
     }
     
     @Test(expected=RuntimeException.class)

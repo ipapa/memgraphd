@@ -1,10 +1,10 @@
 package org.memgraphd.test.data;
 
 import org.joda.time.DateTime;
-import org.memgraphd.data.DataImpl;
+import org.memgraphd.data.ReadWriteData;
 import org.memgraphd.data.relationship.DataRelationship;
 
-public class Movie extends DataImpl implements DataRelationship {
+public class Movie extends ReadWriteData implements DataRelationship {
     private final String name;
     private final String networkId;
     

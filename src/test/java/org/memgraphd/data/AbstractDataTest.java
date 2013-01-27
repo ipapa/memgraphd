@@ -6,20 +6,20 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-public class DataImplTest {
+public class AbstractDataTest {
     private static final String ID = "id";
     private static final DateTime CREATED_DATE = new DateTime();
     private static final DateTime LAST_MODIFIED_DATE = new DateTime();
     
-    private DataImpl data;
+    private ReadWriteData data;
     
     @Before
     public void setUp() {
-        data = new DataImpl(ID, CREATED_DATE, LAST_MODIFIED_DATE);
+        data = new ReadWriteData(ID, CREATED_DATE, LAST_MODIFIED_DATE);
     }
     
     @Test
-    public void testDataImpl() {
+    public void testData() {
         assertNotNull(data);
     }
 
