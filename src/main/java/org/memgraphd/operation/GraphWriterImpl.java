@@ -29,8 +29,10 @@ public class GraphWriterImpl extends AbstractGraphAccess implements GraphWriter 
     private final GraphDataEventListenerManager eventManager;
     private final GraphMappings mappings;
     private final GraphSeeker seeker;
+    private final GraphReader reader;
     private final DataMatchmaker dataMatchmaker;
     private final Librarian librarian;
+    private final GraphAuthority authority;
     
     /**
      * 
@@ -42,16 +44,18 @@ public class GraphWriterImpl extends AbstractGraphAccess implements GraphWriter 
      * @param matchMaker {@link DataMatchmaker}
      * @param librarian {@link Librarian}
      */
-    public GraphWriterImpl(MemoryOperations memoryAccess, DecisionMaker decisionMaker, 
+    public GraphWriterImpl(MemoryOperations memoryAccess, GraphReader reader, DecisionMaker decisionMaker, 
             GraphDataEventListenerManager eventManager, GraphMappings mappings, 
             GraphSeeker seeker, DataMatchmaker matchMaker, Librarian librarian) {
         super(memoryAccess);
+        this.reader = reader;
         this.decisionMaker = decisionMaker;
         this.eventManager = eventManager;
         this.seeker = seeker;
         this.mappings = mappings;
         this.dataMatchmaker = matchMaker;
         this.librarian = librarian;
+        this.authority = new GraphAuthorityImpl();
     }
     
     /**
@@ -59,12 +63,17 @@ public class GraphWriterImpl extends AbstractGraphAccess implements GraphWriter 
      */
     @Override
     public MemoryReference write(Data data) throws GraphException {
-        // Validate data first.
+        
+        // 1. Validate the actual data.
         validate(data);
         
-        // Send data to decision maker to get a sequence assigned to it
+        // 2. Authorize the request.
+        authorizeWrite(data);
+        
+        // 3. Generate a decision sequence for this request and log the transaction.
         Decision decision = decisionMaker.decidePutRequest(data);
         
+        // 4. Update the graph
         return write(decision);
     }
     
@@ -111,10 +120,13 @@ public class GraphWriterImpl extends AbstractGraphAccess implements GraphWriter 
     public void delete(GraphData gData) throws GraphException {
         Data data = gData.getData();
         
-        validate(data);
+        // 1. Authorize the delete request
+        authority.grantDelete(data);
         
+        // 2. Get a sequence assigned by decision maker to this delete request
         Decision decision = decisionMaker.decideDeleteRequest(data);
         
+        // 3. Delete the actual data
         deleteState(gData, decision);
  
     }
@@ -159,11 +171,14 @@ public class GraphWriterImpl extends AbstractGraphAccess implements GraphWriter 
      */
     @Override
     public void delete(String dataId) throws GraphException {
-        MemoryReference ref = seeker.seekById(dataId);
-        if(ref == null) {
+        // 1. Make sure data id exists in the Graph
+        GraphData gData = reader.readId(dataId);
+        if(gData == null) {
             throw new GraphException(String.format("Data does not exist for id=%s", dataId));    
         }
-        delete(getMemoryAccess().read(ref));
+        
+        // 2. Delete to delete graph method
+        delete(gData);
     }
 
     @Override
@@ -232,6 +247,16 @@ public class GraphWriterImpl extends AbstractGraphAccess implements GraphWriter 
             if(!((DataValidator) data).isValid()) {
                 throw new GraphException("Data validation failed.");
             }
+        }
+    }
+    
+    private void authorizeWrite(Data data) {
+        GraphData existing = reader.readId(data.getId());
+        if(existing == null) {
+            authority.grantInsert(data);
+        }
+        else {
+            authority.grantUpdate(existing.getData(), data);
         }
     }
 

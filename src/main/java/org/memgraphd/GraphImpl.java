@@ -65,7 +65,7 @@ public final class GraphImpl implements Graph {
         this.reader = new GraphReaderImpl(memoryAccess, seeker);
         this.dataMatchmaker = new DataMatchmakerImpl(memoryAccess, seeker);
         
-        this.writer = new GraphWriterImpl(memoryAccess, config.getDecisionMaker(),
+        this.writer = new GraphWriterImpl(memoryAccess, reader, config.getDecisionMaker(),
                 new GraphDataEventListenerManagerImpl(), mappings, seeker, dataMatchmaker, config.getLibrarian());
         this.filter = new GraphFilterImpl(memoryAccess, reader);
         

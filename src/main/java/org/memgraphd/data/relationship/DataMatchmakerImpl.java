@@ -98,12 +98,9 @@ public class DataMatchmakerImpl extends AbstractGraphAccess implements DataMatch
     }
     
     private void handleExistingSingles(MemoryReference ref, DataRelationship data) {
-        if (data != null && getSingles().containsKey(data.getId())) {
-            if (ref != null) {
-                for (MemoryReference r : getSingles().get(data.getId())) {
-                    getMemoryAccess().link(r, ref);
-                }
-//                getSingles().remove(data.getId());
+        if (getSingles().containsKey(data.getId())) {
+            for (MemoryReference r : getSingles().get(data.getId())) {
+                getMemoryAccess().link(r, ref);
             }
         }
     }
@@ -113,9 +110,7 @@ public class DataMatchmakerImpl extends AbstractGraphAccess implements DataMatch
             getSingles().put(id, new HashSet<MemoryReference>());
         }
 
-        if (ref != null) {
-            getSingles().get(id).add(ref);
-        }
+        getSingles().get(id).add(ref);
     }
     
     private Map<String, Set<MemoryReference>> getSingles() {
