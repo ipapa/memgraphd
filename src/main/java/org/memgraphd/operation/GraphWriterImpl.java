@@ -132,8 +132,9 @@ public class GraphWriterImpl extends AbstractGraphAccess implements GraphWriter 
     }
 
     private void deleteState(GraphData gData, Decision decision) {
-        if(decision.getData() instanceof DataRelationship) {
-            DataRelationship relationships = (DataRelationship) decision.getData();         
+        Data data = decision.getData();
+        if(data instanceof DataRelationship) {
+            DataRelationship relationships = (DataRelationship) data;         
             // separate existing relationships
             dataMatchmaker.separate(relationships);
         }
@@ -172,10 +173,7 @@ public class GraphWriterImpl extends AbstractGraphAccess implements GraphWriter 
     @Override
     public void delete(String dataId) throws GraphException {
         // 1. Make sure data id exists in the Graph
-        GraphData gData = reader.readId(dataId);
-        if(gData == null) {
-            throw new GraphException(String.format("Data does not exist for id=%s", dataId));    
-        }
+        GraphData gData = checkDataExists(dataId);
         
         // 2. Delete to delete graph method
         delete(gData);
@@ -183,31 +181,45 @@ public class GraphWriterImpl extends AbstractGraphAccess implements GraphWriter 
 
     @Override
     public void delete(Decision decision) throws GraphException {
-        MemoryReference ref = seeker.seekById(decision.getDataId());
-        if(ref == null) {
-            throw new GraphException(String.format("Data does not exist for id=%s", decision.getDataId()));    
-        }
-        deleteState(getMemoryAccess().read(ref), decision);
+        delete(decision.getDataId());
     }
-
+    
+    private GraphData checkDataExists(String dataId) throws GraphException {
+        GraphData gData = reader.readId(dataId);
+        if(gData == null) {
+            throw new GraphException(String.format("Data does not exist for id=%s", dataId));    
+        }
+        return gData;
+    }
+    
     private MemoryReference insertUpdateState(Data data, GraphData newData) {
         // 4. Is it an update or a new write request?
         // 4.1. Update relationships for data affected.
         // 4.2. Notify listeners about this change.
         MemoryReference ref = seeker.seekById(data.getId());
         if(ref != null) { // update
-            GraphData oldData = getMemoryAccess().read(ref);
-            getMemoryAccess().update(ref, newData);
-            updateDataRelationships(oldData.getData(), data);
-            eventManager.onUpdate(oldData, newData);
+            handleUpdate(data, newData, ref);
         }
         else { // new data
-            ref = getMemoryAccess().write(newData);
-            mappings.put(data.getId(), ref);
-            buildDataRelationships(newData);
-            eventManager.onCreate(newData);
+            ref = handleInsert(data, newData);
         }
         return ref;
+    }
+
+    private MemoryReference handleInsert(Data data, GraphData newData) {
+        MemoryReference ref;
+        ref = getMemoryAccess().write(newData);
+        mappings.put(data.getId(), ref);
+        buildDataRelationships(newData);
+        eventManager.onCreate(newData);
+        return ref;
+    }
+
+    private void handleUpdate(Data data, GraphData newData, MemoryReference ref) {
+        GraphData oldData = getMemoryAccess().read(ref);
+        getMemoryAccess().update(ref, newData);
+        updateDataRelationships(oldData.getData(), data);
+        eventManager.onUpdate(oldData, newData);
     }
     
     private void buildDataRelationships(GraphData data) {
