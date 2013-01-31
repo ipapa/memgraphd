@@ -58,11 +58,11 @@ public class GraphDataSnapshotManagerImplTest {
         
         when(decisionMaker.getReadWriteBatchSize()).thenReturn(5L);
         
-        decision1 = new DecisionImpl(Sequence.valueOf(1L), null, GraphRequestType.PUT, "1", data);
+        decision1 = new DecisionImpl(Sequence.valueOf(1L), null, GraphRequestType.CREATE, "1", data);
         decision2 = new DecisionImpl(Sequence.valueOf(2L), null, GraphRequestType.DELETE, "2", data);
-        decision3 = new DecisionImpl(Sequence.valueOf(3L), null, GraphRequestType.PUT, "3", data);
+        decision3 = new DecisionImpl(Sequence.valueOf(3L), null, GraphRequestType.CREATE, "3", data);
         decision4 = new DecisionImpl(Sequence.valueOf(4L), null, GraphRequestType.DELETE, "4", data);
-        decision5 = new DecisionImpl(Sequence.valueOf(5L), null, GraphRequestType.PUT, "5", data);
+        decision5 = new DecisionImpl(Sequence.valueOf(5L), null, GraphRequestType.CREATE, "5", data);
     }
 
     @Test
@@ -89,7 +89,7 @@ public class GraphDataSnapshotManagerImplTest {
     public void testInitialize_BadDecisionWithRequestTypeGET() throws GraphException {
         Sequence seq0 = Sequence.valueOf(0);
         Sequence seq1 = Sequence.valueOf(1);
-        Decision d = new DecisionImpl(seq0, null, GraphRequestType.GET, "data1", data);
+        Decision d = new DecisionImpl(seq0, null, GraphRequestType.RETRIEVE, "data1", data);
         
         when(decisionMaker.latestDecision()).thenReturn(seq1);
         when(decisionMaker.readRange(seq0, seq1)).thenReturn(Arrays.asList(d));

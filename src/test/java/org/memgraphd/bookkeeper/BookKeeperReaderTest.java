@@ -64,7 +64,7 @@ public class BookKeeperReaderTest {
        when(resultSet.next()).thenReturn(true).thenReturn(false);
        when(resultSet.getLong("SEQUENCE_ID")).thenReturn(1L);
        when(resultSet.getTimestamp("DECISION_TIME")).thenReturn(new Timestamp(System.currentTimeMillis()));
-       when(resultSet.getString("REQUEST_TYPE")).thenReturn("PUT");
+       when(resultSet.getString("REQUEST_TYPE")).thenReturn("CREATE");
        when(resultSet.getString("DATA_ID")).thenReturn("id");
        when(resultSet.getObject("DATA")).thenReturn(new ReadWriteData("id", null, null));
        
@@ -75,7 +75,7 @@ public class BookKeeperReaderTest {
        
        assertNotNull(d);
        assertEquals(1L, d.getSequence().number());
-       assertEquals(GraphRequestType.PUT, d.getRequestType());
+       assertEquals(GraphRequestType.CREATE, d.getRequestType());
        assertNotNull(d.getTime());
        assertEquals("id", d.getDataId());
        assertNotNull(d.getData());

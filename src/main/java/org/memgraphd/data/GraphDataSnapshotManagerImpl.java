@@ -92,7 +92,7 @@ public class GraphDataSnapshotManagerImpl implements GraphDataSnapshotManager {
                 if(GraphRequestType.DELETE == d.getRequestType()) {
                     writer.delete(d);
                 }
-                else if(GraphRequestType.PUT == d.getRequestType())  {
+                else if(GraphRequestType.CREATE == d.getRequestType())  {
                     writer.write(d);
                 }
                 else {

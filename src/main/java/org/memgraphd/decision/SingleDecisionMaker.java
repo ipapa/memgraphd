@@ -40,7 +40,7 @@ public class SingleDecisionMaker implements DecisionMaker {
     @Override
     public final Decision decidePutRequest(Data data) {
         Decision decision = new DecisionImpl(Sequence.valueOf(latestInUseSequence.incrementAndGet()), 
-                new DateTime(), GraphRequestType.PUT, data.getId(), data);
+                new DateTime(), GraphRequestType.CREATE, data.getId(), data);
         LOGGER.info(String.format("Write decision: Assigned dataId=%s sequence=%d", data.getId(), decision.getSequence().number()));
         bookKeeper.record(decision);
         return decision;

@@ -14,7 +14,7 @@ import static org.junit.Assert.assertNull;
 
 public class GraphDataImplTest {
     private final MemoryReference REFERENCE = MemoryReference.valueOf(1);
-    private final GraphRequestType REQUEST_TYPE = GraphRequestType.PUT;
+    private final GraphRequestType REQUEST_TYPE = GraphRequestType.CREATE;
     private final String DATA_ID = "data-1";
     private final Data DATA = new ReadWriteData(DATA_ID, null, null);
     private final DateTime TIME = new DateTime();

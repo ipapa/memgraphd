@@ -79,7 +79,7 @@ public class BookKeeperWriterTest {
         when(d2.getSequence()).thenReturn(Sequence.valueOf(2));
         when(d1.getTime()).thenReturn(new DateTime());
         when(d2.getTime()).thenReturn(new DateTime());
-        when(d1.getRequestType()).thenReturn(GraphRequestType.PUT);
+        when(d1.getRequestType()).thenReturn(GraphRequestType.CREATE);
         when(d2.getRequestType()).thenReturn(GraphRequestType.DELETE);
         
         when(preparedStatement.executeBatch()).thenReturn(null);
