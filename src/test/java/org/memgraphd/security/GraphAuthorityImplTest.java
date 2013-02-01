@@ -1,4 +1,4 @@
-package org.memgraphd.operation;
+package org.memgraphd.security;
 
 import org.joda.time.DateTime;
 import org.junit.Before;
@@ -13,6 +13,8 @@ import org.memgraphd.data.ReadOnlyProtectedData;
 import org.memgraphd.data.ReadWriteData;
 import org.memgraphd.data.ReadWriteExpiringData;
 import org.memgraphd.data.ReadWriteProtectedData;
+import org.memgraphd.security.GraphAuthority;
+import org.memgraphd.security.GraphAuthorityImpl;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 

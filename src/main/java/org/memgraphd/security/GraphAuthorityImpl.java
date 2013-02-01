@@ -1,4 +1,4 @@
-package org.memgraphd.operation;
+package org.memgraphd.security;
 
 import org.apache.log4j.Logger;
 import org.memgraphd.data.Data;

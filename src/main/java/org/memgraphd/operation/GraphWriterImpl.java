@@ -15,6 +15,8 @@ import org.memgraphd.decision.DecisionMaker;
 import org.memgraphd.exception.GraphException;
 import org.memgraphd.memory.MemoryReference;
 import org.memgraphd.memory.operation.MemoryOperations;
+import org.memgraphd.security.GraphAuthority;
+import org.memgraphd.security.GraphAuthorityImpl;
 /**
  * Base implementation for {@link GraphWriter}.
  * 

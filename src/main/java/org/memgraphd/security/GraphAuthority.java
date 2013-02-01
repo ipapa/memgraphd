@@ -1,4 +1,4 @@
-package org.memgraphd.operation;
+package org.memgraphd.security;
 
 import org.memgraphd.Graph;
 import org.memgraphd.data.Data;

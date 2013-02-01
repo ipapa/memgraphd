@@ -17,6 +17,7 @@ import org.memgraphd.decision.Sequence;
 import org.memgraphd.exception.GraphException;
 import org.memgraphd.memory.MemoryReference;
 import org.memgraphd.memory.operation.MemoryOperations;
+import org.memgraphd.security.GraphAuthority;
 import org.memgraphd.test.data.TvEpisode;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
