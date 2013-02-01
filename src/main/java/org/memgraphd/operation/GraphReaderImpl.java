@@ -39,32 +39,8 @@ public class GraphReaderImpl extends AbstractGraphAccess implements GraphReader 
      * {@inheritDoc}
      */
     @Override
-    public final GraphData[] readIds(String[] ids) {
-        return readIds(ids, false);
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final GraphData[] readSequences(Sequence[] seqs) {
-        return readSequences(seqs, false);
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public GraphData readReference(MemoryReference ref) {
         return readReference(ref, false);
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public GraphData[] readReferences(MemoryReference[] refs) {
-        return readReferences(refs, false);
     }
     
     /**
@@ -90,43 +66,6 @@ public class GraphReaderImpl extends AbstractGraphAccess implements GraphReader 
     public final GraphData readGraph(MemoryReference ref) {
         return readReference(ref, true);
     }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final GraphData[] readGraph(String[] ids) {
-        return readIds(ids, true);
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final GraphData[] readGraph(Sequence[] seqs) {
-        return readSequences(seqs, true);
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final GraphData[] readGraph(MemoryReference[] refs) {
-        return readReferences(refs, true);
-    }
-
-    private GraphData[] readSequences(Sequence[] seqs, boolean includeRelationships) {
-        GraphData[] result = new GraphData[seqs.length];
-        for(int i=0; i < seqs.length; i++) {
-            if(includeRelationships) {
-                result[i] = readGraph(seqs[i]);
-            }
-            else {
-                result[i] = readSequence(seqs[i]);
-            }
-        }
-        return result;
-    }
 
     private GraphData readReference(MemoryReference ref, boolean includeRelationships) {
         if(includeRelationships) {
@@ -149,32 +88,6 @@ public class GraphReaderImpl extends AbstractGraphAccess implements GraphReader 
             return ref != null ? getMemoryAccess().readGraph(ref) : null;
         }
         return ref != null ? getMemoryAccess().read(ref) : null;
-    }
-
-    private GraphData[] readIds(String[] ids, boolean includeRelationships) {
-        GraphData[] result = new GraphData[ids.length];
-        for(int i=0; i < ids.length; i++) {
-            if(includeRelationships) {
-                result[i] = readGraph(ids[i]);
-            }
-            else {
-                result[i] = readId(ids[i]);
-            }
-        }
-        return result;
-    }
-
-    private GraphData[] readReferences(MemoryReference[] refs, boolean includeRelationships) {
-        GraphData[] result = new GraphData[refs.length];
-        for(int i=0; i < refs.length; i++) {
-            if(includeRelationships) {
-                result[i] = readGraph(refs[i]);
-            }
-            else {
-                result[i] = readReference(refs[i]);
-            }
-        }
-        return result;
     }
 
 }

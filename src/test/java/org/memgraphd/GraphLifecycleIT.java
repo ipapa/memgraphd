@@ -5,9 +5,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.memgraphd.data.Data;
-import org.memgraphd.data.ReadWriteData;
-import org.memgraphd.data.GraphData;
 import org.memgraphd.data.GraphDataImpl;
+import org.memgraphd.data.ReadWriteData;
 import org.memgraphd.decision.Sequence;
 import org.memgraphd.exception.GraphException;
 import org.memgraphd.memory.MemoryReference;
@@ -75,11 +74,6 @@ public class GraphLifecycleIT {
     }
     
     @Test(expected=RuntimeException.class)
-    public void testGraphNotRuning_ThrowsExceptionOnDeleteGraphDataArray() throws GraphException {
-        graph.delete(new GraphData[] { new GraphDataImpl(null) });
-    }
-    
-    @Test(expected=RuntimeException.class)
     public void testGraphNotRuning_ThrowsExceptionOnDeleteDataId() throws GraphException {
         graph.delete("id");
     }
@@ -105,18 +99,8 @@ public class GraphLifecycleIT {
     }
     
     @Test(expected=RuntimeException.class)
-    public void testGraphNotRuning_ThrowsExceptionOnReadIds() throws GraphException {
-        graph.readIds(new String[] { "id" });
-    }
-    
-    @Test(expected=RuntimeException.class)
     public void testGraphNotRuning_ThrowsExceptionOnReadReference() throws GraphException {
         graph.readReference(MemoryReference.valueOf(1));
-    }
-    
-    @Test(expected=RuntimeException.class)
-    public void testGraphNotRuning_ThrowsExceptionOnReadReferences() throws GraphException {
-        graph.readReferences(new MemoryReference[] { MemoryReference.valueOf(1)});
     }
     
     @Test(expected=RuntimeException.class)
@@ -125,18 +109,8 @@ public class GraphLifecycleIT {
     }
     
     @Test(expected=RuntimeException.class)
-    public void testGraphNotRuning_ThrowsExceptionOnReadSequences() throws GraphException {
-        graph.readSequences(new Sequence[] {Sequence.valueOf(1)});
-    }
-    
-    @Test(expected=RuntimeException.class)
     public void testGraphNotRuning_ThrowsExceptionOnWrite() throws GraphException {
         graph.write(data);
-    }
-    
-    @Test(expected=RuntimeException.class)
-    public void testGraphNotRuning_ThrowsExceptionOnWrites() throws GraphException {
-        graph.write(new Data[] { data });
     }
     
     @Test
@@ -265,14 +239,7 @@ public class GraphLifecycleIT {
         graph.shutdown();
         graph.delete(new GraphDataImpl(null));
     }
-
-    @Test(expected=RuntimeException.class)
-    public void testGraphShutdown_ThrowsExceptionOnDeleteGraphDataArray() throws GraphException {
-        graph.run();
-        graph.shutdown();
-        graph.delete(new GraphData[] { new GraphDataImpl(null) });
-    }
-
+    
     @Test(expected=RuntimeException.class)
     public void testGraphShutdown_ThrowsExceptionOnDeleteDataId() throws GraphException {
         graph.run();
@@ -309,24 +276,10 @@ public class GraphLifecycleIT {
     }
 
     @Test(expected=RuntimeException.class)
-    public void testGraphShutdown_ThrowsExceptionOnReadIds() throws GraphException {
-        graph.run();
-        graph.shutdown();
-        graph.readIds(new String[] { "id" });
-    }
-
-    @Test(expected=RuntimeException.class)
     public void testGraphShutdown_ThrowsExceptionOnReadReference() throws GraphException {
         graph.run();
         graph.shutdown();
         graph.readReference(MemoryReference.valueOf(1));
-    }
-
-    @Test(expected=RuntimeException.class)
-    public void testGraphShutdown_ThrowsExceptionOnReadReferences() throws GraphException {
-        graph.run();
-        graph.shutdown();
-        graph.readReferences(new MemoryReference[] { MemoryReference.valueOf(1)});
     }
 
     @Test(expected=RuntimeException.class)
@@ -337,23 +290,10 @@ public class GraphLifecycleIT {
     }
 
     @Test(expected=RuntimeException.class)
-    public void testGraphShutdown_ThrowsExceptionOnReadSequences() throws GraphException {
-        graph.run();
-        graph.shutdown();
-        graph.readSequences(new Sequence[] {Sequence.valueOf(1)});
-    }
-
-    @Test(expected=RuntimeException.class)
     public void testGraphShutdown_ThrowsExceptionOnWrite() throws GraphException {
         graph.run();
         graph.shutdown();
         graph.write(data);
     }
-
-    @Test(expected=RuntimeException.class)
-    public void testGraphShutdown_ThrowsExceptionOnWrites() throws GraphException {
-        graph.run();
-        graph.shutdown();
-        graph.write(new Data[] { data });
-    }
+    
 }

@@ -121,30 +121,6 @@ public final class GraphImpl implements Graph {
     public GraphData readReference(MemoryReference ref) {
         return reader.readReference(ref);
     }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public GraphData[] readIds(String[] ids) {
-        return reader.readIds(ids);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public GraphData[] readSequences(Sequence[] seqs) {
-        return reader.readSequences(seqs);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public GraphData[] readReferences(MemoryReference[] refs) {
-        return reader.readReferences(refs);
-    }
     
     /**
      * {@inheritDoc}
@@ -174,42 +150,10 @@ public final class GraphImpl implements Graph {
      * {@inheritDoc}
      */
     @Override
-    public GraphData[] readGraph(String[] ids) {
-        return reader.readGraph(ids);
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public GraphData[] readGraph(Sequence[] seqs) {
-        return reader.readGraph(seqs);
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public GraphData[] readGraph(MemoryReference[] refs) {
-        return reader.readGraph(refs);
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public MemoryReference write(Data data) throws GraphException {
         return writer.write(data);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public MemoryReference[] write(Data[] data) throws GraphException {
-        return writer.write(data);
-    }
-    
     /**
      * {@inheritDoc}
      */
@@ -223,14 +167,6 @@ public final class GraphImpl implements Graph {
      */
     @Override
     public void delete(GraphData data) throws GraphException {
-        writer.delete(data);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void delete(GraphData[] data) throws GraphException {
         writer.delete(data);
     }
 

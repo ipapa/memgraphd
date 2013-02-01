@@ -78,18 +78,6 @@ public class GraphWriterImpl extends AbstractGraphAccess implements GraphWriter 
         // 4. Update the graph
         return write(decision);
     }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public MemoryReference[] write(Data[] data) throws GraphException {
-        MemoryReference[] result = new MemoryReference[data.length];
-        for(int i=0; i < data.length; i++) {
-            result[i] = write(data[i]);
-        }
-        return result;
-    }
 
     /**
      * {@inheritDoc}
@@ -157,16 +145,6 @@ public class GraphWriterImpl extends AbstractGraphAccess implements GraphWriter 
         
         // alert listeners
         eventManager.onDelete(gData);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void delete(GraphData[] data) throws GraphException {
-        for(GraphData sd : data) {
-            delete(sd);
-        }
     }
 
     /**

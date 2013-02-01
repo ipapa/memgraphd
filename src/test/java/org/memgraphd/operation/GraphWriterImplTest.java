@@ -181,37 +181,6 @@ public class GraphWriterImplTest {
     }
 
     @Test
-    public void testWriteDataArray() throws GraphException {
-        MemoryReference ref1 = MemoryReference.valueOf(1);
-        Sequence seq1 = Sequence.valueOf(1L);
-        
-        Data[] input = new Data[] { data, data2 };
-        
-        when(data.getId()).thenReturn("id");
-        when(data.canWrite()).thenReturn(true);
-        when(reader.readId("id")).thenReturn(graphData2);
-        when(decisionMaker.decidePutRequest(data)).thenReturn(decision);
-        when(decisionMaker.decidePutRequest(data2)).thenReturn(decision);
-        
-        when(seeker.seekById("id")).thenReturn(ref1);
-        when(memoryAccess.read(ref1)).thenReturn(graphData2);
-        when(graphData2.getData()).thenReturn(data2);
-        
-        when(decision.getData()).thenReturn(data);
-        when(decision.getSequence()).thenReturn(seq1);
-        
-        MemoryReference[] refs = writer.write(input);
-        assertNotNull(refs);
-        assertEquals(2, input.length);
-        
-        verify(eventManager, times(2)).onUpdate(any(GraphData.class), any(GraphData.class));
-        verify(mappings, times(2)).put(seq1, ref1);
-        verify(librarian, times(2)).archive(any(GraphData.class));
-        verify(authority).grantInsert(data2);
-        verify(authority).grantUpdate(data2, data);
-    }
-
-    @Test
     public void testWriteDecision() {
         MemoryReference ref1 = MemoryReference.valueOf(1);
         Sequence seq1 = Sequence.valueOf(1L);
@@ -277,30 +246,6 @@ public class GraphWriterImplTest {
         verify(matchmaker).separate(episode);
         verify(memoryAccess).free(ref1);
         verify(mappings).delete("ep-1");
-        verify(mappings).delete(seq1);
-        verify(librarian).unarchive(graphData);
-        verify(eventManager).onDelete(graphData);
-    }
-    
-    @Test
-    public void testDeleteGraphDataArray() throws GraphException {
-        GraphData[] input = new GraphData[] { graphData };
-        MemoryReference ref1 = MemoryReference.valueOf(1);
-        Sequence seq1 = Sequence.valueOf(1L);
-        
-        when(graphData.getData()).thenReturn(data);
-        when(decisionMaker.decideDeleteRequest(data)).thenReturn(decision);
-        when(decision.getData()).thenReturn(data);
-        when(decision.getDataId()).thenReturn("id");
-        when(graphData.getReference()).thenReturn(ref1);
-        when(graphData.getSequence()).thenReturn(seq1);
-        
-        writer.delete(input);
-        
-        verify(authority).grantDelete(data);
-        verify(memoryAccess).dereferenceAll(ref1);
-        verify(memoryAccess).free(ref1);
-        verify(mappings).delete("id");
         verify(mappings).delete(seq1);
         verify(librarian).unarchive(graphData);
         verify(eventManager).onDelete(graphData);

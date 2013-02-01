@@ -161,36 +161,6 @@ public class GraphImplTest {
         assertSame(gData, graph.readReference(MemoryReference.valueOf(1)));
         verify(reader).readReference(MemoryReference.valueOf(1));
     }
-
-    @Test
-    public void testReadIds() {
-        String[] ids = new String[] {"id1", "id2", "id3"};
-        GraphData[] values = new GraphData[] {gData, gData, gData};
-        when(reader.readIds(ids)).thenReturn(values);
-        assertSame(values, graph.readIds(ids));
-        
-        verify(reader).readIds(ids);
-    }
-
-    @Test
-    public void testReadSequences() {
-        Sequence[] sequences = new Sequence[] {Sequence.valueOf(1), Sequence.valueOf(2), Sequence.valueOf(3)};
-        GraphData[] values = new GraphData[] {gData, gData, gData};
-        when(reader.readSequences(sequences)).thenReturn(values);
-        assertSame(values, graph.readSequences(sequences));
-        
-        verify(reader).readSequences(sequences);
-    }
-
-    @Test
-    public void testReadReferences() {
-        MemoryReference[] refs = new MemoryReference[] {MemoryReference.valueOf(1), MemoryReference.valueOf(2), MemoryReference.valueOf(3)};
-        GraphData[] values = new GraphData[] {gData, gData, gData};
-        when(reader.readReferences(refs)).thenReturn(values);
-        assertSame(values, graph.readReferences(refs));
-        
-        verify(reader).readReferences(refs);
-    }
     
     @Test
     public void testReadGraphId() {
@@ -214,52 +184,11 @@ public class GraphImplTest {
     }
 
     @Test
-    public void testReadGraphIds() {
-        String[] ids = new String[] {"id1", "id2", "id3"};
-        GraphData[] values = new GraphData[] {gData, gData, gData};
-        when(reader.readGraph(ids)).thenReturn(values);
-        assertSame(values, graph.readGraph(ids));
-        
-        verify(reader).readGraph(ids);
-    }
-
-    @Test
-    public void testReadGraphSequences() {
-        Sequence[] sequences = new Sequence[] {Sequence.valueOf(1), Sequence.valueOf(2), Sequence.valueOf(3)};
-        GraphData[] values = new GraphData[] {gData, gData, gData};
-        when(reader.readGraph(sequences)).thenReturn(values);
-        assertSame(values, graph.readGraph(sequences));
-        
-        verify(reader).readGraph(sequences);
-    }
-
-    @Test
-    public void testReadGraphReferences() {
-        MemoryReference[] refs = new MemoryReference[] {MemoryReference.valueOf(1), MemoryReference.valueOf(2), MemoryReference.valueOf(3)};
-        GraphData[] values = new GraphData[] {gData, gData, gData};
-        when(reader.readGraph(refs)).thenReturn(values);
-        assertSame(values, graph.readGraph(refs));
-        
-        verify(reader).readGraph(refs);
-    }
-    
-    @Test
     public void testWriteData() throws GraphException {
         when(writer.write(data)).thenReturn(MemoryReference.valueOf(1));
         assertSame(MemoryReference.valueOf(1), graph.write(data));
         
         verify(writer).write(data);
-    }
-
-    @Test
-    public void testWriteDataArray() throws GraphException {
-        Data[] arrayOfData = new Data[] { data, data, data};
-        MemoryReference[] values = new MemoryReference[] { 
-                MemoryReference.valueOf(1), MemoryReference.valueOf(2), MemoryReference.valueOf(3)};
-        when(writer.write(arrayOfData)).thenReturn(values);
-        assertSame(values, graph.write(arrayOfData));
-        
-        verify(writer).write(arrayOfData);
     }
     
     @Test
@@ -277,15 +206,6 @@ public class GraphImplTest {
         graph.delete(gData);
         
         verify(writer).delete(gData);
-    }
-
-    @Test
-    public void testDeleteGraphDataArray() throws GraphException {
-        GraphData[] array = new GraphData[] { gData, gData, gData};
-        
-        graph.delete(array);
-        
-        verify(writer).delete(array);
     }
 
     @Test
