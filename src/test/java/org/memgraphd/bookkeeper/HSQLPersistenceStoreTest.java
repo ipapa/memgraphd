@@ -21,6 +21,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyString;
 
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -131,6 +132,10 @@ public class HSQLPersistenceStoreTest {
         when(statement.execute("SHUTDOWN COMPACT;")).thenReturn(Boolean.TRUE);
         
         store.closeConnection();
+        
+        verify(store, times(2)).openConnection();
+        verify(connection).createStatement();
+        verify(statement).execute("SHUTDOWN COMPACT;");
     }
 
     @Test
@@ -140,7 +145,7 @@ public class HSQLPersistenceStoreTest {
     
     @Test
     public void testGetConnectionString() {
-        assertEquals("jdbc:hsqldb:file:" + tmpFile.getAbsolutePath() + ";shutdown=true", store.getConnectionString());
+        assertEquals("jdbc:hsqldb:file:" + tmpFile.getAbsolutePath(), store.getConnectionString());
     }
 
     @Test

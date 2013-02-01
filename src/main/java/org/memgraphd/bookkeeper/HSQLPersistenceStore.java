@@ -27,7 +27,7 @@ public class HSQLPersistenceStore implements PersistenceStore {
     public HSQLPersistenceStore(String dbName, String dbFilePath) throws SQLException {
         this.dbName = dbName;
         this.dbFilePath =dbFilePath;
-        this.connectionString = String.format("jdbc:hsqldb:file:%s;shutdown=true", getDatabaseFilePath());
+        this.connectionString = String.format("jdbc:hsqldb:file:%s", getDatabaseFilePath());
         
         loadJDBCDriver();
         
