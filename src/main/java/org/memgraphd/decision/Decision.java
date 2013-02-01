@@ -6,7 +6,7 @@ import org.memgraphd.data.Data;
 
 /**
  * The {@link DecisionMaker} makes {@link Decision}(s) on incoming Graph events that change the state of our data model.
- * These requests are either {@link GraphRequestType#PUT} or {@link GraphRequestType#DELETE}.
+ * These requests are either {@link GraphRequestType#CREATE}, {@link GraphRequestType#UPDATE} or {@link GraphRequestType#DELETE}.
  * These events get ordered and assigned a {@link Sequence}. 
  * 
  * @author Ilirjan Papa

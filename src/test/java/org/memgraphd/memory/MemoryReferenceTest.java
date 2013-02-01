@@ -27,11 +27,6 @@ public class MemoryReferenceTest {
         assertEquals(1, reference.id());
     }
     
-    @Test(expected=RuntimeException.class)
-    public void testId_negative() {
-        MemoryReference.valueOf(-1);
-    }
-    
     @Test
     public void testValueOf() {
         assertSame(reference, MemoryReference.valueOf(1));
@@ -44,18 +39,18 @@ public class MemoryReferenceTest {
         assertEquals(1, refs1[0].id());
     }
     
-    @Test(expected=RuntimeException.class)
+    @Test
     public void testRangeOf_StartNegative() {
         MemoryReference refs1[] = MemoryReference.rangeOf(-1, 1);
-        assertEquals(1, refs1.length);
-        assertEquals(1, refs1[0]);
+        assertEquals(3, refs1.length);
+        assertEquals(-1, refs1[0].id());
     }
     
     @Test(expected=RuntimeException.class)
     public void testRangeOf_EndNegative() {
         MemoryReference refs1[] = MemoryReference.rangeOf(1, -1);
         assertEquals(1, refs1.length);
-        assertEquals(1, refs1[0]);
+        assertEquals(1, refs1[0].id());
     }
     
     @Test(expected=RuntimeException.class)

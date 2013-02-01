@@ -46,8 +46,7 @@ public final class MemoryReference implements GraphLifecycleHandler {
      * @return {@link MemoryReference}
      */
     public static MemoryReference valueOf(int id) {
-        validateReference(id);
-        
+  
         if(store.containsKey(id)) {
             return store.get(id);
         }
@@ -94,10 +93,5 @@ public final class MemoryReference implements GraphLifecycleHandler {
     public final String toString() {
         return ReflectionToStringBuilder.toString(this, ToStringStyle.MULTI_LINE_STYLE);
     }
-
-    private static void validateReference(int number) {
-        if(number < 0) {
-            throw new RuntimeException("Memory reference should be greater than zero.");
-        }
-    }
+    
 }
