@@ -25,7 +25,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class PersistenceStoreTest {
+public class HSQLPersistenceStoreTest {
     
     private HSQLPersistenceStore store;
     
@@ -140,7 +140,7 @@ public class PersistenceStoreTest {
     
     @Test
     public void testGetConnectionString() {
-        assertEquals("jdbc:hsqldb:file:" + tmpFile.getAbsolutePath(), store.getConnectionString());
+        assertEquals("jdbc:hsqldb:file:" + tmpFile.getAbsolutePath() + ";shutdown=true", store.getConnectionString());
     }
 
     @Test
