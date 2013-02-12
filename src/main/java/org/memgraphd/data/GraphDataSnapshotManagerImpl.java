@@ -72,7 +72,7 @@ public class GraphDataSnapshotManagerImpl implements GraphDataSnapshotManager {
             GraphData gData = reader.readReference(ref);
             try {
                 LOGGER.info(String.format("Deleting graph data id=%s", gData.getData().getId()));
-                writer.delete(gData);
+                writer.delete(gData.getData().getId());
             } catch (GraphException e) {
                 LOGGER.error(
                         String.format("Failed to delete graph data id=%s", gData.getData().getId()),

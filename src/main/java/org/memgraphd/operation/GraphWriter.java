@@ -31,11 +31,4 @@ public interface GraphWriter {
      */
     void delete(String dataId) throws GraphException;
     
-    /**
-     * Delete this {@link GraphData} from the {@link Graph}.
-     * @param data {@link GraphData}
-     * @throws GraphException
-     */
-    void delete(GraphData data) throws GraphException;
-    
 }

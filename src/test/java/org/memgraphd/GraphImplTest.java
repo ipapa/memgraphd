@@ -191,13 +191,6 @@ public class GraphImplTest {
     }
 
     @Test
-    public void testDeleteGraphData() throws GraphException {
-        graph.delete(gData);
-        
-        verify(writer).delete(gData);
-    }
-
-    @Test
     public void testDeleteString() throws GraphException {
         graph.delete("someId");
         verify(writer).delete("someId");

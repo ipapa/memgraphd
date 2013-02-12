@@ -29,10 +29,10 @@ import org.memgraphd.operation.GraphStateManager;
 import org.memgraphd.operation.GraphStateManagerImpl;
 import org.memgraphd.operation.GraphWriter;
 import org.memgraphd.operation.GraphWriterImpl;
-import org.memgraphd.security.GraphRequestResolverImpl;
 import org.memgraphd.security.GraphAuthority;
 import org.memgraphd.security.GraphAuthorityImpl;
 import org.memgraphd.security.GraphRequestResolver;
+import org.memgraphd.security.GraphRequestResolverImpl;
 import org.memgraphd.security.GraphValidator;
 import org.memgraphd.security.GraphValidatorImpl;
 
@@ -166,14 +166,6 @@ public final class GraphImpl implements Graph {
     @Override
     public MemoryReference write(Data data) throws GraphException {
         return writer.write(data);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void delete(GraphData data) throws GraphException {
-        writer.delete(data);
     }
 
     /**

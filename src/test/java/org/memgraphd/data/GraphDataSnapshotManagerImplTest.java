@@ -22,6 +22,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import static org.junit.Assert.assertNotNull;
 
+import static org.mockito.Matchers.anyString;
+
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -167,7 +169,7 @@ public class GraphDataSnapshotManagerImplTest {
         
         snapMan.clear();
         
-        verify(writer).delete(graphData);
+        verify(writer).delete(data.getId());
         verify(decisionMaker).reverseAll();
     }
     
@@ -176,7 +178,7 @@ public class GraphDataSnapshotManagerImplTest {
         MemoryReference memRef = MemoryReference.valueOf(1);
         when(mappings.getAllMemoryReferences()).thenReturn(Arrays.asList(memRef));
         when(reader.readReference(memRef)).thenReturn(graphData);
-        doThrow(new GraphException("")).when(writer).delete(graphData);
+        doThrow(new GraphException("")).when(writer).delete(anyString());
         when(graphData.getData()).thenReturn(data);
         
         snapMan.clear();

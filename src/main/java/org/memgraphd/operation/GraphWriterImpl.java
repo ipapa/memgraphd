@@ -2,7 +2,6 @@ package org.memgraphd.operation;
 
 import org.memgraphd.GraphRequestType;
 import org.memgraphd.data.Data;
-import org.memgraphd.data.GraphData;
 import org.memgraphd.decision.Decision;
 import org.memgraphd.decision.DecisionMaker;
 import org.memgraphd.exception.GraphException;
@@ -66,30 +65,6 @@ public class GraphWriterImpl extends AbstractGraphAccess implements GraphWriter 
         
         // 5. Update the state of the graph
         return stateManager.create(decision);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void delete(GraphData gData) throws GraphException {
-        Data data = gData.getData();
-        
-        // 1. Create a request context
-        GraphRequestContext context = requestResolver.resolve(GraphRequestType.DELETE, data);
-        
-        // 2. Validate the input
-        validator.validate(context);
-        
-        // 3. Authorize the request
-        authority.authorize(context);
-        
-        // 4. Get a sequence assigned by decision maker to this delete request
-        Decision decision = decisionMaker.decideDeleteRequest(data);
-        
-        // 5. Delete the actual data
-        stateManager.delete(decision, context.getGraphData());
- 
     }
 
     /**

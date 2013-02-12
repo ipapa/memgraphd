@@ -5,7 +5,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.memgraphd.data.Data;
-import org.memgraphd.data.GraphDataImpl;
 import org.memgraphd.data.ReadWriteData;
 import org.memgraphd.decision.Sequence;
 import org.memgraphd.exception.GraphException;
@@ -66,11 +65,6 @@ public class GraphLifecycleIT {
     @Test(expected=RuntimeException.class)
     public void testGraphNotRuning_ThrowsExceptionOnAvailable() throws GraphException {
         graph.available();
-    }
-    
-    @Test(expected=RuntimeException.class)
-    public void testGraphNotRuning_ThrowsExceptionOnDeleteGraphData() throws GraphException {
-        graph.delete(new GraphDataImpl(null));
     }
     
     @Test(expected=RuntimeException.class)
@@ -233,13 +227,6 @@ public class GraphLifecycleIT {
         graph.available();
     }
 
-    @Test(expected=RuntimeException.class)
-    public void testGraphShutdown_ThrowsExceptionOnDeleteGraphData() throws GraphException {
-        graph.run();
-        graph.shutdown();
-        graph.delete(new GraphDataImpl(null));
-    }
-    
     @Test(expected=RuntimeException.class)
     public void testGraphShutdown_ThrowsExceptionOnDeleteDataId() throws GraphException {
         graph.run();
