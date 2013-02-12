@@ -5,24 +5,21 @@ import org.memgraphd.GraphRequestType;
 import org.memgraphd.decision.DecisionMaker;
 import org.memgraphd.decision.Sequence;
 import org.memgraphd.exception.GraphException;
-import org.memgraphd.memory.MemoryReference;
-import org.memgraphd.operation.GraphReader;
 /**
- * Abstract class that all implementations of {@link GraphLookupInputValidator} should extend.
+ * Abstract class that all implementations of {@link GraphDataValidator} should extend.
  * @author Ilirjan Papa
  * @since January 31, 2013
  *
  */
-public abstract class AbstractLookupInputValidator {
+public abstract class AbstractInputValidator {
     private final DecisionMaker decisionMaker;
-    private final GraphReader reader;
     
     /**
-     * Default constructor.
+     * Constructs a new instance.
+     * @param decisionMaker {@link DecisionMaker}
      */
-    public AbstractLookupInputValidator(DecisionMaker decisionMaker, GraphReader reader) {
+    public AbstractInputValidator(DecisionMaker decisionMaker) {
         this.decisionMaker = decisionMaker;
-        this.reader = reader;
     }
     
     protected void checkRequestType(GraphRequestType type) throws GraphException {
@@ -53,16 +50,5 @@ public abstract class AbstractLookupInputValidator {
             throw new GraphException("Decision sequence number is out of range.");
         }
     }
-    
-    protected boolean dataExists(String dataId) {
-        return reader.readId(dataId) != null;
-    }
-    
-    protected boolean dataExists(MemoryReference reference) {
-        return reader.readReference(reference) != null;
-    }
-    
-    protected boolean dataExists(Sequence sequence) {
-        return reader.readSequence(sequence) != null;
-    }
+
 }

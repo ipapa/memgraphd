@@ -10,7 +10,6 @@ import org.memgraphd.data.event.GraphDataEventListenerManagerImpl;
 import org.memgraphd.data.library.Library;
 import org.memgraphd.data.relationship.DataMatchmaker;
 import org.memgraphd.data.relationship.DataMatchmakerImpl;
-import org.memgraphd.decision.Decision;
 import org.memgraphd.decision.Sequence;
 import org.memgraphd.exception.GraphException;
 import org.memgraphd.memory.MemoryAccess;
@@ -26,8 +25,16 @@ import org.memgraphd.operation.GraphReader;
 import org.memgraphd.operation.GraphReaderImpl;
 import org.memgraphd.operation.GraphSeeker;
 import org.memgraphd.operation.GraphSeekerImpl;
+import org.memgraphd.operation.GraphStateManager;
+import org.memgraphd.operation.GraphStateManagerImpl;
 import org.memgraphd.operation.GraphWriter;
 import org.memgraphd.operation.GraphWriterImpl;
+import org.memgraphd.security.GraphRequestResolverImpl;
+import org.memgraphd.security.GraphAuthority;
+import org.memgraphd.security.GraphAuthorityImpl;
+import org.memgraphd.security.GraphRequestResolver;
+import org.memgraphd.security.GraphValidator;
+import org.memgraphd.security.GraphValidatorImpl;
 
 /**
  * This is the default implementation of {@link Graph} that brings all
@@ -47,7 +54,10 @@ public final class GraphImpl implements Graph {
     private final GraphReader reader;
     private final GraphWriter writer;
     private final GraphSeeker seeker;
-    
+    private final GraphStateManager stateManager;
+    private final GraphAuthority authority;
+    private final GraphValidator validator;
+    private final GraphRequestResolver resolver;
     private final MemoryOperations memoryAccess;
     private final DataMatchmaker dataMatchmaker;
     private final GraphSupervisor supervisor;
@@ -60,16 +70,20 @@ public final class GraphImpl implements Graph {
         MemoryManager memoryManager = new MemoryManagerImpl(config.getMemoryBlockResolver());
         this.memoryAccess = new MemoryAccess(memoryManager);
         this.mappings = new GraphMappingsImpl();
-
+        
         this.seeker = new GraphSeekerImpl(memoryAccess, mappings);
         this.reader = new GraphReaderImpl(memoryAccess, seeker);
         this.dataMatchmaker = new DataMatchmakerImpl(memoryAccess, seeker);
-        
-        this.writer = new GraphWriterImpl(memoryAccess, reader, config.getDecisionMaker(),
-                new GraphDataEventListenerManagerImpl(), mappings, seeker, dataMatchmaker, config.getLibrarian());
+        this.stateManager = new GraphStateManagerImpl(memoryAccess, mappings, config.getLibrarian(), 
+                                dataMatchmaker, new GraphDataEventListenerManagerImpl());
+        this.authority = new GraphAuthorityImpl();
+        this.validator = new GraphValidatorImpl(config.getDecisionMaker());
+        this.resolver = new GraphRequestResolverImpl(reader);
+        this.writer = new GraphWriterImpl(memoryAccess, authority, validator,
+                resolver, config.getDecisionMaker(), stateManager);
         this.filter = new GraphFilterImpl(memoryAccess, reader);
         
-        GraphDataSnapshotManager snapshotManager = new GraphDataSnapshotManagerImpl(reader, writer, mappings, config.getDecisionMaker());
+        GraphDataSnapshotManager snapshotManager = new GraphDataSnapshotManagerImpl(reader, writer, mappings, config.getDecisionMaker(), stateManager);
         this.supervisor = new GraphSupervisorImpl(snapshotManager, (MemoryStats) memoryManager);
         this.library = (Library) config.getLibrarian();
     }
@@ -158,14 +172,6 @@ public final class GraphImpl implements Graph {
      * {@inheritDoc}
      */
     @Override
-    public MemoryReference write(Decision decision) throws GraphException {
-        return writer.write(decision);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public void delete(GraphData data) throws GraphException {
         writer.delete(data);
     }
@@ -177,14 +183,6 @@ public final class GraphImpl implements Graph {
     @Override
     public void delete(String id) throws GraphException {
         writer.delete(id);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void delete(Decision decision) throws GraphException {
-        writer.delete(decision);
     }
 
     /**

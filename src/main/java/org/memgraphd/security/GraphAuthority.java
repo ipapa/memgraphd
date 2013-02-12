@@ -1,7 +1,6 @@
 package org.memgraphd.security;
 
 import org.memgraphd.Graph;
-import org.memgraphd.data.Data;
 
 /**
  * The {@link GraphAuthority} is in charge of granting ore revoking requests that change the 
@@ -16,27 +15,11 @@ import org.memgraphd.data.Data;
 public interface GraphAuthority {
     
     /**
-     * It will throw a runtime exception if the delete request is not granted, meaning data permissions
+     * It will throw a runtime exception if the request is not granted/authorized, meaning data permissions
      * do not allow this change to happen.
-     * @param data {@link Data} data to be deleted in the {@link Graph}
+     * @param requestContext {@link GraphRequestContext}
      * @throws IllegalAccessException
      */
-    void grantDelete(Data data);
+    void authorize(GraphRequestContext requestContext);
     
-    /**
-     * It will throw a runtime exception if the insert request is not granted, meaning data permissions
-     * do not allow this change to happen.
-     * @param data {@link Data} data to be inserted in the {@link Graph}
-     * @throws IllegalAccessException
-     */
-    void grantInsert(Data data);
-    
-    /**
-     * It will throw a runtime exception if the update request is not granted, meaning data permissions do not
-     * allow this change to happen. 
-     * @param oldData {@link Data} existing data in the {@link Graph} that will be overwritten.
-     * @param newData {@link Data} new data instance that will update the {@link Graph}.
-     * @throws IllegalAccessException
-     */
-    void grantUpdate(Data oldData, Data newData);
 }

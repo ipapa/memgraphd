@@ -11,7 +11,6 @@ import org.memgraphd.data.Data;
 import org.memgraphd.data.GraphData;
 import org.memgraphd.data.library.DefaultLibrary;
 import org.memgraphd.data.relationship.DataMatchmaker;
-import org.memgraphd.decision.Decision;
 import org.memgraphd.decision.DecisionMaker;
 import org.memgraphd.decision.Sequence;
 import org.memgraphd.exception.GraphException;
@@ -190,16 +189,6 @@ public class GraphImplTest {
         
         verify(writer).write(data);
     }
-    
-    @Test
-    public void testWriteDecision() throws GraphException {
-        Decision dec = mock(Decision.class);
-        when(writer.write(dec)).thenReturn(MemoryReference.valueOf(1));
-        
-        assertEquals(MemoryReference.valueOf(1), graph.write(dec));
-
-        verify(writer).write(dec);
-    }
 
     @Test
     public void testDeleteGraphData() throws GraphException {
@@ -212,13 +201,6 @@ public class GraphImplTest {
     public void testDeleteString() throws GraphException {
         graph.delete("someId");
         verify(writer).delete("someId");
-    }
-    
-    @Test
-    public void testDeleteDecision() throws GraphException {
-        Decision dec = mock(Decision.class);
-        graph.delete(dec);
-        verify(writer).delete(dec);
     }
 
     @Test

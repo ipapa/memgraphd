@@ -15,7 +15,7 @@ public enum GraphRequestType {
     /**
      * Lookup an existing entry in the {@link Graph} - assuming such entry exists.
      */
-    RETRIEVE,
+    READ,
     
     /**
      * Update an existing entry in the {@link Graph} - assuming such entry exists.

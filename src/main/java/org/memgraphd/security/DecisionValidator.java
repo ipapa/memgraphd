@@ -7,45 +7,34 @@ import org.memgraphd.data.Data;
 import org.memgraphd.decision.Decision;
 import org.memgraphd.decision.DecisionMaker;
 import org.memgraphd.exception.GraphException;
-import org.memgraphd.operation.GraphReader;
 
 /**
- * Validates the {@link Decision} made by the {@link Graph} to make sure they are valid.
+ * Validates the {@link Decision}(s) made by the {@link Graph} to make sure they are valid.
  * @author Ilirjan Papa
  * @since January 31, 2013
  *
  */
-public class DecisionValidator extends AbstractLookupInputValidator implements GraphLookupInputValidator<Decision>{
+public class DecisionValidator extends AbstractInputValidator {
     
     /**
      * Constructs a new instance of this validator.
      * @param decisionMaker {@link DecisionMaker}
-     * @param reader {@link GraphReader}
      */
-    public DecisionValidator(DecisionMaker decisionMaker, GraphReader reader) {
-        super(decisionMaker, reader);
+    public DecisionValidator(DecisionMaker decisionMaker) {
+        super(decisionMaker);
     }
     
     /**
-     * {@inheritDoc}
+     * Validates a decision. It will throw a {@link GraphException} if decision state is invalid.
+     * @param inputData {@link Decision}
+     * @throws GraphException
      */
-    @Override
-    public final void validate(Decision inputData) throws GraphException {
+    public void validate(Decision inputData) throws GraphException {
         checkDecisionNotNull(inputData);
         checkDecisionSequence(inputData.getSequence());
         checkDecisionRequestType(inputData);
         checkDecisionData(inputData);
         checkDecisionTime(inputData);
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final void validate(GraphRequestType requestType, Decision inputData) throws GraphException {
-        checkRequestType(requestType);
-        validate(inputData);
-        
     }
     
     private void checkDecisionNotNull(Decision decision) throws GraphException {
@@ -61,7 +50,7 @@ public class DecisionValidator extends AbstractLookupInputValidator implements G
             throw new GraphException("Decision is missing request type object.");
         }
         
-        if(requestType.equals(GraphRequestType.RETRIEVE)) {
+        if(requestType.equals(GraphRequestType.READ)) {
             throw new GraphException("Decision has an unsupported request type.");
         }
     }

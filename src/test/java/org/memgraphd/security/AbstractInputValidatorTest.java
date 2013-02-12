@@ -4,39 +4,28 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.memgraphd.GraphRequestType;
-import org.memgraphd.data.GraphData;
 import org.memgraphd.decision.DecisionMaker;
 import org.memgraphd.decision.Sequence;
 import org.memgraphd.exception.GraphException;
-import org.memgraphd.memory.MemoryReference;
-import org.memgraphd.operation.GraphReader;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AbstractLookupInputValidatorTest {
+public class AbstractInputValidatorTest {
     
-    private AbstractLookupInputValidator validator;
+    private AbstractInputValidator validator;
     
     @Mock
     private DecisionMaker decisionMaker;
     
-    @Mock
-    private GraphReader reader;
-    
-    @Mock
-    private GraphData graphData;
-    
     @Before
     public void setUp() throws Exception {
-        validator = new LookupByDataIdValidator(decisionMaker, reader);
+        validator = new GraphDataValidatorImpl(decisionMaker);
     }
 
     @Test
@@ -91,64 +80,6 @@ public class AbstractLookupInputValidatorTest {
         validator.checkDecisionSequence(seq1);
         
         verify(decisionMaker).latestDecision();
-    }
-
-    @Test
-    public void testDataExistsString_true() {
-        when(reader.readId("id")).thenReturn(graphData);
-        
-        assertTrue(validator.dataExists("id"));
-        
-        verify(reader).readId("id");
-    }
-    
-    @Test
-    public void testDataExistsString_false() {
-        when(reader.readId("id")).thenReturn(null);
-        
-        assertFalse(validator.dataExists("id"));
-        
-        verify(reader).readId("id");
-    }
-
-    @Test
-    public void testDataExistsMemoryReference_true() {
-        MemoryReference ref = MemoryReference.valueOf(1);
-        when(reader.readReference(ref)).thenReturn(graphData);
-        
-        assertTrue(validator.dataExists(ref));
-        
-        verify(reader).readReference(ref);
-    }
-    
-    @Test
-    public void testDataExistsMemoryReference_false() {
-        MemoryReference ref = MemoryReference.valueOf(1);
-        when(reader.readReference(ref)).thenReturn(null);
-        
-        assertFalse(validator.dataExists(ref));
-        
-        verify(reader).readReference(ref);
-    }
-
-    @Test
-    public void testDataExistsSequence_true() {
-        Sequence seq = Sequence.valueOf(1L);
-        when(reader.readSequence(seq)).thenReturn(graphData);
-        
-        assertTrue(validator.dataExists(seq));
-        
-        verify(reader).readSequence(seq);
-    }
-    
-    @Test
-    public void testDataExistsSequence_false() {
-        Sequence seq = Sequence.valueOf(1L);
-        when(reader.readSequence(seq)).thenReturn(null);
-        
-        assertFalse(validator.dataExists(seq));
-        
-        verify(reader).readSequence(seq);
     }
 
 }

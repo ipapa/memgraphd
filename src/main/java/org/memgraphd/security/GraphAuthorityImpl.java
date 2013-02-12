@@ -11,13 +11,33 @@ import org.memgraphd.data.Data;
  *
  */
 public class GraphAuthorityImpl implements GraphAuthority {
+    
     private static final Logger LOGGER = Logger.getLogger(GraphAuthorityImpl.class);
     
     /**
      * {@inheritDoc}
      */
     @Override
-    public void grantDelete(Data data) {
+    public void authorize(GraphRequestContext requestContext) {
+        
+        switch (requestContext.getRequestType()) {
+            case CREATE:
+                grantCreate(requestContext.getData());
+                break;
+            case UPDATE:
+                grantUpdate(requestContext.getGraphData().getData(), requestContext.getData());
+                break;
+            case DELETE:
+                grantDelete(requestContext.getGraphData().getData());
+                break;
+            default:
+                logGrantedPermission(requestContext.getRequestType().name(), requestContext.getData().getId());
+                break;
+        }
+        
+    }
+
+    private void grantDelete(Data data) {
         if(!data.canDelete()) {
             throwException(String.format("Data id=%s is protected and cannot be deleted.", data.getId()));
         }
@@ -25,11 +45,7 @@ public class GraphAuthorityImpl implements GraphAuthority {
         logGrantedPermission("delete", data.getId());
     }
     
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void grantInsert(Data data) {
+    private void grantCreate(Data data) {
         if(!data.canWrite()) {
             throwException(String.format("Data id=%s permissions do not allow it to be stored.", data.getId()));
         }
@@ -37,16 +53,12 @@ public class GraphAuthorityImpl implements GraphAuthority {
         logGrantedPermission("insert", data.getId());
     }
     
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void grantUpdate(Data oldData, Data newData) {
+    private void grantUpdate(Data oldData, Data newData) {
         if(!oldData.canUpdate()) {
             throwException(String.format("Existing data id=%s permissions do not allow an update.", oldData.getId()));
         }
         grantDelete(oldData);
-        grantInsert(newData);
+        grantCreate(newData);
         
         logGrantedPermission("update", newData.getId());
     }
@@ -59,4 +71,5 @@ public class GraphAuthorityImpl implements GraphAuthority {
         LOGGER.error(message);
         throw new RuntimeException(message);
     }
+
 }

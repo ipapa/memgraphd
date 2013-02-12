@@ -9,7 +9,6 @@ import org.memgraphd.GraphRequestType;
 import org.memgraphd.data.Data;
 import org.memgraphd.decision.DecisionMaker;
 import org.memgraphd.exception.GraphException;
-import org.memgraphd.operation.GraphReader;
 import org.memgraphd.test.data.TvEpisode;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -20,9 +19,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class InputDataValidatorTest {
+public class GraphDataValidatorTest {
     
-    private InputDataValidator validator;
+    private GraphDataValidatorImpl validator;
     
     @Rule
     public ExpectedException exception = ExpectedException.none();
@@ -31,14 +30,11 @@ public class InputDataValidatorTest {
     private DecisionMaker decisionMaker;
     
     @Mock
-    private GraphReader reader;
-    
-    @Mock
     private Data data;
     
     @Before
     public void setUp() throws Exception {
-        validator = new InputDataValidator(decisionMaker, reader);
+        validator = new GraphDataValidatorImpl(decisionMaker);
     }
 
     @Test
@@ -51,7 +47,7 @@ public class InputDataValidatorTest {
         exception.expect(GraphException.class);
         exception.expectMessage("Data is null.");
         
-        validator.validate((Data)null);
+        validator.validate(new GraphRequestContext(GraphRequestType.CREATE, null, null));
     }
     
     @Test
@@ -60,7 +56,7 @@ public class InputDataValidatorTest {
         exception.expectMessage("Data id is invalid.");
         when(data.getId()).thenReturn(null);
         
-        validator.validate(data);
+        validator.validate(new GraphRequestContext(GraphRequestType.CREATE, data, null));
     
         verify(data).getId();
     }
@@ -71,21 +67,21 @@ public class InputDataValidatorTest {
         exception.expect(GraphException.class);
         exception.expectMessage("Data validation failed.");
         
-        validator.validate(episode);
+        validator.validate(new GraphRequestContext(GraphRequestType.CREATE, episode, null));
     }
     
     @Test
     public void testValidateData_dataValidationSucceeds() throws GraphException {
         TvEpisode episode = new TvEpisode("id", null, null, "season-1", null, null, null);
       
-        validator.validate(episode);
+        validator.validate(new GraphRequestContext(GraphRequestType.CREATE, episode, null));
     }
     
     @Test
     public void testValidateData() throws GraphException {
         when(data.getId()).thenReturn("id");
         
-        validator.validate(data);
+        validator.validate(new GraphRequestContext(GraphRequestType.CREATE, data, null));
     
         verify(data).getId();
     }
@@ -97,7 +93,7 @@ public class InputDataValidatorTest {
         exception.expect(GraphException.class);
         exception.expectMessage("Failed to resolve this request.");
         
-        validator.validate(null, data);
+        validator.validate(new GraphRequestContext(null, data, null));
     
         verify(data).getId();
     }
@@ -106,7 +102,7 @@ public class InputDataValidatorTest {
     public void testValidateGraphRequestTypeData_succeeds() throws GraphException {
         when(data.getId()).thenReturn("id");
         
-        validator.validate(GraphRequestType.CREATE, data);
+        validator.validate(new GraphRequestContext(GraphRequestType.CREATE, data, null));
     
         verify(data).getId();
     }

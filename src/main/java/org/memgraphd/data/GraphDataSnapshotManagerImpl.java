@@ -12,6 +12,7 @@ import org.memgraphd.decision.Sequence;
 import org.memgraphd.exception.GraphException;
 import org.memgraphd.memory.MemoryReference;
 import org.memgraphd.operation.GraphReader;
+import org.memgraphd.operation.GraphStateManager;
 import org.memgraphd.operation.GraphWriter;
 /**
  * Its sole responsibility is to replay all decision stored in the book on application startup
@@ -25,15 +26,17 @@ public class GraphDataSnapshotManagerImpl implements GraphDataSnapshotManager {
     private static final Logger LOGGER = Logger.getLogger(GraphDataSnapshotManagerImpl.class);
     
     private final GraphWriter writer;
+    private final GraphStateManager stateManager;
     private final GraphReader reader;
     private final GraphMappings mappings;
     private final DecisionMaker decisionMaker;
 
     public GraphDataSnapshotManagerImpl(GraphReader reader, GraphWriter writer, GraphMappings mappings, 
-            DecisionMaker decisionMaker) {
+            DecisionMaker decisionMaker, GraphStateManager stateManager) {
         this.reader = reader;
         this.mappings = mappings;
         this.writer = writer;
+        this.stateManager = stateManager;
         this.decisionMaker = decisionMaker;
     }
     
@@ -90,10 +93,10 @@ public class GraphDataSnapshotManagerImpl implements GraphDataSnapshotManager {
             LOGGER.debug(String.format("Loading decision sequenceId=%d", d.getSequence().number()));
             try {
                 if(GraphRequestType.DELETE == d.getRequestType()) {
-                    writer.delete(d);
+                    stateManager.delete(d, reader.readId(d.getDataId()));
                 }
                 else if(GraphRequestType.CREATE == d.getRequestType())  {
-                    writer.write(d);
+                    stateManager.create(d);
                 }
                 else {
                     LOGGER.warn(String.format("Ignoring decision sequenceId=%d with bad request type=%s", d.getSequence().number(), d.getRequestType()));

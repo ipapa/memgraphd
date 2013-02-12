@@ -12,7 +12,6 @@ import org.memgraphd.decision.Decision;
 import org.memgraphd.decision.DecisionMaker;
 import org.memgraphd.decision.Sequence;
 import org.memgraphd.exception.GraphException;
-import org.memgraphd.operation.GraphReader;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
@@ -34,9 +33,6 @@ public class DecisionValidatorTest {
     private DecisionMaker decisionMaker;
     
     @Mock
-    private GraphReader reader;
-    
-    @Mock
     private Data data;
     
     @Mock
@@ -44,7 +40,7 @@ public class DecisionValidatorTest {
     
     @Before
     public void setUp() throws Exception {
-        validator = new DecisionValidator(decisionMaker, reader);
+        validator = new DecisionValidator(decisionMaker);
     }
 
     @Test
@@ -111,7 +107,7 @@ public class DecisionValidatorTest {
         Sequence seq1 = Sequence.valueOf(1L);
         when(decision.getSequence()).thenReturn(seq1);
         when(decisionMaker.latestDecision()).thenReturn(seq1);
-        when(decision.getRequestType()).thenReturn(GraphRequestType.RETRIEVE);
+        when(decision.getRequestType()).thenReturn(GraphRequestType.READ);
         
         exception.expect(GraphException.class);
         exception.expectMessage("Decision has an unsupported request type.");
@@ -297,33 +293,4 @@ public class DecisionValidatorTest {
         verify(data, times(2)).getId();
     }
     
-    @Test
-    public void testValidateGraphRequestTypeDecision_requestTypeNull() throws GraphException {
-        
-        exception.expect(GraphException.class);
-        exception.expectMessage("Failed to resolve this request.");
-        
-        validator.validate(null, decision);
-    }
-    
-    @Test
-    public void testValidateGraphRequestTypeDecision_Succeeds() throws GraphException {
-        Sequence seq1 = Sequence.valueOf(1L);
-        when(decision.getSequence()).thenReturn(seq1);
-        when(decisionMaker.latestDecision()).thenReturn(seq1);
-        when(decision.getRequestType()).thenReturn(GraphRequestType.CREATE);
-        when(decision.getData()).thenReturn(data);
-        when(data.getId()).thenReturn("id");
-        when(decision.getDataId()).thenReturn("id");
-        when(decision.getTime()).thenReturn(DateTime.now());
-        
-        validator.validate(GraphRequestType.CREATE, decision);
-    
-        verify(decision).getSequence();
-        verify(decisionMaker).latestDecision();
-        verify(decision).getRequestType();
-        verify(decision).getData();
-        verify(decision).getTime();
-        verify(data, times(2)).getId();
-    }
 }

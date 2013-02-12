@@ -286,7 +286,7 @@ public class AbstractBookKeeperTest {
         
         Set<Decision> decisions = ImmutableSet.of();
         ReflectionTestUtils.setField(keeper, "buffer", decisions);
-        ReflectionTestUtils.setField(keeper, "lastTimeFlushedToDisk", new AtomicLong(System.currentTimeMillis() - 5));
+        ReflectionTestUtils.setField(keeper, "lastTimeFlushedToDisk", new AtomicLong(System.currentTimeMillis() - 1));
         
         assertFalse(keeper.isFlushToDiskTime());
     }

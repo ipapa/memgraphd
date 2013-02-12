@@ -9,7 +9,7 @@ public class GraphRequestTypeTest {
     @Test
     public void test() {
         assertNotNull(GraphRequestType.CREATE);
-        assertNotNull(GraphRequestType.RETRIEVE);
+        assertNotNull(GraphRequestType.READ);
         assertNotNull(GraphRequestType.UPDATE);
         assertNotNull(GraphRequestType.DELETE);
     }

@@ -15,6 +15,7 @@ import org.memgraphd.decision.Sequence;
 import org.memgraphd.exception.GraphException;
 import org.memgraphd.memory.MemoryReference;
 import org.memgraphd.operation.GraphReader;
+import org.memgraphd.operation.GraphStateManager;
 import org.memgraphd.operation.GraphWriter;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -50,11 +51,14 @@ public class GraphDataSnapshotManagerImplTest {
     @Mock
     private Data data;
     
+    @Mock
+    private GraphStateManager stateManager;
+    
     private Decision decision1, decision2, decision3, decision4, decision5;
     
     @Before
     public void setUp() throws Exception {
-        snapMan = new GraphDataSnapshotManagerImpl(reader, writer, mappings, decisionMaker);
+        snapMan = new GraphDataSnapshotManagerImpl(reader, writer, mappings, decisionMaker, stateManager);
         
         when(decisionMaker.getReadWriteBatchSize()).thenReturn(5L);
         
@@ -77,9 +81,8 @@ public class GraphDataSnapshotManagerImplTest {
         
         when(decisionMaker.latestDecision()).thenReturn(seq1);
         when(decisionMaker.readRange(seq0, seq1)).thenReturn(Arrays.asList(decision1, decision2));
-        doThrow(new GraphException("")).when(writer).write(decision1);
-        doThrow(new GraphException("")).when(writer).delete(decision2);
-        
+        doThrow(new GraphException("")).when(stateManager).delete(decision1, null);
+     
         snapMan.initialize();
         
         verify(decisionMaker).latestDecision();
@@ -89,7 +92,7 @@ public class GraphDataSnapshotManagerImplTest {
     public void testInitialize_BadDecisionWithRequestTypeGET() throws GraphException {
         Sequence seq0 = Sequence.valueOf(0);
         Sequence seq1 = Sequence.valueOf(1);
-        Decision d = new DecisionImpl(seq0, null, GraphRequestType.RETRIEVE, "data1", data);
+        Decision d = new DecisionImpl(seq0, null, GraphRequestType.READ, "data1", data);
         
         when(decisionMaker.latestDecision()).thenReturn(seq1);
         when(decisionMaker.readRange(seq0, seq1)).thenReturn(Arrays.asList(d));
@@ -111,8 +114,8 @@ public class GraphDataSnapshotManagerImplTest {
         snapMan.initialize();
         
         verify(decisionMaker).latestDecision();
-        verify(writer).write(decision1);
-        verify(writer).delete(decision2);
+        verify(stateManager).create(decision1);
+        verify(stateManager).delete(decision2, null);
     }
     
     @Test
@@ -127,11 +130,11 @@ public class GraphDataSnapshotManagerImplTest {
         snapMan.initialize();
         
         verify(decisionMaker).latestDecision();
-        verify(writer).write(decision1);
-        verify(writer).delete(decision2);
-        verify(writer).write(decision3);
-        verify(writer).delete(decision4);
-        verify(writer).write(decision5);
+        verify(stateManager).create(decision1);
+        verify(stateManager).delete(decision2, null);
+        verify(stateManager).create(decision3);
+        verify(stateManager).delete(decision4, null);
+        verify(stateManager).create(decision5);
     }
     
     @Test
@@ -148,11 +151,11 @@ public class GraphDataSnapshotManagerImplTest {
         snapMan.initialize();
         
         verify(decisionMaker).latestDecision();
-        verify(writer, times(2)).write(decision1);
-        verify(writer, times(2)).delete(decision2);
-        verify(writer, times(2)).write(decision3);
-        verify(writer, times(2)).delete(decision4);
-        verify(writer, times(2)).write(decision5);
+        verify(stateManager, times(2)).create(decision1);
+        verify(stateManager, times(2)).delete(decision2, null);
+        verify(stateManager, times(2)).create(decision3);
+        verify(stateManager, times(2)).delete(decision4, null);
+        verify(stateManager, times(2)).create(decision5);
     }
 
     @Test

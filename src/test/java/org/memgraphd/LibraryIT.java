@@ -161,12 +161,9 @@ public class LibraryIT {
         graph.write(videoLongForm2);
         graph.write(movie1);
         graph.write(videoShortForm3);
-        graph.write(episode1);
         graph.write(season2);
         graph.write(series1);
         graph.write(season1);
-        
-        graph.write(episode1);
         graph.write(episode2);
         graph.write(episode3);
         
