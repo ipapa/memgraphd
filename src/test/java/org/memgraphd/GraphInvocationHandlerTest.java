@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.memgraphd.data.Data;
 import org.memgraphd.data.GraphDataSnapshotManager;
+import org.memgraphd.data.GraphDataSnapshotManagerImpl;
 import org.mockito.Mock;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -110,6 +111,13 @@ public class GraphInvocationHandlerTest {
         verify(graph).clear();
     }
     
+    @Test
+    public void testInvoke_someOtherMethod() throws Throwable {
+        when(graph.isRunning()).thenReturn(true);
+        handler.invoke(proxy, GraphDataSnapshotManagerImpl.class.getMethod("hashCode", new Class<?>[] {}), null);
+        verify(graph).isRunning();
+    }
+    
     @Test(expected=RuntimeException.class)
     public void testInvoke_clear_Stopped() throws Throwable {
         when(graph.isShutdown()).thenReturn(true);
@@ -185,5 +193,4 @@ public class GraphInvocationHandlerTest {
         handler.invoke(proxy, GraphSupervisor.class.getMethod("unregister", new Class<?>[] { GraphLifecycleHandler.class }), new Object[] {arg});
         verify(graph).unregister(arg);
     }
-    
 }

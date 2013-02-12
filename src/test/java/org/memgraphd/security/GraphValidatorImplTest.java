@@ -76,19 +76,19 @@ public class GraphValidatorImplTest {
         when(decision.getSequence()).thenReturn(Sequence.valueOf(1L));
         when(decision.getTime()).thenReturn(DateTime.now());
         
-        decisionValidator.validate(decision);
+        validator.validate(decision);
         verify(decisionValidator).validate(decision);
     }
     
     @Test(expected=GraphException.class)
     public void testValidateGraphRequestContext_throwsGraphException() throws GraphException {
         doThrow(new GraphException("")).when(dataValidator).validate(context);
-        dataValidator.validate(context);
+        validator.validate(context);
     }
     
     @Test
     public void testValidateGraphRequestContext() throws GraphException {
-        dataValidator.validate(context);
+        validator.validate(context);
         verify(dataValidator).validate(context);
     }
 }

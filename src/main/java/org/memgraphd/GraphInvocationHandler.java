@@ -15,15 +15,17 @@ public class GraphInvocationHandler implements InvocationHandler {
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         
-        if(method.getDeclaringClass().equals(GraphSupervisor.class)) {
+        Class<?> declaringClass = method.getDeclaringClass();
+        
+        if(GraphSupervisor.class.equals(declaringClass)) {
             return handleSupervisorCall(proxy, method, args);
         }
         
-        else if(method.getDeclaringClass().equals(GraphDataSnapshotManager.class)) {
+        else if(GraphDataSnapshotManager.class.equals(declaringClass)) {
             return handleSnapshotManagerCall(proxy, method, args);
         }
         
-        else if(method.getDeclaringClass().equals(GraphLifecycleListenerManager.class)) {
+        else if(GraphLifecycleListenerManager.class.equals(declaringClass)) {
             return handleGraphLifecycleManagerCall(proxy, method, args);
         }
 

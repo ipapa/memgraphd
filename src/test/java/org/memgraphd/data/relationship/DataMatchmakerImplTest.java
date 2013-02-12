@@ -115,6 +115,7 @@ public class DataMatchmakerImplTest {
     public void testMatch_IdNotFound() {
         when(dataRelationship.getId()).thenReturn("id");
         when(seeker.seekById("id")).thenReturn(null);
+        when(dataRelationship.getId()).thenReturn("id");
         
         matchmaker.match(dataRelationship);
         
@@ -124,12 +125,19 @@ public class DataMatchmakerImplTest {
     @Test
     public void testMatch() {
         MemoryReference ref1 = MemoryReference.valueOf(1);
+        Map<String, Set<MemoryReference>> map = new HashMap<String, Set<MemoryReference>>();
+        Set<MemoryReference> set = new HashSet<MemoryReference>();
+        set.add(ref1);
+        map.put("id", set);
+        ReflectionTestUtils.setField(matchmaker, "singles", map);
+        
         matchmaker = spy(matchmaker);
         when(dataRelationship.getId()).thenReturn("id");
         when(seeker.seekById("id")).thenReturn(ref1);
         
         matchmaker.match(dataRelationship);
         
+        verify(memoryAccess).link(ref1, ref1);
         verify(matchmaker).vow(dataRelationship, ref1);
     }
 
@@ -181,6 +189,37 @@ public class DataMatchmakerImplTest {
         
         assertTrue(singles.containsKey("id3"));
         assertEquals(1, singles.get("id3").size());
+        assertTrue(singles.get("id3").contains(ref1));
+        assertTrue(singles.containsKey("id4"));
+        assertEquals(1, singles.get("id4").size());
+        assertTrue(singles.get("id4").contains(ref1));
+        
+        verify(seeker).seekById(ids);
+        verify(memoryAccess).link(ref1, ref1);
+        verify(memoryAccess).link(ref1, ref2);
+    }
+    
+    @Test
+    public void testVow_singleAlreadyThere() {
+        String[] ids = new String[] { "id1", "id2", "id3", "id4" };
+        MemoryReference ref1 = MemoryReference.valueOf(1);
+        MemoryReference ref2 = MemoryReference.valueOf(2);
+        MemoryReference[] refs = new MemoryReference[] { ref1, ref2, null, null};
+        
+        Map<String, Set<MemoryReference>> singles = new HashMap<String, Set<MemoryReference>>();
+        Set<MemoryReference> refs3 = new HashSet<MemoryReference>();
+        refs3.add(ref2);
+        singles.put("id3", refs3);
+        ReflectionTestUtils.setField(matchmaker, "singles", singles);
+        
+        when(memoryAccess.read(ref1)).thenReturn(gData);
+        when(dataRelationship.getRelatedIds()).thenReturn(ids);
+        when(seeker.seekById(ids)).thenReturn(refs);
+        
+        matchmaker.vow(dataRelationship, ref1);
+        
+        assertTrue(singles.containsKey("id3"));
+        assertEquals(2, singles.get("id3").size());
         assertTrue(singles.get("id3").contains(ref1));
         assertTrue(singles.containsKey("id4"));
         assertEquals(1, singles.get("id4").size());

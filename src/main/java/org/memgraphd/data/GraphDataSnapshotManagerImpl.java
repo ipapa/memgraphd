@@ -30,7 +30,15 @@ public class GraphDataSnapshotManagerImpl implements GraphDataSnapshotManager {
     private final GraphReader reader;
     private final GraphMappings mappings;
     private final DecisionMaker decisionMaker;
-
+    
+    /**
+     * Constructs a new instance.
+     * @param reader {@link GraphReader}
+     * @param writer {@link GraphWriter}
+     * @param mappings {@link GraphMappings}
+     * @param decisionMaker {@link DecisionMaker}
+     * @param stateManager {@link GraphStateManager}
+     */
     public GraphDataSnapshotManagerImpl(GraphReader reader, GraphWriter writer, GraphMappings mappings, 
             DecisionMaker decisionMaker, GraphStateManager stateManager) {
         this.reader = reader;
@@ -44,7 +52,7 @@ public class GraphDataSnapshotManagerImpl implements GraphDataSnapshotManager {
      * {@inheritDoc}
      */
     @Override
-    public synchronized void initialize() {
+    public synchronized void initialize() throws GraphException {
         Sequence totalDecisions = decisionMaker.latestDecision();
         LOGGER.info(String.format("GraphDataInitializer is replaying %d decisions from disk", totalDecisions.number()));
 
@@ -84,26 +92,21 @@ public class GraphDataSnapshotManagerImpl implements GraphDataSnapshotManager {
 
     }
 
-    private void replayDecisionRange(Sequence start, Sequence end) {
+    private void replayDecisionRange(Sequence start, Sequence end) throws GraphException {
         long startTime = System.currentTimeMillis();
         List<Decision> allDecsions = decisionMaker.readRange(start, end);
         LOGGER.info(String.format("Loaded %d decisions from disk in %d milliseconds.", allDecsions.size(), (System.currentTimeMillis() - startTime)));
         
         for(Decision d : allDecsions) {
             LOGGER.debug(String.format("Loading decision sequenceId=%d", d.getSequence().number()));
-            try {
-                if(GraphRequestType.DELETE == d.getRequestType()) {
-                    stateManager.delete(d, reader.readId(d.getDataId()));
-                }
-                else if(GraphRequestType.CREATE == d.getRequestType())  {
-                    stateManager.create(d);
-                }
-                else {
-                    LOGGER.warn(String.format("Ignoring decision sequenceId=%d with bad request type=%s", d.getSequence().number(), d.getRequestType()));
-                }
-                
-            } catch (GraphException e) {
-                LOGGER.error("Failed to write decision to Graph " + d.toString());
+            if(GraphRequestType.DELETE == d.getRequestType()) {
+                stateManager.delete(d, reader.readId(d.getDataId()));
+            }
+            else if(GraphRequestType.CREATE == d.getRequestType())  {
+                stateManager.create(d);
+            }
+            else {
+                LOGGER.warn(String.format("Ignoring decision sequenceId=%d with bad request type=%s", d.getSequence().number(), d.getRequestType()));
             }
         }
     }

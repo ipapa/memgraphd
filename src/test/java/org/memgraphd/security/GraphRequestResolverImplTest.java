@@ -57,7 +57,30 @@ public class GraphRequestResolverImplTest {
         
         verify(reader).readId("id");
     }
+    
+    @Test
+    public void testResolveGraphRequestTypeString_null() {
+       
+        GraphRequestContext context = resolver.resolve(GraphRequestType.CREATE, (String)null);
+        
+        assertNotNull(context);
+        assertNull(context.getGraphData());
+        assertSame(GraphRequestType.CREATE, context.getRequestType());
+        assertNull(context.getData());
+    }
+    
+    @Test
+    public void testResolveGraphRequestTypeString_emptyString() {
+        
+        GraphRequestContext context = resolver.resolve(GraphRequestType.CREATE, "");
+        
+        assertNotNull(context);
+        assertNull(context.getGraphData());
+        assertSame(GraphRequestType.CREATE, context.getRequestType());
+        assertNull(context.getData());
 
+    }
+    
     @Test
     public void testResolveGraphRequestTypeData() {
         when(data.getId()).thenReturn("id");

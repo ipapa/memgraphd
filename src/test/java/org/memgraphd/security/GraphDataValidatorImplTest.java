@@ -7,6 +7,7 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.memgraphd.GraphRequestType;
 import org.memgraphd.data.Data;
+import org.memgraphd.data.GraphData;
 import org.memgraphd.decision.DecisionMaker;
 import org.memgraphd.exception.GraphException;
 import org.memgraphd.test.data.TvEpisode;
@@ -19,7 +20,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class GraphDataValidatorTest {
+public class GraphDataValidatorImplTest {
     
     private GraphDataValidatorImpl validator;
     
@@ -31,6 +32,9 @@ public class GraphDataValidatorTest {
     
     @Mock
     private Data data;
+    
+    @Mock
+    private GraphData gData; 
     
     @Before
     public void setUp() throws Exception {
@@ -62,7 +66,7 @@ public class GraphDataValidatorTest {
     }
     
     @Test
-    public void testValidateData_dataValidationFailed() throws GraphException {
+    public void testValidateData_CREATEdataValidationFailed() throws GraphException {
         TvEpisode episode = new TvEpisode("id", null, null, null, null, null, null);
         exception.expect(GraphException.class);
         exception.expectMessage("Data validation failed.");
@@ -71,10 +75,51 @@ public class GraphDataValidatorTest {
     }
     
     @Test
-    public void testValidateData_dataValidationSucceeds() throws GraphException {
+    public void testValidateData_CREATEdataAlreadyExists() throws GraphException {
+        TvEpisode episode = new TvEpisode("id", null, null, null, null, null, null);
+        exception.expect(GraphException.class);
+        exception.expectMessage("Data already exists in the graph.");
+        
+        validator.validate(new GraphRequestContext(GraphRequestType.CREATE, episode, gData));
+    }
+    
+    @Test
+    public void testValidateData_CREATEdataValidationSucceeds() throws GraphException {
         TvEpisode episode = new TvEpisode("id", null, null, "season-1", null, null, null);
       
         validator.validate(new GraphRequestContext(GraphRequestType.CREATE, episode, null));
+    }
+    
+    @Test
+    public void testValidateData_UPDATEdataValidationFailed() throws GraphException {
+        TvEpisode episode = new TvEpisode("id", null, null, null, null, null, null);
+        exception.expect(GraphException.class);
+        exception.expectMessage("Data does not exist in the graph.");
+        
+        validator.validate(new GraphRequestContext(GraphRequestType.UPDATE, episode, null));
+    }
+    
+    @Test
+    public void testValidateData_UPDATEdataValidationSucceeds() throws GraphException {
+        TvEpisode episode = new TvEpisode("id", null, null, "season-1", null, null, null);
+      
+        validator.validate(new GraphRequestContext(GraphRequestType.UPDATE, episode, gData));
+    }
+    
+    @Test
+    public void testValidateData_DELETEdataValidationFailed() throws GraphException {
+        TvEpisode episode = new TvEpisode("id", null, null, null, null, null, null);
+        exception.expect(GraphException.class);
+        exception.expectMessage("Data does not exist in the graph.");
+        
+        validator.validate(new GraphRequestContext(GraphRequestType.DELETE, episode, null));
+    }
+    
+    @Test
+    public void testValidateData_DELETEdataValidationSucceeds() throws GraphException {
+        TvEpisode episode = new TvEpisode("id", null, null, "season-1", null, null, null);
+      
+        validator.validate(new GraphRequestContext(GraphRequestType.DELETE, episode, gData));
     }
     
     @Test

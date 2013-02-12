@@ -173,4 +173,11 @@ public class GraphAuthorityImplTest {
         
         authority.authorize(new GraphRequestContext(GraphRequestType.UPDATE, readWriteProtected, graphData));
     }
+    
+    @Test
+    public void testAuthorize_Read() {
+        when(graphData.getData()).thenReturn(readOnly);
+        
+        authority.authorize(new GraphRequestContext(GraphRequestType.READ, readOnly, graphData));
+    }
 }
