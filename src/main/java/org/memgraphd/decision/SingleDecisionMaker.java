@@ -7,7 +7,8 @@ import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.memgraphd.GraphRequestType;
 import org.memgraphd.bookkeeper.BookKeeper;
-import org.memgraphd.data.Data;
+import org.memgraphd.exception.GraphException;
+import org.memgraphd.security.GraphRequestContext;
 
 /**
  * A single node implementation of a {@link DecisionMaker} meant to be used when running on a single JVM.
@@ -36,28 +37,21 @@ public class SingleDecisionMaker implements DecisionMaker {
     
     /**
      * {@inheritDoc}
+     * @throws GraphException 
      */
     @Override
-    public final Decision decidePutRequest(Data data) {
+    public Decision decide(GraphRequestContext context) throws GraphException {
+        if(GraphRequestType.READ.equals(context.getRequestType())) {
+            throw new GraphException("No decision needed for READ requests.");
+        }
         Decision decision = new DecisionImpl(Sequence.valueOf(latestInUseSequence.incrementAndGet()), 
-                new DateTime(), GraphRequestType.CREATE, data.getId(), data);
-        LOGGER.info(String.format("Write decision: Assigned dataId=%s sequence=%d", data.getId(), decision.getSequence().number()));
+                new DateTime(), context.getRequestType(), context.getData().getId(), context.getData());
+        LOGGER.info(String.format("%s decision: Assigned dataId=%s sequence=%d",
+                    new Object[] { context.getRequestType(), context.getData().getId(), decision.getSequence().number()}));
         bookKeeper.record(decision);
         return decision;
     }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final Decision decideDeleteRequest(Data data) {
-        Decision decision = new DecisionImpl(Sequence.valueOf(latestInUseSequence.incrementAndGet()), 
-                new DateTime(), GraphRequestType.DELETE, data.getId(), data);
-        LOGGER.info(String.format("Delete decision: Assigned dataId=%s sequence=%d", data.getId(), decision.getSequence().number()));
-        bookKeeper.record(decision);
-        return decision;
-    }
-    
+   
     /**
      * {@inheritDoc}
      */
@@ -85,6 +79,9 @@ public class SingleDecisionMaker implements DecisionMaker {
         bookKeeper.wipe(decision);
     }
     
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public final synchronized void reverseAll() {
         LOGGER.info("Wiping out ALL decisions.");
@@ -93,7 +90,10 @@ public class SingleDecisionMaker implements DecisionMaker {
         LOGGER.info("Latest in-use decision sequence is: " + seq.number());
         latestInUseSequence.set(seq.number());
     }
-
+    
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public final long getReadWriteBatchSize() {
         return batchSize;

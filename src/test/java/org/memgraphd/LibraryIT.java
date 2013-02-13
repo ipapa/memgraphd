@@ -134,8 +134,8 @@ public class LibraryIT {
     @Test
     public void testGetLibrary_irelevantDataWritten() throws GraphException, SQLException {
         
-        graph.write(episode1);
-        graph.write(season1);
+        graph.create(episode1);
+        graph.create(season1);
         
         Library library = graph.getLibrary();
         
@@ -156,16 +156,16 @@ public class LibraryIT {
     @Test
     public void testGetLibrary() throws GraphException, SQLException {
         
-        graph.write(episode1);
-        graph.write(videoLongForm1);
-        graph.write(videoLongForm2);
-        graph.write(movie1);
-        graph.write(videoShortForm3);
-        graph.write(season2);
-        graph.write(series1);
-        graph.write(season1);
-        graph.write(episode2);
-        graph.write(episode3);
+        graph.create(episode1);
+        graph.create(videoLongForm1);
+        graph.create(videoLongForm2);
+        graph.create(movie1);
+        graph.create(videoShortForm3);
+        graph.create(season2);
+        graph.create(series1);
+        graph.create(season1);
+        graph.create(episode2);
+        graph.create(episode3);
         
         Library library = graph.getLibrary();
         
@@ -189,18 +189,18 @@ public class LibraryIT {
         
         assertEquals(0, library.size());
         
-        graph.write(videoLongForm1);
-        graph.write(videoLongForm2);
-        graph.write(videoShortForm1);
-        graph.write(videoShortForm2);
-        graph.write(videoShortForm3);
+        graph.create(videoLongForm1);
+        graph.create(videoLongForm2);
+        graph.create(videoShortForm1);
+        graph.create(videoShortForm2);
+        graph.create(videoShortForm3);
         
-        graph.write(movie1);
-        graph.write(movie2); 
-        graph.write(movie3);
-        graph.write(series1);
-        graph.write(series2);
-        graph.write(series3);
+        graph.create(movie1);
+        graph.create(movie2); 
+        graph.create(movie3);
+        graph.create(series1);
+        graph.create(series2);
+        graph.create(series3);
         
         assertEquals(11, library.size());
  
@@ -212,11 +212,11 @@ public class LibraryIT {
     @Test
     public void testGetLibrary_sortById() throws GraphException, SQLException {
 
-        graph.write(videoLongForm1);
-        graph.write(videoLongForm2);
-        graph.write(videoShortForm1);
-        graph.write(videoShortForm2);
-        graph.write(videoShortForm3);
+        graph.create(videoLongForm1);
+        graph.create(videoLongForm2);
+        graph.create(videoShortForm1);
+        graph.create(videoShortForm2);
+        graph.create(videoShortForm3);
         
         Library library = graph.getLibrary();
         LibraryDataCollection videoColl = library.getSection(videos);
@@ -239,11 +239,11 @@ public class LibraryIT {
     @Test
     public void testGetLibrary_sortByCreatedDate() throws GraphException, SQLException {
 
-        graph.write(videoLongForm1);
-        graph.write(videoLongForm2);
-        graph.write(videoShortForm1);
-        graph.write(videoShortForm2);
-        graph.write(videoShortForm3);
+        graph.create(videoLongForm1);
+        graph.create(videoLongForm2);
+        graph.create(videoShortForm1);
+        graph.create(videoShortForm2);
+        graph.create(videoShortForm3);
         
         Library library = graph.getLibrary();
         LibraryDataCollection videoColl = library.getSection(videos);
@@ -266,11 +266,11 @@ public class LibraryIT {
     @Test
     public void testGetLibrary_sortByLastModifiedDate() throws GraphException, SQLException {
 
-        graph.write(videoLongForm1);
-        graph.write(videoLongForm2);
-        graph.write(videoShortForm1);
-        graph.write(videoShortForm2);
-        graph.write(videoShortForm3);
+        graph.create(videoLongForm1);
+        graph.create(videoLongForm2);
+        graph.create(videoShortForm1);
+        graph.create(videoShortForm2);
+        graph.create(videoShortForm3);
         
         Library library = graph.getLibrary();
         LibraryDataCollection videoColl = library.getSection(videos);
@@ -293,11 +293,11 @@ public class LibraryIT {
     @Test
     public void testGetLibrary_filterBy() throws GraphException, SQLException {
 
-        graph.write(videoLongForm1);
-        graph.write(videoLongForm2);
-        graph.write(videoShortForm1);
-        graph.write(videoShortForm2);
-        graph.write(videoShortForm3);
+        graph.create(videoLongForm1);
+        graph.create(videoLongForm2);
+        graph.create(videoShortForm1);
+        graph.create(videoShortForm2);
+        graph.create(videoShortForm3);
         
         Library library = graph.getLibrary();
         LibraryDataCollection videoColl = library.getSection(videos);
@@ -311,11 +311,11 @@ public class LibraryIT {
     @Test
     public void testGetLibrary_filterByCategory() throws GraphException, SQLException {
 
-        graph.write(videoLongForm1);
-        graph.write(videoLongForm2);
-        graph.write(videoShortForm1);
-        graph.write(videoShortForm2);
-        graph.write(videoShortForm3);
+        graph.create(videoLongForm1);
+        graph.create(videoLongForm2);
+        graph.create(videoShortForm1);
+        graph.create(videoShortForm2);
+        graph.create(videoShortForm3);
         
         Library library = graph.getLibrary();
         LibraryDataCollection videoColl = library.getSection(videos);
@@ -336,11 +336,11 @@ public class LibraryIT {
     @Test
     public void testGetLibrary_filterByAll() throws GraphException, SQLException {
 
-        graph.write(videoLongForm1);
-        graph.write(videoLongForm2);
-        graph.write(videoShortForm1);
-        graph.write(videoShortForm2);
-        graph.write(videoShortForm3);
+        graph.create(videoLongForm1);
+        graph.create(videoLongForm2);
+        graph.create(videoShortForm1);
+        graph.create(videoShortForm2);
+        graph.create(videoShortForm3);
         
         Library library = graph.getLibrary();
         LibraryDataCollection videoColl = library.getSection(videos);
@@ -362,11 +362,11 @@ public class LibraryIT {
     @Test
     public void testGetLibrary_filterByAny() throws GraphException, SQLException {
 
-        graph.write(videoLongForm1);
-        graph.write(videoLongForm2);
-        graph.write(videoShortForm1);
-        graph.write(videoShortForm2);
-        graph.write(videoShortForm3);
+        graph.create(videoLongForm1);
+        graph.create(videoLongForm2);
+        graph.create(videoShortForm1);
+        graph.create(videoShortForm2);
+        graph.create(videoShortForm3);
         
         Library library = graph.getLibrary();
         LibraryDataCollection videoColl = library.getSection(videos);
@@ -388,11 +388,11 @@ public class LibraryIT {
     @Test
     public void testGetLibrary_filterByDataPredicate() throws GraphException, SQLException {
 
-        graph.write(videoLongForm1);
-        graph.write(videoLongForm2);
-        graph.write(videoShortForm1);
-        graph.write(videoShortForm2);
-        graph.write(videoShortForm3);
+        graph.create(videoLongForm1);
+        graph.create(videoLongForm2);
+        graph.create(videoShortForm1);
+        graph.create(videoShortForm2);
+        graph.create(videoShortForm3);
         
         Library library = graph.getLibrary();
         LibraryDataCollection videoColl = library.getSection(videos);
@@ -412,11 +412,11 @@ public class LibraryIT {
     @Test
     public void testGetLibrary_combineFilterByWithSortBy() throws GraphException, SQLException {
 
-        graph.write(videoLongForm1);
-        graph.write(videoLongForm2);
-        graph.write(videoShortForm1);
-        graph.write(videoShortForm2);
-        graph.write(videoShortForm3);
+        graph.create(videoLongForm1);
+        graph.create(videoLongForm2);
+        graph.create(videoShortForm1);
+        graph.create(videoShortForm2);
+        graph.create(videoShortForm3);
         
         Library library = graph.getLibrary();
         LibraryDataCollection videoColl = library.getSection(videos);
@@ -440,11 +440,11 @@ public class LibraryIT {
     @Test
     public void testGetLibrary_combineAllFilterBy() throws GraphException, SQLException {
 
-        graph.write(videoLongForm1);
-        graph.write(videoLongForm2);
-        graph.write(videoShortForm1);
-        graph.write(videoShortForm2);
-        graph.write(videoShortForm3);
+        graph.create(videoLongForm1);
+        graph.create(videoLongForm2);
+        graph.create(videoShortForm1);
+        graph.create(videoShortForm2);
+        graph.create(videoShortForm3);
         
         Library library = graph.getLibrary();
         LibraryDataCollection videoColl = library.getSection(videos);

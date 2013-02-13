@@ -183,17 +183,32 @@ public class GraphImplTest {
     }
 
     @Test
-    public void testWriteData() throws GraphException {
-        when(writer.write(data)).thenReturn(MemoryReference.valueOf(1));
-        assertSame(MemoryReference.valueOf(1), graph.write(data));
+    public void testCreateData() throws GraphException {
+        when(writer.create(data)).thenReturn(MemoryReference.valueOf(1));
+        assertSame(MemoryReference.valueOf(1), graph.create(data));
         
-        verify(writer).write(data);
+        verify(writer).create(data);
     }
+    
+    @Test
+    public void testUpdateData() throws GraphException {
+        when(writer.update(data)).thenReturn(MemoryReference.valueOf(1));
+        assertSame(MemoryReference.valueOf(1), graph.update(data));
+        
+        verify(writer).update(data);
+    }
+
 
     @Test
     public void testDeleteString() throws GraphException {
         graph.delete("someId");
         verify(writer).delete("someId");
+    }
+    
+    @Test
+    public void testDeleteData() throws GraphException {
+        graph.delete(data);
+        verify(writer).delete(data);
     }
 
     @Test

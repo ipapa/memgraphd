@@ -48,10 +48,10 @@ public class GraphInvocationHandlerTest {
     }
     
     @Test
-    public void testInvokeWriteData_Running() throws Throwable {
+    public void testInvokeCreateData_Running() throws Throwable {
         when(graph.isRunning()).thenReturn(true);
         Data data = mock(Data.class);
-        handler.invoke(proxy, Graph.class.getMethod("write", new Class<?>[] { Data.class }), new Object[] { data });
+        handler.invoke(proxy, Graph.class.getMethod("create", new Class<?>[] { Data.class }), new Object[] { data });
         verify(graph).isRunning();
     }
     
@@ -64,12 +64,12 @@ public class GraphInvocationHandlerTest {
     }
     
     @Test
-    public void testInvokeWriteData() throws Throwable {
+    public void testInvokeCreateData() throws Throwable {
         when(graph.isRunning()).thenReturn(true);
         Data data = mock(Data.class);
-        handler.invoke(proxy, Graph.class.getMethod("write", new Class<?>[] { Data.class }), new Object[] { data });
+        handler.invoke(proxy, Graph.class.getMethod("create", new Class<?>[] { Data.class }), new Object[] { data });
         verify(graph).isRunning();
-        verify(graph).write(data);
+        verify(graph).create(data);
     }
     
     @Test

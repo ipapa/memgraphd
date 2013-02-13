@@ -33,11 +33,15 @@ public class GraphRequestResolverImpl implements GraphRequestResolver {
     @Override
     public GraphRequestContext resolve(GraphRequestType requestType, String dataId) {
         if(!StringUtils.isBlank(dataId)) {
-            return new GraphRequestContext(requestType, null, reader.readId(dataId));
+            Data data = null;
+            GraphData gData = reader.readId(dataId);
+            if(GraphRequestType.DELETE.equals(requestType) && gData != null) {
+                data = gData.getData();
+            }
+            return new GraphRequestContext(requestType, data, gData);
         }
-        else {
-            return new GraphRequestContext(requestType, null, null);
-        }
+
+        return new GraphRequestContext(requestType, null, null);
     }
     
     /**
@@ -79,11 +83,4 @@ public class GraphRequestResolverImpl implements GraphRequestResolver {
         }
     }
     
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public GraphRequestContext resolve(GraphRequestType requestType, GraphData graphData) {
-        return new GraphRequestContext(requestType, null, graphData);
-    }
 }

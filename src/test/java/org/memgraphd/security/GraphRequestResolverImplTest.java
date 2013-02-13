@@ -165,17 +165,37 @@ public class GraphRequestResolverImplTest {
         
         verifyZeroInteractions(reader);
     }
-
+    
     @Test
-    public void testResolveGraphRequestTypeGraphData() {
-      
-        GraphRequestContext context = resolver.resolve(GraphRequestType.CREATE, gData);
+    public void testResolveGraphRequestTypeGraphData_DELETE_Success() {
+
+        when(reader.readId("id")).thenReturn(gData);
+        when(gData.getData()).thenReturn(data);
+        
+        GraphRequestContext context = resolver.resolve(GraphRequestType.DELETE, "id");
         
         assertNotNull(context);
         assertSame(gData, context.getGraphData());
-        assertSame(GraphRequestType.CREATE, context.getRequestType());
+        assertSame(GraphRequestType.DELETE, context.getRequestType());
+        assertSame(data, context.getData());
+
+        verify(reader).readId("id");
+        verify(gData).getData();
+    }
+    
+    @Test
+    public void testResolveGraphRequestTypeGraphData_DELETE_Failure() {
+
+        when(reader.readId("id")).thenReturn(null);
+        
+        GraphRequestContext context = resolver.resolve(GraphRequestType.DELETE, "id");
+        
+        assertNotNull(context);
+        assertNull(context.getGraphData());
+        assertSame(GraphRequestType.DELETE, context.getRequestType());
         assertNull(context.getData());
 
+        verify(reader).readId("id");
     }
 
 }

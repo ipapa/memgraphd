@@ -123,7 +123,7 @@ public class DataMatchmakerImplTest {
     }
     
     @Test
-    public void testMatch() {
+    public void testMatch_knownSingle() {
         MemoryReference ref1 = MemoryReference.valueOf(1);
         Map<String, Set<MemoryReference>> map = new HashMap<String, Set<MemoryReference>>();
         Set<MemoryReference> set = new HashSet<MemoryReference>();
@@ -138,6 +138,21 @@ public class DataMatchmakerImplTest {
         matchmaker.match(dataRelationship);
         
         verify(memoryAccess).link(ref1, ref1);
+        verify(matchmaker).vow(dataRelationship, ref1);
+    }
+    
+    @Test
+    public void testMatch_unknownSingle() {
+        MemoryReference ref1 = MemoryReference.valueOf(1);
+        Map<String, Set<MemoryReference>> map = new HashMap<String, Set<MemoryReference>>();
+        ReflectionTestUtils.setField(matchmaker, "singles", map);
+        
+        matchmaker = spy(matchmaker);
+        when(dataRelationship.getId()).thenReturn("id");
+        when(seeker.seekById("id")).thenReturn(ref1);
+        
+        matchmaker.match(dataRelationship);
+        
         verify(matchmaker).vow(dataRelationship, ref1);
     }
 

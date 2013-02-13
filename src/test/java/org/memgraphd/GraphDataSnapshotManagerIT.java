@@ -83,11 +83,11 @@ public class GraphDataSnapshotManagerIT {
     }
     
     private void writeDataToGraph() throws GraphException {
-        assertNotNull(graph.write(data1));
-        assertNotNull(graph.write(data2));
-        assertNotNull(graph.write(data3));
-        assertNotNull(graph.write(data4));
-        assertNotNull(graph.write(data5));
+        assertNotNull(graph.create(data1));
+        assertNotNull(graph.create(data2));
+        assertNotNull(graph.create(data3));
+        assertNotNull(graph.create(data4));
+        assertNotNull(graph.create(data5));
     }
 
     private void chekGraphStats() {

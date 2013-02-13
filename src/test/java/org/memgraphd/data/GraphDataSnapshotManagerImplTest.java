@@ -65,7 +65,7 @@ public class GraphDataSnapshotManagerImplTest {
         when(decisionMaker.getReadWriteBatchSize()).thenReturn(5L);
         
         decision1 = new DecisionImpl(Sequence.valueOf(1L), null, GraphRequestType.CREATE, "1", data);
-        decision2 = new DecisionImpl(Sequence.valueOf(2L), null, GraphRequestType.DELETE, "2", data);
+        decision2 = new DecisionImpl(Sequence.valueOf(2L), null, GraphRequestType.UPDATE, "2", data);
         decision3 = new DecisionImpl(Sequence.valueOf(3L), null, GraphRequestType.CREATE, "3", data);
         decision4 = new DecisionImpl(Sequence.valueOf(4L), null, GraphRequestType.DELETE, "4", data);
         decision5 = new DecisionImpl(Sequence.valueOf(5L), null, GraphRequestType.CREATE, "5", data);
@@ -117,7 +117,7 @@ public class GraphDataSnapshotManagerImplTest {
         
         verify(decisionMaker).latestDecision();
         verify(stateManager).create(decision1);
-        verify(stateManager).delete(decision2, null);
+        verify(stateManager).update(decision2, null);
     }
     
     @Test
@@ -133,7 +133,7 @@ public class GraphDataSnapshotManagerImplTest {
         
         verify(decisionMaker).latestDecision();
         verify(stateManager).create(decision1);
-        verify(stateManager).delete(decision2, null);
+        verify(stateManager).update(decision2, null);
         verify(stateManager).create(decision3);
         verify(stateManager).delete(decision4, null);
         verify(stateManager).create(decision5);
@@ -154,7 +154,7 @@ public class GraphDataSnapshotManagerImplTest {
         
         verify(decisionMaker).latestDecision();
         verify(stateManager, times(2)).create(decision1);
-        verify(stateManager, times(2)).delete(decision2, null);
+        verify(stateManager, times(2)).update(decision2, null);
         verify(stateManager, times(2)).create(decision3);
         verify(stateManager, times(2)).delete(decision4, null);
         verify(stateManager, times(2)).create(decision5);

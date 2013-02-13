@@ -49,7 +49,7 @@ public class GraphWriterImpl extends AbstractGraphAccess implements GraphWriter 
      * {@inheritDoc}
      */
     @Override
-    public MemoryReference write(Data data) throws GraphException {
+    public MemoryReference create(Data data) throws GraphException {
         
         // 1. Create a request context
         GraphRequestContext context = requestResolver.resolve(GraphRequestType.CREATE, data);
@@ -61,10 +61,32 @@ public class GraphWriterImpl extends AbstractGraphAccess implements GraphWriter 
         authority.authorize(context);
         
         // 4. Generate a decision sequence for this request and log the transaction.
-        Decision decision = decisionMaker.decidePutRequest(data);
+        Decision decision = decisionMaker.decide(context);
         
         // 5. Update the state of the graph
         return stateManager.create(decision);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public MemoryReference update(Data data) throws GraphException {
+        
+        // 1. Create a request context
+        GraphRequestContext context = requestResolver.resolve(GraphRequestType.UPDATE, data);
+        
+        // 2. Validate the request context
+        validator.validate(context);
+        
+        // 3. Authorize the request.
+        authority.authorize(context);
+        
+        // 4. Generate a decision sequence for this request and log the transaction.
+        Decision decision = decisionMaker.decide(context);
+        
+        // 5. Update the state of the graph
+        return stateManager.update(decision, context.getGraphData());
     }
 
     /**
@@ -82,7 +104,29 @@ public class GraphWriterImpl extends AbstractGraphAccess implements GraphWriter 
         authority.authorize(context);
         
         // 4. Get a sequence assigned by decision maker to this delete request
-        Decision decision = decisionMaker.decideDeleteRequest(context.getGraphData().getData());
+        Decision decision = decisionMaker.decide(context);
+        
+        // 5. Delete the actual data
+        stateManager.delete(decision, context.getGraphData());
+      
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void delete(Data data) throws GraphException {
+        // 1. Create the request context
+        GraphRequestContext context = requestResolver.resolve(GraphRequestType.DELETE, data);
+        
+        // 2. Validate the request
+        validator.validate(context);
+        
+        // 3. Authorize the request
+        authority.authorize(context);
+        
+        // 4. Get a sequence assigned by decision maker to this delete request
+        Decision decision = decisionMaker.decide(context);
         
         // 5. Delete the actual data
         stateManager.delete(decision, context.getGraphData());

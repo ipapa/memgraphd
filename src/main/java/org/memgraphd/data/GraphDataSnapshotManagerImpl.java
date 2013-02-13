@@ -99,11 +99,14 @@ public class GraphDataSnapshotManagerImpl implements GraphDataSnapshotManager {
         
         for(Decision d : allDecsions) {
             LOGGER.debug(String.format("Loading decision sequenceId=%d", d.getSequence().number()));
-            if(GraphRequestType.DELETE == d.getRequestType()) {
-                stateManager.delete(d, reader.readId(d.getDataId()));
-            }
-            else if(GraphRequestType.CREATE == d.getRequestType())  {
+            if(GraphRequestType.CREATE == d.getRequestType())  {
                 stateManager.create(d);
+            }
+            else if(GraphRequestType.UPDATE == d.getRequestType())  {
+                stateManager.update(d, reader.readId(d.getDataId()));
+            }
+            else if(GraphRequestType.DELETE == d.getRequestType()) {
+                stateManager.delete(d, reader.readId(d.getDataId()));
             }
             else {
                 LOGGER.warn(String.format("Ignoring decision sequenceId=%d with bad request type=%s", d.getSequence().number(), d.getRequestType()));

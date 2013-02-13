@@ -104,7 +104,7 @@ public class GraphLifecycleIT {
     
     @Test(expected=RuntimeException.class)
     public void testGraphNotRuning_ThrowsExceptionOnWrite() throws GraphException {
-        graph.write(data);
+        graph.create(data);
     }
     
     @Test
@@ -280,7 +280,7 @@ public class GraphLifecycleIT {
     public void testGraphShutdown_ThrowsExceptionOnWrite() throws GraphException {
         graph.run();
         graph.shutdown();
-        graph.write(data);
+        graph.create(data);
     }
     
 }

@@ -62,7 +62,7 @@ public class GraphRelationshipsIT {
     
     @Test
     public void testNoRelationships() throws GraphException {
-        graph.write(video);
+        graph.create(video);
         
         GraphData videoGraph = graph.readGraph(video.getId());
         assertNotNull(videoGraph);
@@ -73,8 +73,8 @@ public class GraphRelationshipsIT {
     
     @Test
     public void testOneLinkRelationship() throws GraphException {
-        graph.write(video);
-        graph.write(episode);
+        graph.create(video);
+        graph.create(episode);
         
         GraphData videoGraph = graph.readGraph(video.getId());
         assertNotNull(videoGraph);
@@ -94,8 +94,8 @@ public class GraphRelationshipsIT {
     
     @Test
     public void testOneLinkRelationship_writesReverseOrder() throws GraphException {
-        graph.write(episode);
-        graph.write(video);
+        graph.create(episode);
+        graph.create(video);
         
         GraphData videoGraph = graph.readGraph(video.getId());
         assertNotNull(videoGraph);
@@ -115,9 +115,9 @@ public class GraphRelationshipsIT {
     
     @Test
     public void testOneToManyRelationship() throws GraphException {
-        graph.write(video);
-        graph.write(video2);
-        graph.write(episode);
+        graph.create(video);
+        graph.create(video2);
+        graph.create(episode);
         
         GraphData videoGraph = graph.readGraph(video.getId());
         assertNotNull(videoGraph);
@@ -145,9 +145,9 @@ public class GraphRelationshipsIT {
     
     @Test
     public void testOneToManyRelationship_writesReverseOrder() throws GraphException {
-        graph.write(episode);
-        graph.write(video);
-        graph.write(video2);
+        graph.create(episode);
+        graph.create(video);
+        graph.create(video2);
         
         GraphData videoGraph = graph.readGraph(video.getId());
         assertNotNull(videoGraph);
@@ -175,10 +175,10 @@ public class GraphRelationshipsIT {
     
     @Test
     public void testTreeRelationship() throws GraphException, SQLException {
-        graph.write(video);
-        graph.write(episode);
-        graph.write(season);
-        graph.write(series);
+        graph.create(video);
+        graph.create(episode);
+        graph.create(season);
+        graph.create(series);
 
         GraphData graphVideo = graph.readGraph(VIDEO_ID);
 
@@ -206,13 +206,13 @@ public class GraphRelationshipsIT {
     
     @Test
     public void testBigTreeRelationship() throws GraphException {
-        graph.write(network);
-        graph.write(video);
-        graph.write(episode);
-        graph.write(season);
-        graph.write(series);
-        graph.write(movie1);
-        graph.write(movie2);
+        graph.create(network);
+        graph.create(video);
+        graph.create(episode);
+        graph.create(season);
+        graph.create(series);
+        graph.create(movie1);
+        graph.create(movie2);
         
         GraphData networkData = graph.readGraph(network.getId());
         assertNotNull(networkData);
@@ -225,8 +225,8 @@ public class GraphRelationshipsIT {
     
     @Test
     public void testRelationshipOnDelete() throws GraphException {
-        graph.write(video);
-        graph.write(episode);
+        graph.create(video);
+        graph.create(episode);
         
         graph.delete(episode.getId());
         assertNull(graph.readGraph(episode.getId()));
@@ -234,7 +234,7 @@ public class GraphRelationshipsIT {
         assertNull(videoGraph.getRelatedData().getLinks());
         assertNull(videoGraph.getRelatedData().getReferences());
         
-        graph.write(episode);
+        graph.create(episode);
         videoGraph = graph.readGraph(video.getId());
         assertSame(episode, videoGraph.getRelatedData().getLinks().oneToOne(TvEpisode.class));
         assertNull(videoGraph.getRelatedData().getReferences());
@@ -246,7 +246,7 @@ public class GraphRelationshipsIT {
     @Test
     public void testSimpleDelete() throws GraphException, SQLException, InterruptedException {
 
-        graph.write(video);
+        graph.create(video);
 
         GraphData graphVideo = graph.readGraph(VIDEO_ID);
         assertNotNull(graphVideo);
@@ -264,10 +264,10 @@ public class GraphRelationshipsIT {
     @Test
     public void testDeleteTopReference() throws GraphException, SQLException, InterruptedException {
 
-        graph.write(video);
-        graph.write(episode);
-        graph.write(season);
-        graph.write(series);
+        graph.create(video);
+        graph.create(episode);
+        graph.create(season);
+        graph.create(series);
 
         graph.delete(TVEPISODE_ID);
         graph.delete(TVSERIES_ID);
@@ -284,8 +284,8 @@ public class GraphRelationshipsIT {
     public void testDeleteReference() throws GraphException, SQLException,
             InterruptedException {
 
-        graph.write(video);
-        graph.write(episode);
+        graph.create(video);
+        graph.create(episode);
    
         graph.delete(VIDEO_ID);
         
@@ -301,8 +301,8 @@ public class GraphRelationshipsIT {
     public void testWriteDeleteWrite() throws GraphException, SQLException,
             InterruptedException {
 
-        graph.write(video);
-        graph.write(episode);
+        graph.create(video);
+        graph.create(episode);
    
         graph.delete(VIDEO_ID);
         
@@ -314,7 +314,7 @@ public class GraphRelationshipsIT {
         assertNull(graphEpisode.getRelatedData().getReferences());
         
         // write video again
-        graph.write(video);
+        graph.create(video);
         
         GraphData videoGraph = graph.readGraph(video.getId());
         assertSame(episode, videoGraph.getRelatedData().getLinks().oneToOne(TvEpisode.class));
@@ -328,10 +328,10 @@ public class GraphRelationshipsIT {
     public void testDeleteLinkInTheMiddleOfGraph() throws GraphException, SQLException,
             InterruptedException {
 
-        graph.write(video);
-        graph.write(episode);
-        graph.write(season);
-        graph.write(series);
+        graph.create(video);
+        graph.create(episode);
+        graph.create(season);
+        graph.create(series);
         
         GraphData graphEpisode = graph.readId(TVEPISODE_ID);
         assertNotNull(graphEpisode);

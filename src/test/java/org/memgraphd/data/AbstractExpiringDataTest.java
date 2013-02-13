@@ -37,6 +37,7 @@ public class AbstractExpiringDataTest {
     
     @Test
     public void testHasExpired_same() {
+        ReflectionTestUtils.setField(expiringData, "expirationDate", expirationDate);
         assertFalse(expiringData.hasExpired());
     }
     

@@ -164,8 +164,16 @@ public final class GraphImpl implements Graph {
      * {@inheritDoc}
      */
     @Override
-    public MemoryReference write(Data data) throws GraphException {
-        return writer.write(data);
+    public MemoryReference create(Data data) throws GraphException {
+        return writer.create(data);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public MemoryReference update(Data data) throws GraphException {
+        return writer.update(data);
     }
 
     /**
@@ -175,6 +183,15 @@ public final class GraphImpl implements Graph {
     @Override
     public void delete(String id) throws GraphException {
         writer.delete(id);
+    }
+    
+    /**
+     * {@inheritDoc}
+     * 
+     */
+    @Override
+    public void delete(Data data) throws GraphException {
+        writer.delete(data);
     }
 
     /**

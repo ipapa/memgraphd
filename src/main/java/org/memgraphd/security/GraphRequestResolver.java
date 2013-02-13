@@ -2,7 +2,6 @@ package org.memgraphd.security;
 
 import org.memgraphd.GraphRequestType;
 import org.memgraphd.data.Data;
-import org.memgraphd.data.GraphData;
 import org.memgraphd.decision.Sequence;
 import org.memgraphd.memory.MemoryReference;
 
@@ -50,11 +49,4 @@ public interface GraphRequestResolver {
      */
     GraphRequestContext resolve(GraphRequestType requestType, MemoryReference reference);
     
-    /**
-     * Resolves the request by {@link GraphData}.
-     * @param requestType GraphRequestType
-     * @param graphData {@link GraphData}
-     * @return {@link GraphRequestContext}
-     */
-    GraphRequestContext resolve(GraphRequestType requestType, GraphData graphData);
 }

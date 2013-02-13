@@ -3,7 +3,8 @@ package org.memgraphd.decision;
 import java.util.List;
 
 import org.memgraphd.bookkeeper.BookKeeper;
-import org.memgraphd.data.Data;
+import org.memgraphd.exception.GraphException;
+import org.memgraphd.security.GraphRequestContext;
 
 /**
  * The {@link DecisionMaker} is in charge of making decisions about the write/delete events that change
@@ -17,18 +18,12 @@ import org.memgraphd.data.Data;
 public interface DecisionMaker {
     
     /**
-     * Orders a write event to memgraphd.
-     * @param data {@link Data}
+     * It makes a decision on the order in which this request should be executed.
+     * @param context {@link GraphRequestContext}
      * @return {@link Decision}
+     * @throws GraphException
      */
-    Decision decidePutRequest(Data data);
-    
-    /**
-     * Orders a write event to memgraphd.
-     * @param data {@link Data}
-     * @return {@link Decision}
-     */
-    Decision decideDeleteRequest(Data data);
+    Decision decide(GraphRequestContext context) throws GraphException;
     
     /**
      * Return the last-good-known decision sequence made by this decision maker.

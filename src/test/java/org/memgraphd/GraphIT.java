@@ -105,7 +105,7 @@ public class GraphIT {
 
         for (int i = 0; i < CAPACITY; i++) {
            Data data = new ReadWriteData(String.valueOf(i), new DateTime(), new DateTime());
-           graph.write(data);
+           graph.create(data);
         }
     }
 }
