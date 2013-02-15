@@ -57,12 +57,12 @@ public class GraphReaderImplTest {
     public void testReadId() {
         MemoryReference ref = MemoryReference.valueOf(1);
         when(seeker.seekById("id")).thenReturn(ref);
-        when(memoryAccess.read(ref)).thenReturn(gData);
+        when(memoryAccess.readGraph(ref)).thenReturn(gData);
         
         assertSame(gData, reader.read("id"));
         
         verify(seeker).seekById("id");
-        verify(memoryAccess).read(ref);
+        verify(memoryAccess).readGraph(ref);
     }
     
     @Test
@@ -81,73 +81,29 @@ public class GraphReaderImplTest {
         Sequence seq = Sequence.valueOf(1L);
         MemoryReference ref = MemoryReference.valueOf(1);
         when(seeker.seekBySequence(seq)).thenReturn(ref);
-        when(memoryAccess.read(ref)).thenReturn(gData);
+        when(memoryAccess.readGraph(ref)).thenReturn(gData);
         
         assertSame(gData, reader.read(seq));
         
         verify(seeker).seekBySequence(seq);
-        verify(memoryAccess).read(ref);
+        verify(memoryAccess).readGraph(ref);
     }
 
     @Test
     public void testReadReference_nullRef() {
-        when(memoryAccess.read(null)).thenReturn(null);
+        when(memoryAccess.readGraph(null)).thenReturn(null);
         assertNull(reader.read((MemoryReference)null));
-        verify(memoryAccess).read(null);
+        verify(memoryAccess).readGraph(null);
     }
     
     @Test
     public void testReadReference() {
         MemoryReference ref = MemoryReference.valueOf(1);
-        when(memoryAccess.read(ref)).thenReturn(gData);
+        when(memoryAccess.readGraph(ref)).thenReturn(gData);
         
         assertEquals(gData, reader.read(ref));
         
-        verify(memoryAccess).read(ref);
-    }
-
-    @Test
-    public void testReadGraphId() {
-        MemoryReference ref = MemoryReference.valueOf(1);
-        when(seeker.seekById("id")).thenReturn(ref);
-        when(memoryAccess.readGraph(ref)).thenReturn(gData);
-        
-        assertSame(gData, reader.readGraph("id"));
-        
-        verify(seeker).seekById("id");
         verify(memoryAccess).readGraph(ref);
     }
     
-    @Test
-    public void testReadGraphId_NullReference() {
-        when(seeker.seekById("id")).thenReturn(null);
-        assertNull(reader.readGraph("id"));
-        
-        verify(seeker).seekById("id");
-        verifyZeroInteractions(memoryAccess);
-    }
-    
-    @Test
-    public void testReadGraphSequence() {
-        Sequence seq = Sequence.valueOf(1L);
-        MemoryReference ref = MemoryReference.valueOf(1);
-        when(seeker.seekBySequence(seq)).thenReturn(ref);
-        when(memoryAccess.readGraph(ref)).thenReturn(gData);
-        
-        assertSame(gData, reader.readGraph(seq));
-        
-        verify(seeker).seekBySequence(seq);
-        verify(memoryAccess).readGraph(ref);
-    }
-    
-    @Test
-    public void testReadGraphReference() {
-        MemoryReference ref = MemoryReference.valueOf(1);
-        when(memoryAccess.readGraph(ref)).thenReturn(gData);
-        
-        assertEquals(gData, reader.readGraph(ref));
-        
-        verify(memoryAccess).readGraph(ref);
-    }
-
 }

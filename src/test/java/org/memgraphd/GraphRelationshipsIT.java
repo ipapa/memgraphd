@@ -64,7 +64,7 @@ public class GraphRelationshipsIT {
     public void testNoRelationships() throws GraphException {
         graph.create(video);
         
-        GraphData videoGraph = graph.readGraph(video.getId());
+        GraphData videoGraph = graph.read(video.getId());
         assertNotNull(videoGraph);
         assertNotNull(videoGraph.getRelatedData());
         assertNull(videoGraph.getRelatedData().getLinks());
@@ -76,7 +76,7 @@ public class GraphRelationshipsIT {
         graph.create(video);
         graph.create(episode);
         
-        GraphData videoGraph = graph.readGraph(video.getId());
+        GraphData videoGraph = graph.read(video.getId());
         assertNotNull(videoGraph);
         assertNotNull(videoGraph.getRelatedData());
         assertNotNull(videoGraph.getRelatedData().getLinks());
@@ -97,7 +97,7 @@ public class GraphRelationshipsIT {
         graph.create(episode);
         graph.create(video);
         
-        GraphData videoGraph = graph.readGraph(video.getId());
+        GraphData videoGraph = graph.read(video.getId());
         assertNotNull(videoGraph);
         assertNotNull(videoGraph.getRelatedData());
         assertNotNull(videoGraph.getRelatedData().getLinks());
@@ -119,21 +119,21 @@ public class GraphRelationshipsIT {
         graph.create(video2);
         graph.create(episode);
         
-        GraphData videoGraph = graph.readGraph(video.getId());
+        GraphData videoGraph = graph.read(video.getId());
         assertNotNull(videoGraph);
         assertNotNull(videoGraph.getRelatedData());
         assertNotNull(videoGraph.getRelatedData().getLinks());
         assertEquals(1, videoGraph.getRelatedData().getLinks().relationships().length);
         assertSame(episode, videoGraph.getRelatedData().getLinks().oneToOne(TvEpisode.class));
         
-        GraphData videoGraph2 = graph.readGraph(video2.getId());
+        GraphData videoGraph2 = graph.read(video2.getId());
         assertNotNull(videoGraph2);
         assertNotNull(videoGraph2.getRelatedData());
         assertNotNull(videoGraph2.getRelatedData().getLinks());
         assertEquals(1, videoGraph2.getRelatedData().getLinks().relationships().length);
         assertSame(episode, videoGraph2.getRelatedData().getLinks().oneToOne(TvEpisode.class));
         
-        GraphData episodeGraph = graph.readGraph(episode.getId());
+        GraphData episodeGraph = graph.read(episode.getId());
         assertNotNull(episodeGraph);
         assertNotNull(episodeGraph.getRelatedData());
         assertNull(episodeGraph.getRelatedData().getLinks());
@@ -149,21 +149,21 @@ public class GraphRelationshipsIT {
         graph.create(video);
         graph.create(video2);
         
-        GraphData videoGraph = graph.readGraph(video.getId());
+        GraphData videoGraph = graph.read(video.getId());
         assertNotNull(videoGraph);
         assertNotNull(videoGraph.getRelatedData());
         assertNotNull(videoGraph.getRelatedData().getLinks());
         assertEquals(1, videoGraph.getRelatedData().getLinks().relationships().length);
         assertSame(episode, videoGraph.getRelatedData().getLinks().oneToOne(TvEpisode.class));
         
-        GraphData videoGraph2 = graph.readGraph(video2.getId());
+        GraphData videoGraph2 = graph.read(video2.getId());
         assertNotNull(videoGraph2);
         assertNotNull(videoGraph2.getRelatedData());
         assertNotNull(videoGraph2.getRelatedData().getLinks());
         assertEquals(1, videoGraph2.getRelatedData().getLinks().relationships().length);
         assertSame(episode, videoGraph2.getRelatedData().getLinks().oneToOne(TvEpisode.class));
         
-        GraphData episodeGraph = graph.readGraph(episode.getId());
+        GraphData episodeGraph = graph.read(episode.getId());
         assertNotNull(episodeGraph);
         assertNotNull(episodeGraph.getRelatedData());
         assertNull(episodeGraph.getRelatedData().getLinks());
@@ -180,7 +180,7 @@ public class GraphRelationshipsIT {
         graph.create(season);
         graph.create(series);
 
-        GraphData graphVideo = graph.readGraph(VIDEO_ID);
+        GraphData graphVideo = graph.read(VIDEO_ID);
 
         assertNotNull(graphVideo);
         assertSame(video, graphVideo.getData());
@@ -214,7 +214,7 @@ public class GraphRelationshipsIT {
         graph.create(movie1);
         graph.create(movie2);
         
-        GraphData networkData = graph.readGraph(network.getId());
+        GraphData networkData = graph.read(network.getId());
         assertNotNull(networkData);
         Set<Movie> hboMovies = networkData.getRelatedData().getReferences().oneToMany(Movie.class);
         assertNotNull(hboMovies);
@@ -229,17 +229,17 @@ public class GraphRelationshipsIT {
         graph.create(episode);
         
         graph.delete(episode.getId());
-        assertNull(graph.readGraph(episode.getId()));
-        GraphData videoGraph = graph.readGraph(video.getId());
+        assertNull(graph.read(episode.getId()));
+        GraphData videoGraph = graph.read(video.getId());
         assertNull(videoGraph.getRelatedData().getLinks());
         assertNull(videoGraph.getRelatedData().getReferences());
         
         graph.create(episode);
-        videoGraph = graph.readGraph(video.getId());
+        videoGraph = graph.read(video.getId());
         assertSame(episode, videoGraph.getRelatedData().getLinks().oneToOne(TvEpisode.class));
         assertNull(videoGraph.getRelatedData().getReferences());
         
-        GraphData episodeGraph = graph.readGraph(episode.getId());
+        GraphData episodeGraph = graph.read(episode.getId());
         assertSame(video, episodeGraph.getRelatedData().getReferences().oneToOne(OnlineVideo.class));
     }
     
@@ -248,12 +248,12 @@ public class GraphRelationshipsIT {
 
         graph.create(video);
 
-        GraphData graphVideo = graph.readGraph(VIDEO_ID);
+        GraphData graphVideo = graph.read(VIDEO_ID);
         assertNotNull(graphVideo);
         assertSame(video, graphVideo.getData());
 
         graph.delete(VIDEO_ID);
-        assertNull(graph.readGraph(VIDEO_ID));
+        assertNull(graph.read(VIDEO_ID));
     }
     
     @Test(expected=GraphException.class)
@@ -272,10 +272,10 @@ public class GraphRelationshipsIT {
         graph.delete(TVEPISODE_ID);
         graph.delete(TVSERIES_ID);
 
-        assertNull(graph.readGraph(TVEPISODE_ID));
-        assertNull(graph.readGraph(TVSERIES_ID));
+        assertNull(graph.read(TVEPISODE_ID));
+        assertNull(graph.read(TVSERIES_ID));
 
-        GraphData graphSeason = graph.readGraph(TVSEASON_ID);
+        GraphData graphSeason = graph.read(TVSEASON_ID);
         assertNull(graphSeason.getRelatedData().getLinks());
         assertNull(graphSeason.getRelatedData().getReferences());
     }
@@ -289,9 +289,9 @@ public class GraphRelationshipsIT {
    
         graph.delete(VIDEO_ID);
         
-        assertNull(graph.readGraph(VIDEO_ID));
+        assertNull(graph.read(VIDEO_ID));
 
-        GraphData graphEpisode = graph.readGraph(episode.getId());
+        GraphData graphEpisode = graph.read(episode.getId());
         assertNotNull(graphEpisode);
         assertNull(graphEpisode.getRelatedData().getLinks());
         assertNull(graphEpisode.getRelatedData().getReferences());
@@ -306,9 +306,9 @@ public class GraphRelationshipsIT {
    
         graph.delete(VIDEO_ID);
         
-        assertNull(graph.readGraph(VIDEO_ID));
+        assertNull(graph.read(VIDEO_ID));
 
-        GraphData graphEpisode = graph.readGraph(episode.getId());
+        GraphData graphEpisode = graph.read(episode.getId());
         assertNotNull(graphEpisode);
         assertNull(graphEpisode.getRelatedData().getLinks());
         assertNull(graphEpisode.getRelatedData().getReferences());
@@ -316,11 +316,11 @@ public class GraphRelationshipsIT {
         // write video again
         graph.create(video);
         
-        GraphData videoGraph = graph.readGraph(video.getId());
+        GraphData videoGraph = graph.read(video.getId());
         assertSame(episode, videoGraph.getRelatedData().getLinks().oneToOne(TvEpisode.class));
         assertNull(videoGraph.getRelatedData().getReferences());
         
-        GraphData episodeGraph = graph.readGraph(episode.getId());
+        GraphData episodeGraph = graph.read(episode.getId());
         assertSame(video, episodeGraph.getRelatedData().getReferences().oneToOne(OnlineVideo.class));
     }
     
@@ -337,14 +337,14 @@ public class GraphRelationshipsIT {
         assertNotNull(graphEpisode);
         graph.delete(TVEPISODE_ID);
         
-        GraphData graphVideo = graph.readGraph(VIDEO_ID);
+        GraphData graphVideo = graph.read(VIDEO_ID);
 
-        assertNull("I just deleted you", graph.readGraph(TVEPISODE_ID));
+        assertNull("I just deleted you", graph.read(TVEPISODE_ID));
         assertNotNull(graphVideo);
         assertNull(graphVideo.getRelatedData().getLinks());
         assertNull(graphVideo.getRelatedData().getReferences());
 
-        GraphData graphSeason = graph.readGraph(TVSEASON_ID);
+        GraphData graphSeason = graph.read(TVSEASON_ID);
         assertNotNull(graphSeason);
         assertNotNull(graphSeason.getRelatedData().getLinks());
         assertNotNull(graphSeason.getRelatedData().getLinks().relationships()[0]);

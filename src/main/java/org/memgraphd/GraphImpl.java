@@ -140,30 +140,6 @@ public final class GraphImpl implements Graph {
      * {@inheritDoc}
      */
     @Override
-    public GraphData readGraph(String id) {
-        return reader.readGraph(id);
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public GraphData readGraph(Sequence seq) {
-        return reader.readGraph(seq);
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public GraphData readGraph(MemoryReference ref) {
-        return reader.readGraph(ref);
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public MemoryReference create(Data data) throws GraphException {
         return writer.create(data);
     }

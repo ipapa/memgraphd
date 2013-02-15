@@ -160,27 +160,6 @@ public class GraphImplTest {
         assertSame(gData, graph.read(MemoryReference.valueOf(1)));
         verify(reader).read(MemoryReference.valueOf(1));
     }
-    
-    @Test
-    public void testReadGraphId() {
-        when(reader.readGraph("some id")).thenReturn(gData);
-        assertSame(gData, graph.readGraph("some id"));
-        verify(reader).readGraph("some id");
-    }
-
-    @Test
-    public void testReadGraphSequence() {
-        when(reader.readGraph(Sequence.valueOf(1))).thenReturn(gData);
-        assertSame(gData, graph.readGraph(Sequence.valueOf(1)));
-        verify(reader).readGraph(Sequence.valueOf(1));
-    }
-
-    @Test
-    public void testReadGraphReference() {
-        when(reader.readGraph(MemoryReference.valueOf(1))).thenReturn(gData);
-        assertSame(gData, graph.readGraph(MemoryReference.valueOf(1)));
-        verify(reader).readGraph(MemoryReference.valueOf(1));
-    }
 
     @Test
     public void testCreateData() throws GraphException {
