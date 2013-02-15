@@ -46,7 +46,7 @@ public class GraphRequestResolverImplTest {
 
     @Test
     public void testResolveGraphRequestTypeString() {
-        when(reader.readId("id")).thenReturn(gData);
+        when(reader.read("id")).thenReturn(gData);
         
         GraphRequestContext context = resolver.resolve(GraphRequestType.CREATE, "id");
         
@@ -55,7 +55,7 @@ public class GraphRequestResolverImplTest {
         assertSame(GraphRequestType.CREATE, context.getRequestType());
         assertNull(context.getData());
         
-        verify(reader).readId("id");
+        verify(reader).read("id");
     }
     
     @Test
@@ -84,7 +84,7 @@ public class GraphRequestResolverImplTest {
     @Test
     public void testResolveGraphRequestTypeData() {
         when(data.getId()).thenReturn("id");
-        when(reader.readId("id")).thenReturn(gData);
+        when(reader.read("id")).thenReturn(gData);
         
         GraphRequestContext context = resolver.resolve(GraphRequestType.CREATE, data);
         
@@ -94,7 +94,7 @@ public class GraphRequestResolverImplTest {
         assertSame(data, context.getData());
         
         verify(data).getId();
-        verify(reader).readId("id");
+        verify(reader).read("id");
     }
     
     @Test
@@ -113,7 +113,7 @@ public class GraphRequestResolverImplTest {
     @Test
     public void testResolveGraphRequestTypeSequence() {
         Sequence seq = Sequence.valueOf(1);
-        when(reader.readSequence(seq)).thenReturn(gData);
+        when(reader.read(seq)).thenReturn(gData);
         
         GraphRequestContext context = resolver.resolve(GraphRequestType.CREATE, seq);
         
@@ -122,7 +122,7 @@ public class GraphRequestResolverImplTest {
         assertSame(GraphRequestType.CREATE, context.getRequestType());
         assertNull(context.getData());
         
-        verify(reader).readSequence(seq);
+        verify(reader).read(seq);
     }
     
     @Test
@@ -141,7 +141,7 @@ public class GraphRequestResolverImplTest {
     @Test
     public void testResolveGraphRequestTypeMemoryReference() {
         MemoryReference ref = MemoryReference.valueOf(1);
-        when(reader.readReference(ref)).thenReturn(gData);
+        when(reader.read(ref)).thenReturn(gData);
         
         GraphRequestContext context = resolver.resolve(GraphRequestType.CREATE, ref);
         
@@ -150,7 +150,7 @@ public class GraphRequestResolverImplTest {
         assertSame(GraphRequestType.CREATE, context.getRequestType());
         assertNull(context.getData());
         
-        verify(reader).readReference(ref);
+        verify(reader).read(ref);
     }
     
     @Test
@@ -169,7 +169,7 @@ public class GraphRequestResolverImplTest {
     @Test
     public void testResolveGraphRequestTypeGraphData_DELETE_Success() {
 
-        when(reader.readId("id")).thenReturn(gData);
+        when(reader.read("id")).thenReturn(gData);
         when(gData.getData()).thenReturn(data);
         
         GraphRequestContext context = resolver.resolve(GraphRequestType.DELETE, "id");
@@ -179,14 +179,14 @@ public class GraphRequestResolverImplTest {
         assertSame(GraphRequestType.DELETE, context.getRequestType());
         assertSame(data, context.getData());
 
-        verify(reader).readId("id");
+        verify(reader).read("id");
         verify(gData).getData();
     }
     
     @Test
     public void testResolveGraphRequestTypeGraphData_DELETE_Failure() {
 
-        when(reader.readId("id")).thenReturn(null);
+        when(reader.read("id")).thenReturn(null);
         
         GraphRequestContext context = resolver.resolve(GraphRequestType.DELETE, "id");
         
@@ -195,7 +195,7 @@ public class GraphRequestResolverImplTest {
         assertSame(GraphRequestType.DELETE, context.getRequestType());
         assertNull(context.getData());
 
-        verify(reader).readId("id");
+        verify(reader).read("id");
     }
 
 }

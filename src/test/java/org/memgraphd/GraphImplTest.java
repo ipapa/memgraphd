@@ -142,23 +142,23 @@ public class GraphImplTest {
     
     @Test
     public void testReadId() {
-        when(reader.readId("some id")).thenReturn(gData);
-        assertSame(gData, graph.readId("some id"));
-        verify(reader).readId("some id");
+        when(reader.read("some id")).thenReturn(gData);
+        assertSame(gData, graph.read("some id"));
+        verify(reader).read("some id");
     }
 
     @Test
     public void testReadSequence() {
-        when(reader.readSequence(Sequence.valueOf(1))).thenReturn(gData);
-        assertSame(gData, graph.readSequence(Sequence.valueOf(1)));
-        verify(reader).readSequence(Sequence.valueOf(1));
+        when(reader.read(Sequence.valueOf(1))).thenReturn(gData);
+        assertSame(gData, graph.read(Sequence.valueOf(1)));
+        verify(reader).read(Sequence.valueOf(1));
     }
 
     @Test
     public void testReadReference() {
-        when(reader.readReference(MemoryReference.valueOf(1))).thenReturn(gData);
-        assertSame(gData, graph.readReference(MemoryReference.valueOf(1)));
-        verify(reader).readReference(MemoryReference.valueOf(1));
+        when(reader.read(MemoryReference.valueOf(1))).thenReturn(gData);
+        assertSame(gData, graph.read(MemoryReference.valueOf(1)));
+        verify(reader).read(MemoryReference.valueOf(1));
     }
     
     @Test

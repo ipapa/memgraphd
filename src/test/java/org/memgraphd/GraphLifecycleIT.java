@@ -89,17 +89,17 @@ public class GraphLifecycleIT {
     
     @Test(expected=RuntimeException.class)
     public void testGraphNotRuning_ThrowsExceptionOnReadId() throws GraphException {
-        graph.readId("id");
+        graph.read("id");
     }
     
     @Test(expected=RuntimeException.class)
     public void testGraphNotRuning_ThrowsExceptionOnReadReference() throws GraphException {
-        graph.readReference(MemoryReference.valueOf(1));
+        graph.read(MemoryReference.valueOf(1));
     }
     
     @Test(expected=RuntimeException.class)
     public void testGraphNotRuning_ThrowsExceptionOnReadSequence() throws GraphException {
-        graph.readSequence(Sequence.valueOf(1));
+        graph.read(Sequence.valueOf(1));
     }
     
     @Test(expected=RuntimeException.class)
@@ -196,7 +196,7 @@ public class GraphLifecycleIT {
     public void testGraphShutdown_ThrowsExceptionOnIsEmpty() throws GraphException {
         graph.run();
         graph.shutdown();
-        graph.readId("someId");
+        graph.read("someId");
     }
 
     @Test(expected=RuntimeException.class)
@@ -259,21 +259,21 @@ public class GraphLifecycleIT {
     public void testGraphShutdown_ThrowsExceptionOnReadId() throws GraphException {
         graph.run();
         graph.shutdown();
-        graph.readId("id");
+        graph.read("id");
     }
 
     @Test(expected=RuntimeException.class)
     public void testGraphShutdown_ThrowsExceptionOnReadReference() throws GraphException {
         graph.run();
         graph.shutdown();
-        graph.readReference(MemoryReference.valueOf(1));
+        graph.read(MemoryReference.valueOf(1));
     }
 
     @Test(expected=RuntimeException.class)
     public void testGraphShutdown_ThrowsExceptionOnReadSequence() throws GraphException {
         graph.run();
         graph.shutdown();
-        graph.readSequence(Sequence.valueOf(1));
+        graph.read(Sequence.valueOf(1));
     }
 
     @Test(expected=RuntimeException.class)

@@ -99,11 +99,11 @@ public class GraphDataSnapshotManagerIT {
     }
 
     private void readDataFromGraph() {
-        compareData(data1, graph.readId(data1.getId()).getData());
-        compareData(data2, graph.readId(data2.getId()).getData());
-        compareData(data3, graph.readId(data3.getId()).getData());
-        compareData(data4, graph.readId(data4.getId()).getData());
-        compareData(data5, graph.readId(data5.getId()).getData());
+        compareData(data1, graph.read(data1.getId()).getData());
+        compareData(data2, graph.read(data2.getId()).getData());
+        compareData(data3, graph.read(data3.getId()).getData());
+        compareData(data4, graph.read(data4.getId()).getData());
+        compareData(data5, graph.read(data5.getId()).getData());
     }
     
     private void compareData(Data original, Data newData) {

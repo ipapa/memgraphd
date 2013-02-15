@@ -77,7 +77,7 @@ public class GraphDataSnapshotManagerImpl implements GraphDataSnapshotManager {
     public synchronized void clear() throws GraphException {
         LOGGER.info("Wiping out all graph data.");
         for (MemoryReference ref : mappings.getAllMemoryReferences()) {
-            GraphData gData = reader.readReference(ref);
+            GraphData gData = reader.read(ref);
             try {
                 LOGGER.info(String.format("Deleting graph data id=%s", gData.getData().getId()));
                 writer.delete(gData.getData().getId());
@@ -103,10 +103,10 @@ public class GraphDataSnapshotManagerImpl implements GraphDataSnapshotManager {
                 stateManager.create(d);
             }
             else if(GraphRequestType.UPDATE == d.getRequestType())  {
-                stateManager.update(d, reader.readId(d.getDataId()));
+                stateManager.update(d, reader.read(d.getDataId()));
             }
             else if(GraphRequestType.DELETE == d.getRequestType()) {
-                stateManager.delete(d, reader.readId(d.getDataId()));
+                stateManager.delete(d, reader.read(d.getDataId()));
             }
             else {
                 LOGGER.warn(String.format("Ignoring decision sequenceId=%d with bad request type=%s", d.getSequence().number(), d.getRequestType()));

@@ -52,7 +52,7 @@ public class GraphFilterImpl extends AbstractGraphAccess implements GraphFilter 
         GraphData[] result = new GraphData[range.length];
         int count = 0;
         for(Sequence seq : range) {
-            result[count] = reader.readSequence(seq);
+            result[count] = reader.read(seq);
             count++;
         }
         return result;

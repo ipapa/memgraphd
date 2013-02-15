@@ -21,7 +21,7 @@ public interface GraphReader {
      * @param id {@link String}
      * @return {@link GraphData}
      */
-    GraphData readId(String id);
+    GraphData read(String id);
     
     /**
      * Read {@link GraphData} by {@link Sequence}. <b>Note</b>: This method only returns
@@ -29,7 +29,7 @@ public interface GraphReader {
      * @param seq {@link Sequence}
      * @return {@link GraphData}
      */
-    GraphData readSequence(Sequence seq);
+    GraphData read(Sequence seq);
     
     /**
      * Read {@link GraphData} by memory reference. <b>Note</b>: This method only returns
@@ -37,7 +37,7 @@ public interface GraphReader {
      * @param ref {@link MemoryReference}
      * @return {@link GraphData}
      */
-    GraphData readReference(MemoryReference ref);
+    GraphData read(MemoryReference ref);
     
     /**
      * Read {@link GraphData} by {@link Data#getId()}. <b>Note:<b> It will return

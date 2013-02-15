@@ -34,7 +34,7 @@ public class GraphRequestResolverImpl implements GraphRequestResolver {
     public GraphRequestContext resolve(GraphRequestType requestType, String dataId) {
         if(!StringUtils.isBlank(dataId)) {
             Data data = null;
-            GraphData gData = reader.readId(dataId);
+            GraphData gData = reader.read(dataId);
             if(GraphRequestType.DELETE.equals(requestType) && gData != null) {
                 data = gData.getData();
             }
@@ -50,7 +50,7 @@ public class GraphRequestResolverImpl implements GraphRequestResolver {
     @Override
     public GraphRequestContext resolve(GraphRequestType requestType, Data data) {
         if(data != null) {
-            return new GraphRequestContext(requestType, data, reader.readId(data.getId()));
+            return new GraphRequestContext(requestType, data, reader.read(data.getId()));
         }
         else {
             return new GraphRequestContext(requestType, data, null);
@@ -63,7 +63,7 @@ public class GraphRequestResolverImpl implements GraphRequestResolver {
     @Override
     public GraphRequestContext resolve(GraphRequestType requestType, Sequence sequence) {
         if(sequence != null) {
-            return new GraphRequestContext(requestType, null, reader.readSequence(sequence));
+            return new GraphRequestContext(requestType, null, reader.read(sequence));
         }
         else {
             return new GraphRequestContext(requestType, null, null);
@@ -76,7 +76,7 @@ public class GraphRequestResolverImpl implements GraphRequestResolver {
     @Override
     public GraphRequestContext resolve(GraphRequestType requestType, MemoryReference reference) {
         if(reference != null) {
-            return new GraphRequestContext(requestType, null, reader.readReference(reference));
+            return new GraphRequestContext(requestType, null, reader.read(reference));
         }
         else {
             return new GraphRequestContext(requestType, null, null);

@@ -164,7 +164,7 @@ public class GraphDataSnapshotManagerImplTest {
     public void testClear() throws GraphException {
         MemoryReference memRef = MemoryReference.valueOf(1);
         when(mappings.getAllMemoryReferences()).thenReturn(Arrays.asList(memRef));
-        when(reader.readReference(memRef)).thenReturn(graphData);
+        when(reader.read(memRef)).thenReturn(graphData);
         when(graphData.getData()).thenReturn(data);
         
         snapMan.clear();
@@ -177,7 +177,7 @@ public class GraphDataSnapshotManagerImplTest {
     public void testClear_throwsException() throws GraphException {
         MemoryReference memRef = MemoryReference.valueOf(1);
         when(mappings.getAllMemoryReferences()).thenReturn(Arrays.asList(memRef));
-        when(reader.readReference(memRef)).thenReturn(graphData);
+        when(reader.read(memRef)).thenReturn(graphData);
         doThrow(new GraphException("")).when(writer).delete(anyString());
         when(graphData.getData()).thenReturn(data);
         

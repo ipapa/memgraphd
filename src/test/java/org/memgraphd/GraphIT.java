@@ -50,8 +50,8 @@ public class GraphIT {
     public void testGraph_readId() throws GraphException, SQLException, JSONException {
         testGraph_write();
         for (int i = 0; i < CAPACITY; i++) {
-            assertNotNull(graph.readId(String.valueOf(i)));
-            assertEquals(String.valueOf(i), graph.readId(String.valueOf(i)).getData().getId());
+            assertNotNull(graph.read(String.valueOf(i)));
+            assertEquals(String.valueOf(i), graph.read(String.valueOf(i)).getData().getId());
         }
     }
     
@@ -59,9 +59,9 @@ public class GraphIT {
     public void testGraph_readSequence() throws GraphException, SQLException, JSONException {
         testGraph_write();
         for (int i = 0; i < CAPACITY; i++) {
-            GraphData gData = graph.readId(String.valueOf(i));
+            GraphData gData = graph.read(String.valueOf(i));
             assertNotNull(gData);
-            GraphData seqGData = graph.readSequence(gData.getSequence());
+            GraphData seqGData = graph.read(gData.getSequence());
             assertSame(gData, seqGData);
         }
     }
@@ -72,7 +72,7 @@ public class GraphIT {
         
         for (int i = 0; i < CAPACITY; i++) {
             graph.delete(String.valueOf(i));
-            assertNull(graph.readId(String.valueOf(i)));
+            assertNull(graph.read(String.valueOf(i)));
         }
         
         assertEquals(CAPACITY, graph.capacity());

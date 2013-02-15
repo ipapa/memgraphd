@@ -43,7 +43,7 @@ public class GraphInvocationHandlerTest {
     @Test(expected=RuntimeException.class)
     public void testInvokeReadId_notRunning() throws Throwable {
         when(graph.isRunning()).thenReturn(false);
-        handler.invoke(proxy, Graph.class.getMethod("readId", new Class<?>[] { String.class }), new Object[] { "id" });
+        handler.invoke(proxy, Graph.class.getMethod("read", new Class<?>[] { String.class }), new Object[] { "id" });
         verify(graph).isRunning();
     }
     
@@ -58,9 +58,9 @@ public class GraphInvocationHandlerTest {
     @Test
     public void testInvokeReadId() throws Throwable {
         when(graph.isRunning()).thenReturn(true);
-        handler.invoke(proxy, Graph.class.getMethod("readId", new Class<?>[] { String.class }), new Object[] { "id" });
+        handler.invoke(proxy, Graph.class.getMethod("read", new Class<?>[] { String.class }), new Object[] { "id" });
         verify(graph).isRunning();
-        verify(graph).readId("id");
+        verify(graph).read("id");
     }
     
     @Test

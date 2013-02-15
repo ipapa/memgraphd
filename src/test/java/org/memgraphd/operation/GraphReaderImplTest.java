@@ -47,7 +47,7 @@ public class GraphReaderImplTest {
     @Test
     public void testReadId_NullReference() {
         when(seeker.seekById("id")).thenReturn(null);
-        assertNull(reader.readId("id"));
+        assertNull(reader.read("id"));
         
         verify(seeker).seekById("id");
         verifyZeroInteractions(memoryAccess);
@@ -59,7 +59,7 @@ public class GraphReaderImplTest {
         when(seeker.seekById("id")).thenReturn(ref);
         when(memoryAccess.read(ref)).thenReturn(gData);
         
-        assertSame(gData, reader.readId("id"));
+        assertSame(gData, reader.read("id"));
         
         verify(seeker).seekById("id");
         verify(memoryAccess).read(ref);
@@ -70,7 +70,7 @@ public class GraphReaderImplTest {
         Sequence seq = Sequence.valueOf(1L);
         when(seeker.seekBySequence(seq)).thenReturn(null);
         
-        assertNull(reader.readSequence(seq));
+        assertNull(reader.read(seq));
         
         verify(seeker).seekBySequence(seq);
         verifyZeroInteractions(memoryAccess);
@@ -83,7 +83,7 @@ public class GraphReaderImplTest {
         when(seeker.seekBySequence(seq)).thenReturn(ref);
         when(memoryAccess.read(ref)).thenReturn(gData);
         
-        assertSame(gData, reader.readSequence(seq));
+        assertSame(gData, reader.read(seq));
         
         verify(seeker).seekBySequence(seq);
         verify(memoryAccess).read(ref);
@@ -92,7 +92,7 @@ public class GraphReaderImplTest {
     @Test
     public void testReadReference_nullRef() {
         when(memoryAccess.read(null)).thenReturn(null);
-        assertNull(reader.readReference(null));
+        assertNull(reader.read((MemoryReference)null));
         verify(memoryAccess).read(null);
     }
     
@@ -101,7 +101,7 @@ public class GraphReaderImplTest {
         MemoryReference ref = MemoryReference.valueOf(1);
         when(memoryAccess.read(ref)).thenReturn(gData);
         
-        assertEquals(gData, reader.readReference(ref));
+        assertEquals(gData, reader.read(ref));
         
         verify(memoryAccess).read(ref);
     }

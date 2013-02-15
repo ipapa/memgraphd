@@ -23,7 +23,7 @@ public class GraphReaderImpl extends AbstractGraphAccess implements GraphReader 
      * {@inheritDoc}
      */
     @Override
-    public final GraphData readId(String id) {
+    public final GraphData read(String id) {
         return readId(id, false);
     }
     
@@ -31,7 +31,7 @@ public class GraphReaderImpl extends AbstractGraphAccess implements GraphReader 
      * {@inheritDoc}
      */
     @Override
-    public final GraphData readSequence(Sequence seq) {
+    public final GraphData read(Sequence seq) {
         return readSequence(seq, false);
     }
     
@@ -39,7 +39,7 @@ public class GraphReaderImpl extends AbstractGraphAccess implements GraphReader 
      * {@inheritDoc}
      */
     @Override
-    public GraphData readReference(MemoryReference ref) {
+    public GraphData read(MemoryReference ref) {
         return readReference(ref, false);
     }
     
