@@ -24,7 +24,11 @@ public class GraphReaderImpl extends AbstractGraphAccess implements GraphReader 
      */
     @Override
     public final GraphData read(String id) {
-        return readId(id, true);
+        MemoryReference ref = seeker.seekById(id);
+        if(ref != null) {
+            return read(ref);
+        }
+        return null;
     }
     
     /**
@@ -32,7 +36,11 @@ public class GraphReaderImpl extends AbstractGraphAccess implements GraphReader 
      */
     @Override
     public final GraphData read(Sequence seq) {
-        return readSequence(seq, true);
+        MemoryReference ref = seeker.seekBySequence(seq);
+        if(ref != null) {
+            return read(ref);
+        }
+        return null;
     }
     
     /**
@@ -40,30 +48,7 @@ public class GraphReaderImpl extends AbstractGraphAccess implements GraphReader 
      */
     @Override
     public GraphData read(MemoryReference ref) {
-        return readReference(ref, true);
+        return getMemoryAccess().readGraph(ref);
     }
-
-    private GraphData readReference(MemoryReference ref, boolean includeRelationships) {
-        if(includeRelationships) {
-            return getMemoryAccess().readGraph(ref);
-        }
-        return getMemoryAccess().read(ref);
-    }
-
-    private GraphData readSequence(Sequence seq, boolean includeRelationships) {
-        MemoryReference ref = seeker.seekBySequence(seq);
-        if(includeRelationships) {
-            return ref != null ? getMemoryAccess().readGraph(ref) : null;
-        }
-        return ref != null ? getMemoryAccess().read(ref) : null;
-    }
-
-    private GraphData readId(String id, boolean includeRelationships) {
-        MemoryReference ref = seeker.seekById(id);
-        if(includeRelationships) {
-            return ref != null ? getMemoryAccess().readGraph(ref) : null;
-        }
-        return ref != null ? getMemoryAccess().read(ref) : null;
-    }
-
+    
 }

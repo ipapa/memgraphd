@@ -16,7 +16,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -50,7 +49,6 @@ public class GraphReaderImplTest {
         assertNull(reader.read("id"));
         
         verify(seeker).seekById("id");
-        verifyZeroInteractions(memoryAccess);
     }
     
     @Test
@@ -73,7 +71,6 @@ public class GraphReaderImplTest {
         assertNull(reader.read(seq));
         
         verify(seeker).seekBySequence(seq);
-        verifyZeroInteractions(memoryAccess);
     }
     
     @Test

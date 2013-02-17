@@ -37,7 +37,7 @@ public class GraphFilterImpl extends AbstractGraphAccess implements GraphFilter 
         GraphData[] result = new GraphData[refs.length];
         int count = 0;
         for(MemoryReference ref : refs) {
-            result[count] = getMemoryAccess().read(ref);
+            result[count] = reader.read(ref);
             count++;
         }
         return result;

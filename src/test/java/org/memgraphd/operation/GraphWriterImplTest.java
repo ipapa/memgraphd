@@ -133,4 +133,59 @@ public class GraphWriterImplTest {
         verify(decisionMaker).decide(context);
         verify(stateManager).update(decision, graphData);
     }
+    
+    @Test
+    public void testDeleteDataId_validationFailed() throws GraphException {
+        when(resolver.resolve(GraphRequestType.DELETE, (String)null)).thenReturn(context);
+        doThrow(new GraphException("Data is null")).when(validator).validate(context);
+        
+        exception.expect(GraphException.class);
+        exception.expectMessage("Data is null");
+        
+        writer.delete((String)null);
+    }
+    
+    @Test
+    public void testDeleteDataId_Success() throws GraphException { 
+        when(resolver.resolve(GraphRequestType.DELETE, "id")).thenReturn(context);
+        when(decisionMaker.decide(context)).thenReturn(decision);
+        when(context.getGraphData()).thenReturn(graphData);
+        
+        writer.delete("id");
+        
+        verify(resolver).resolve(GraphRequestType.DELETE, "id");
+        verify(validator).validate(context);
+        verify(authority).authorize(context);
+        verify(decisionMaker).decide(context);
+        verify(stateManager).delete(decision, graphData);
+    }
+    
+    @Test
+    public void testDeleteData_validationFailed() throws GraphException {
+        when(resolver.resolve(GraphRequestType.DELETE, (Data)null)).thenReturn(context);
+        doThrow(new GraphException("Data is null")).when(validator).validate(context);
+        
+        exception.expect(GraphException.class);
+        exception.expectMessage("Data is null");
+        
+        writer.delete((Data)null);
+    }
+    
+    @Test
+    public void testDeleteData_Success() throws GraphException {
+        MemoryReference ref1 = MemoryReference.valueOf(1);
+        
+        when(resolver.resolve(GraphRequestType.DELETE, data)).thenReturn(context);
+        when(decisionMaker.decide(context)).thenReturn(decision);
+        when(context.getGraphData()).thenReturn(graphData);
+        when(stateManager.update(decision, graphData)).thenReturn(ref1);
+        
+        writer.delete(data);
+        
+        verify(resolver).resolve(GraphRequestType.DELETE, data);
+        verify(validator).validate(context);
+        verify(authority).authorize(context);
+        verify(decisionMaker).decide(context);
+        verify(stateManager).delete(decision, graphData);
+    }
 }

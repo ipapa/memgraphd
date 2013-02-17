@@ -14,6 +14,14 @@ import org.memgraphd.exception.GraphException;
 import org.memgraphd.memory.MemoryReference;
 import org.memgraphd.memory.operation.MemoryOperations;
 
+import com.sun.corba.se.impl.orbutil.graph.Graph;
+/**
+ * And implementation of {@link GraphStateManager} that manages change request to the
+ * state of the {@link Graph} data.
+ * @author Ilirjan Papa
+ * @since February 9, 2013
+ *
+ */
 public class GraphStateManagerImpl extends AbstractGraphAccess implements GraphStateManager {
     private static final Logger LOGGER = Logger.getLogger(GraphStateManagerImpl.class);
     
@@ -25,6 +33,14 @@ public class GraphStateManagerImpl extends AbstractGraphAccess implements GraphS
     
     private GraphDataEventListenerManager eventManager;
     
+    /**
+     * Constructs a new instance.
+     * @param operations {@link MemoryOperations}
+     * @param mapping {@link GraphMappings}
+     * @param librarian {@link Librarian}
+     * @param dataMatchmaker {@link DataMatchmaker}
+     * @param eventManager {@link GraphDataEventListenerManager}
+     */
     public GraphStateManagerImpl(MemoryOperations operations, GraphMappings mapping, 
             Librarian librarian, DataMatchmaker dataMatchmaker, GraphDataEventListenerManager eventManager) {
         super(operations);
@@ -34,6 +50,9 @@ public class GraphStateManagerImpl extends AbstractGraphAccess implements GraphS
         this.eventManager = eventManager;
     }
     
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public MemoryReference create(Decision decision) throws GraphException {
         // 1. Instantiate the graph data wrapper for this data.
@@ -42,6 +61,8 @@ public class GraphStateManagerImpl extends AbstractGraphAccess implements GraphS
         // 2. Update data snapshot
         MemoryReference ref = handleInsert(decision.getData(), newData);
         
+        LOGGER.info(String.format("Wrote data id=%s at memory reference=%d", decision.getData().getId(), ref.id()));
+        
         // 3. Set the memory reference assigned to data on write (create|update)
         newData.setRefence(ref);
         
@@ -51,51 +72,57 @@ public class GraphStateManagerImpl extends AbstractGraphAccess implements GraphS
         // 5. Let librarian know
         librarian.archive(newData);
         
-        LOGGER.info(String.format("Wrote data id=%s at memory reference=%d", decision.getData().getId(), ref.id()));
-        
         return ref;
     }
-
+    
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public MemoryReference update(Decision decision, GraphData graphData) throws GraphException {
         // 1. Instantiate the graph data wrapper for this data.
         GraphDataImpl newData = new GraphDataImpl(decision);
         
-        // 2. Update data snapshot
-        MemoryReference ref = graphData.getReference();
-        handleUpdate(decision.getData(), newData, ref);
+        // 2. Set the memory reference assigned to data on write (create|update)
+        newData.setRefence(graphData.getReference());
         
-        // 3. Set the memory reference assigned to data on write (create|update)
-        newData.setRefence(ref);
+        // 3. Update data snapshot
+        handleUpdate(decision.getData(), newData, graphData);
         
         // 4. Update sequence mappings.
-        mappings.put(decision.getSequence(), ref);
+        mappings.put(decision.getSequence(), graphData.getReference());
         
         // 5. Let librarian know
         librarian.archive(newData);
         
-        LOGGER.info(String.format("Wrote data id=%s at memory reference=%d", decision.getData().getId(), ref.id()));
+        LOGGER.info(String.format("Wrote data id=%s at memory reference=%d", decision.getData().getId(), newData.getReference().id()));
         
-        return ref;
+        return newData.getReference();
     }
-
+    
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void delete(Decision decision, GraphData gData) throws GraphException {
         Data data = decision.getData();
-        handleDataRelationships(gData, data);
-        // free the actual memory
-        getMemoryAccess().free(gData.getReference());
-        
-        // clear old mappings
-        mappings.delete(decision.getDataId());
-        mappings.delete(gData.getSequence());
         
         LOGGER.info(String.format("Deleting data id=%s at memory reference=%d", decision.getDataId(), gData.getReference().id()));
         
-        // alert librarian
+        // 1. Update relationships
+        handleDataRelationships(gData, data);
+        
+        // 2. Free the actual memory
+        getMemoryAccess().free(gData.getReference());
+        
+        // 3. Clear old mappings
+        mappings.delete(decision.getDataId());
+        mappings.delete(gData.getSequence());
+        
+        // 4. Alert librarian
         librarian.unarchive(gData);
         
-        // alert listeners
+        // 5. Alert listeners
         eventManager.onDelete(gData);
     }
 
@@ -119,21 +146,18 @@ public class GraphStateManagerImpl extends AbstractGraphAccess implements GraphS
         return ref;
     }
     
-    private void handleUpdate(Data data, GraphData newData, MemoryReference ref) {
-        GraphData oldData = getMemoryAccess().read(ref);
-        getMemoryAccess().update(ref, newData);
+    private void handleUpdate(Data data, GraphData newData, GraphData oldData) {
+        getMemoryAccess().update(oldData.getReference(), newData);
         updateDataRelationships(oldData.getData(), data);
         eventManager.onUpdate(oldData, newData);
     }
     
     private void buildDataRelationships(GraphData data) {
-        if(data != null) {
-            if(data.getData() instanceof DataRelationship) {
-                dataMatchmaker.match((DataRelationship) data.getData());
-            }
-            else {
-                dataMatchmaker.bachelor(data.getData());
-            }
+        if(data.getData() instanceof DataRelationship) {
+            dataMatchmaker.match((DataRelationship) data.getData());
+        }
+        else {
+            dataMatchmaker.bachelor(data.getData());
         }
     }
     
@@ -141,11 +165,11 @@ public class GraphStateManagerImpl extends AbstractGraphAccess implements GraphS
         if(oldData instanceof DataRelationship && newData instanceof DataRelationship) {
             dataMatchmaker.revow((DataRelationship)oldData, (DataRelationship)newData);
         }
-        else if(oldData instanceof DataRelationship && !(newData instanceof DataRelationship)) {
+        else if(oldData instanceof DataRelationship) {
             dataMatchmaker.separate((DataRelationship)oldData);
             dataMatchmaker.bachelor(newData);
         }
-        else if(!(oldData instanceof DataRelationship) && newData instanceof DataRelationship) {
+        else if(newData instanceof DataRelationship) {
             dataMatchmaker.match((DataRelationship)newData);
         }
         else {
