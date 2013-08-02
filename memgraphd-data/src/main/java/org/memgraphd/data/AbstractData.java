@@ -9,12 +9,10 @@ import org.joda.time.DateTime;
  */
 public abstract class AbstractData extends AbstractDataPermissions implements Data {
 
-    private static final long serialVersionUID = -7278305016297146334L;
-    
     protected String id;
     protected DateTime createdDate;
     protected DateTime lastModifiedDate;
-    
+
     /**
      * {@inheritDoc}
      */
@@ -22,7 +20,7 @@ public abstract class AbstractData extends AbstractDataPermissions implements Da
     public final String getId() {
         return id;
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -30,7 +28,7 @@ public abstract class AbstractData extends AbstractDataPermissions implements Da
     public final DateTime getCreatedDate() {
         return createdDate;
     }
-    
+
     /**
      * {@inheritDoc}
      */

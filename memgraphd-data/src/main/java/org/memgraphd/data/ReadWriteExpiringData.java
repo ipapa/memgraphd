@@ -10,8 +10,6 @@ import org.joda.time.DateTime;
  */
 public class ReadWriteExpiringData extends AbstractExpiringData {
 
-    private static final long serialVersionUID = -1068295135914266484L;
-    
     /**
      * Constructs a new immutable instance of {@link ExpiringData} with read-write permissions.
      * @param id

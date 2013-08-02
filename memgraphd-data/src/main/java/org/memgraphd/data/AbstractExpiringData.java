@@ -9,10 +9,8 @@ import org.joda.time.DateTime;
  */
 public abstract class AbstractExpiringData extends AbstractData implements ExpiringData {
 
-    private static final long serialVersionUID = -585213396218671489L;
-    
     protected DateTime expirationDate;
-    
+
     /**
      * {@inheritDoc}
      */
@@ -20,7 +18,7 @@ public abstract class AbstractExpiringData extends AbstractData implements Expir
     public final DateTime getExpirationDate() {
         return expirationDate;
     }
-    
+
     /**
      * {@inheritDoc}
      */

@@ -1,20 +1,18 @@
 package org.memgraphd.data;
 
 import org.joda.time.DateTime;
-import org.memgraphd.Graph;
+
 /**
  * Similar to {@link ReadOnlyData} with one big difference: you cannot delete instances of this type
- * but you can delete instances of {@link ReadOnlyData}.The idea here is that you can store data 
- * in the {@link Graph} that you do not want to delete ever. Write once, read always, delete never.
- * 
+ * but you can delete instances of {@link ReadOnlyData}.The idea here is that you can store data
+ * in the Graph that you do not want to delete ever. Write once, read always, delete never.
+ *
  * @author Ilirjan Papa
  * @since January 27, 2013
  *
  */
 public class ReadOnlyProtectedData extends ReadOnlyData {
 
-    private static final long serialVersionUID = 8861557173133847489L;
-    
     /**
      * Constructs an immutable instance of {@link Data} with read-only permissions - no write or delete.
      * @param id {@link String}

@@ -30,6 +30,11 @@
     <dependencies>
       <dependency>
         <groupId>org.memgraphd</groupId>
+        <artifactId>memgraphd-data</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.memgraphd</groupId>
         <artifactId>memgraphd-core</artifactId>
         <version>${project.version}</version>
       </dependency>
@@ -231,6 +236,23 @@
             <encoding>UTF-8</encoding>
           </configuration>
         </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>failsafe-maven-plugin</artifactId>
+          <version>2.4.3-alpha-1</version>
+          <configuration>
+            <skipTests>${maven.integration.test.skip}</skipTests>
+          </configuration>
+          <executions>
+            <execution>
+              <phase>integration-test</phase>
+              <goals>
+                <goal>integration-test</goal>
+                <goal>verify</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
       </plugins>
     </pluginManagement>
   </build>
@@ -246,6 +268,7 @@
     </repository>
   </repositories>
   <modules>
+    <module>memgraphd-data</module>
     <module>memgraphd-core</module>
     <module>memgraphd-ipc</module>
   </modules>
