@@ -5,6 +5,11 @@ import org.memgraphd.data.ReadWriteData;
 import org.memgraphd.data.relationship.DataRelationship;
 
 public class Movie extends ReadWriteData implements DataRelationship {
+    /**
+     *
+     */
+    private static final long serialVersionUID = 7390943752104669622L;
+
     private final String name;
     private final String networkId;
 

@@ -5,9 +5,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Implements the {@link MemoryBlock} and all available {@link MemoryBlockOperations}.
- * The {@link MemoryBlock} interface gives you read-only access to the block and {@link MemoryBlockOperations}
- * give you write access.
+ * Implements the {@link MemoryBlock} and all its operations.
  *
  * @author Ilirjan Papa
  * @since July 28, 2012

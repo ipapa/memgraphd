@@ -16,6 +16,11 @@ import com.sun.corba.se.impl.orbutil.graph.Graph;
 public class ReadOnlyData extends AbstractData {
 
     /**
+     *
+     */
+    private static final long serialVersionUID = 4101587596855722068L;
+
+    /**
      * Constructs an immutable instance of {@link Data} that has read-only permissions.
      * @param id {@link String}
      * @param createdDate {@link DateTime}

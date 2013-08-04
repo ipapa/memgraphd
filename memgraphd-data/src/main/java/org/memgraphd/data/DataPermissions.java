@@ -1,5 +1,7 @@
 package org.memgraphd.data;
 
+import java.io.Serializable;
+
 
 /**
  * A simple interface that captures all available permissions of {@link Data} instances in the Graph.
@@ -7,7 +9,7 @@ package org.memgraphd.data;
  * @since January 27, 2013
  *
  */
-public interface DataPermissions {
+public interface DataPermissions extends Serializable {
 
     /**
      * Returns true if you have read access, otherwise returns false.

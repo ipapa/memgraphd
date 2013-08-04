@@ -9,6 +9,11 @@ import org.joda.time.DateTime;
  */
 public abstract class AbstractData extends AbstractDataPermissions implements Data {
 
+    /**
+     *
+     */
+    private static final long serialVersionUID = -6066170459775258124L;
+
     protected String id;
     protected DateTime createdDate;
     protected DateTime lastModifiedDate;

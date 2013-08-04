@@ -8,6 +8,11 @@ import org.memgraphd.data.relationship.DataRelationship;
 
 public class OnlineVideo extends ReadWriteData implements DataRelationship, DataValidator {
 
+    /**
+     *
+     */
+    private static final long serialVersionUID = -3658283442147491751L;
+
     private final String title;
     private final String episodeId;
     private final boolean isLongForm;

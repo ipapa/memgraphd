@@ -1,9 +1,14 @@
 package org.memgraphd.data;
 
 public abstract class AbstractDataPermissions implements DataPermissions {
-    
+
+    /**
+     *
+     */
+    private static final long serialVersionUID = -2377165350111562720L;
+
     protected boolean read, write, update, delete;
-    
+
     /**
      * {@inheritDoc}
      */
@@ -11,7 +16,7 @@ public abstract class AbstractDataPermissions implements DataPermissions {
     public final boolean canRead() {
         return read;
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -19,7 +24,7 @@ public abstract class AbstractDataPermissions implements DataPermissions {
     public final boolean canWrite() {
         return write;
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -27,7 +32,7 @@ public abstract class AbstractDataPermissions implements DataPermissions {
     public final boolean canUpdate() {
         return update;
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -35,5 +40,5 @@ public abstract class AbstractDataPermissions implements DataPermissions {
     public final boolean canDelete() {
         return delete;
     }
-    
+
 }

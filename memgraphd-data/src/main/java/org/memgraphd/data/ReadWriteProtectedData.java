@@ -12,6 +12,11 @@ import org.joda.time.DateTime;
 public class ReadWriteProtectedData extends ReadWriteData {
 
     /**
+     *
+     */
+    private static final long serialVersionUID = -1598832744991272341L;
+
+    /**
      * Constructs a new immutable instance of {@link Data} with read-write access but no delete access.
      * @param id {@link String}
      * @param createdDate {@link DateTime}

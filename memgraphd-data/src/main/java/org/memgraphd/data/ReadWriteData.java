@@ -12,6 +12,11 @@ import org.joda.time.DateTime;
 public class ReadWriteData extends AbstractData {
 
     /**
+     *
+     */
+    private static final long serialVersionUID = 7861687876320279353L;
+
+    /**
      * Constructs an immutable instance of {@link Data} that is read-write.
      * @param id {@link String}
      * @param createdDate {@link DateTime}

@@ -10,6 +10,11 @@ import org.memgraphd.data.relationship.DataRelationship;
 
 public class TvSeason extends ReadWriteData implements DataRelationship, DataValidator {
 
+    /**
+     *
+     */
+    private static final long serialVersionUID = 7016168350866382062L;
+
     private final String seasonNumber;
     private final String seriesId;
 
