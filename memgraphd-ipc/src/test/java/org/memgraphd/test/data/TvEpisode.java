@@ -6,19 +6,13 @@ import org.memgraphd.data.ReadWriteData;
 import org.memgraphd.data.DataValidator;
 import org.memgraphd.data.relationship.DataRelationship;
 
-
-
 public class TvEpisode extends ReadWriteData implements DataValidator, DataRelationship {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = -8362521491512221109L;
-    
+
     private final String seasonId;
     private final String episodeName;
     private final String episodeNumber;
     private final DateTime episodeOriginalAirDate;
-    
+
     public TvEpisode(String id, DateTime createdDate, DateTime lastModifiedDate, String seasonId,
             String episodeName, String episodeNumber, DateTime airDate) {
         super(id, createdDate, lastModifiedDate);

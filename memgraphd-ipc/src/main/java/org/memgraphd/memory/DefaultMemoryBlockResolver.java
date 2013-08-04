@@ -2,9 +2,9 @@ package org.memgraphd.memory;
 
 import org.memgraphd.data.Data;
 /**
- * Default implementation of {@link MemoryBlockResolver} that creates only one big block 
+ * Default implementation of {@link MemoryBlockResolver} that creates only one big block
  * called {@link DefaultMemoryBlockResolver#DEFAULT_MEMORYBLOCK_NAME}.
- * 
+ *
  * @author Ilirjan Papa
  * @since November 5, 2012
  *
@@ -12,12 +12,12 @@ import org.memgraphd.data.Data;
 public class DefaultMemoryBlockResolver implements MemoryBlockResolver {
 
     public static final String DEFAULT_MEMORYBLOCK_NAME = "global";
-    
+
     final MemoryBlock block;
     final MemoryBlock[] blocks;
 
     public DefaultMemoryBlockResolver(int capacity) {
-        this.block = new MemoryBlockImpl(DEFAULT_MEMORYBLOCK_NAME, capacity);
+        this.block = new MemoryBlockImpl(DEFAULT_MEMORYBLOCK_NAME, MemoryReference.valueOf(0), MemoryReference.valueOf(capacity - 1));
         this.blocks = new MemoryBlock[] { block };
     }
 

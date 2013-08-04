@@ -9,11 +9,7 @@ import org.memgraphd.data.relationship.DataRelationship;
 
 
 public class TvSeries extends ReadWriteData implements DataValidator, DataRelationship {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = -4356481070503427772L;
-    
+
     private final String seriesName;
     private final String networkId;
 
@@ -31,7 +27,7 @@ public class TvSeries extends ReadWriteData implements DataValidator, DataRelati
     public final String getSeriesName() {
         return seriesName;
     }
-    
+
     public final String getNetworkId() {
         return networkId;
     }

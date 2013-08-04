@@ -6,19 +6,13 @@ import org.memgraphd.data.ReadWriteData;
 import org.memgraphd.data.DataValidator;
 import org.memgraphd.data.relationship.DataRelationship;
 
-
-
 public class OnlineVideo extends ReadWriteData implements DataRelationship, DataValidator {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 5747201262235067602L;
-    
+
     private final String title;
     private final String episodeId;
     private final boolean isLongForm;
-    
-    public OnlineVideo(String id, DateTime createdDate, DateTime lastModifiedDate, String title, 
+
+    public OnlineVideo(String id, DateTime createdDate, DateTime lastModifiedDate, String title,
             String episodeId, boolean isLongForm) {
         super(id, createdDate, lastModifiedDate);
         this.title = title;
@@ -33,7 +27,7 @@ public class OnlineVideo extends ReadWriteData implements DataRelationship, Data
     public final String getEpisodeId() {
         return episodeId;
     }
-    
+
     public final boolean isLongForm() {
         return isLongForm;
     }

@@ -4,12 +4,11 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.memgraphd.data.GraphData;
-import org.memgraphd.memory.operation.MemoryBlockOperations;
 import org.memgraphd.memory.operation.MemoryLocationOperations;
 
 /**
  * Implements {@link MemoryLocation} and {@link MemoryLocationOperations}.
- * 
+ *
  * @author Ilirjan Papa
  * @since July 31, 2012
  *
@@ -20,14 +19,14 @@ public class MemoryLocationImpl implements MemoryLocation, MemoryLocationOperati
     private final Set<MemoryLocation> references;
     private GraphData data;
     private MemoryBlock block;
-    
+
     public MemoryLocationImpl(MemoryReference ref, GraphData data) {
         this.reference = ref;
         this.data = data;
         this.links = new CopyOnWriteArraySet<MemoryLocation>();
         this.references = new CopyOnWriteArraySet<MemoryLocation>();
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -35,7 +34,7 @@ public class MemoryLocationImpl implements MemoryLocation, MemoryLocationOperati
     public final MemoryReference reference() {
         return reference;
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -43,7 +42,7 @@ public class MemoryLocationImpl implements MemoryLocation, MemoryLocationOperati
     public final GraphData data() {
         return data;
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -51,17 +50,15 @@ public class MemoryLocationImpl implements MemoryLocation, MemoryLocationOperati
     public final MemoryBlock block() {
         return this.block;
     }
-    
+
     /**
      * {@inheritDoc}
      */
     @Override
-    public final void reserve(MemoryBlock block) {
-        if(block == null)
-            throw new IllegalArgumentException("No Reservation - Memory block is null");
-        setBlock(block);
+    public synchronized final void reserve(MemoryBlock block) {
+        this.block = block;
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -69,7 +66,7 @@ public class MemoryLocationImpl implements MemoryLocation, MemoryLocationOperati
     public final synchronized void update(GraphData data) {
         this.data = data;
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -79,7 +76,7 @@ public class MemoryLocationImpl implements MemoryLocation, MemoryLocationOperati
             links.add(location);
         }
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -87,7 +84,7 @@ public class MemoryLocationImpl implements MemoryLocation, MemoryLocationOperati
     public final synchronized void delink(MemoryLocation location) {
         links.remove(location);
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -97,7 +94,7 @@ public class MemoryLocationImpl implements MemoryLocation, MemoryLocationOperati
             references.add(ref);
         }
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -105,16 +102,16 @@ public class MemoryLocationImpl implements MemoryLocation, MemoryLocationOperati
     public final synchronized void dereference(MemoryLocation loc) {
         references.remove(loc);
     }
-    
+
     /**
      * {@inheritDoc}
      */
     @Override
     public final synchronized void free() {
         data = null;
-        ((MemoryBlockOperations)block).recycle(reference());
+        block.recycle(reference());
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -122,7 +119,7 @@ public class MemoryLocationImpl implements MemoryLocation, MemoryLocationOperati
     public final Set<MemoryLocation> links() {
         return links;
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -130,11 +127,7 @@ public class MemoryLocationImpl implements MemoryLocation, MemoryLocationOperati
     public final Set<MemoryLocation> references() {
         return references;
     }
-    
-    private final synchronized void setBlock(MemoryBlock block) {
-        this.block = block;
-    }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -145,7 +138,7 @@ public class MemoryLocationImpl implements MemoryLocation, MemoryLocationOperati
             ((MemoryLocationOperations)ml).dereference(this);
         }
     }
-    
+
     /**
      * {@inheritDoc}
      */

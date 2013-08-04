@@ -7,7 +7,7 @@ import org.memgraphd.data.relationship.DataRelationship;
 public class Movie extends ReadWriteData implements DataRelationship {
     private final String name;
     private final String networkId;
-    
+
     public Movie(String id, String name, String networkId, DateTime createdDate, DateTime lastModifiedDate) {
         super(id, createdDate, lastModifiedDate);
         this.name = name;
@@ -21,11 +21,6 @@ public class Movie extends ReadWriteData implements DataRelationship {
     public final String getNetworkId() {
         return networkId;
     }
-
-    /**
-     * 
-     */
-    private static final long serialVersionUID = -615780058323486327L;
 
     @Override
     public String[] getRelatedIds() {
